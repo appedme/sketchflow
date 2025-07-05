@@ -1,0 +1,1408 @@
+in the next few minutes we'll teach you
+all the important stuff you need to know
+about ux UI design we've condensed hours
+of training into this short but
+impactful video by the end you'll have
+practical skills you can use right away
+let's dive in first things first what is
+ux UI design user experience or ux
+design is about the overall feel of the
+experience and how a user interacts with
+a product ux design is concerned with
+the entire Journey a user takes this
+includes understanding user needs
+defining user flows and creating
+wireframes among other steps the primary
+objective of ux design is to create a
+product that is intuitive efficient and
+enjoyable to use user interface or UI
+design focuses primarily on the visual
+elements that users interact with on a
+digital platform this includes
+typography spacing colors icons and
+other graphical elements the goal of UI
+design is to create an intuitive and
+Visually appealing interface that
+provides a SE less experience for the
+user in a nutshell ux makes an app
+enjoyable while UI makes it beautiful
+and trust me you need both to create
+something people will love using now
+let's get into tools figma is currently
+the most popular tool among designers
+it's web-based allows for realtime
+collaboration and is easy to learn one
+of the first things you'll want to do in
+any project is set up a frame a frame is
+basically your canvas it's where all
+your Design Elements live with your
+frame ready this is where you can start
+building out your user interface you can
+easily add text shapes and images
+throughout this video I'll be designing
+a Marketplace for digital products this
+will give you a firsthand look at how to
+navigate the entire design process from
+start to finish design thinking is a
+widely used user- centered process with
+five key stages empathize Define id8
+prototype and test the process isn't
+linear you can go back to previous
+stages as you gain more insights there
+are also many more design processes and
+Frameworks that you might come across
+before we jump into the stages of design
+thinking it's worth noting that while
+we're covering all the essentials in
+this video there's so much more to learn
+to master uxui design for that we've
+created a uxui design Mastery course
+that covers everything you need to
+become a professional we've condensed
+the best of everything we've learned
+into this powerful course drawing from
+years of experience designing successful
+products so you can shortcut that
+process and save yourself years of
+frustration our course goes beyond just
+Theory we equip you with all the figma
+skills you need to create stunning well
+organized Pixel Perfect designs you can
+find the link in the description below
+the video now let's get into the first
+stage of design thinking empathize
+before you design anything you need to
+know who you're designing for you might
+start with user interviews where you ask
+open-ended questions this allows you to
+delve into user experiences and needs on
+a more personal level the goal is to
+really get into users heads and
+understand their needs pain points and
+what they value from the data gathered
+you can create user personas user
+Journey Maps Affinity diagrams and much
+more the defined stage is where you
+figure out the main problem you're going
+to solve and for that you need a problem
+statement a good problem statement must
+be specific a bad example might be
+people need a way to sell digital
+products it's not specific enough to
+guide your design process effectively a
+better more targeted problem statement
+could be independent creators need a way
+to reach a wider a audience and handle
+transactions securely when selling
+digital products that's specific it
+pinpoints a problem and identifies a
+user group giving you a clear road map
+for design so the question you and your
+team should ask now is how might we
+create a digital product Marketplace
+that empowers online creators to reach a
+wider audience while ensuring secure
+transactions here we're entering the id8
+stage the goal is simple come up with as
+many ideas as you can use whiteboards
+sticky notes or digital tool tools like
+Meo to quickly write down all your ideas
+some designers also start creating
+wireframes during the ideation stage the
+main purpose of wireframes is to define
+the dimensions and placement of page
+elements information architecture
+intended behaviors and navigation you
+can begin with either low Fidelity or
+mid-fidelity wireframes low Fidelity
+wireframes are quite basic focusing
+primarily on layout and functionality
+they serve as the skeleton of your
+design and are perfect for rough drafts
+and quick internal discussions mid
+Fidelity wireframes are more advanced
+including UI elements like buttons input
+fields and placeholder text while still
+avoiding
+details as your ideas start taking shape
+and you narrow down your choices you'll
+want to transition to High Fidelity
+wireframes that closely mirror what the
+final design will look like making them
+ideal for detailed user testing you can
+kick off user testing during the
+ideation or prototyping stage but it's
+generally more valuable when you test
+with high fidelity wireframes if the
+feedback is positive in alignance with
+your objectives you're ready to
+transform these High Fidelity wireframes
+into actual designs this is where things
+get exciting the core difference between
+a high fidelity wireframe and a
+prototype is interactivity this includes
+clickable buttons Transitions and even
+complex animations Now's the Time to
+finalize the user interface add the
+colors fonts and other design elements
+that will make your design visually
+appealing after your prototype is ready
+go for another round of user testing
+often how a user interacts with a
+complete prototype can reveal issues
+that weren't apparent in the wireframe
+stage usability testing is your goto
+method for this during these tests you
+can observe real users as they navigate
+through your product the goal is to
+identify any parts of your design that
+could be confusing or hard to use once
+you've conducted usability testing and
+made any necessary adjustments to your
+design the next step is the developer
+handoff this is where you transition
+your designs into something that can be
+implemented Ed by your development team
+to ensure a smooth handoff you'll need
+to prepare user interface specifications
+they should include detailed information
+about the dimensions spacing
+responsiveness and interactive elements
+in your design essentially it's a
+comprehensive guide that enables
+developers to bring your vision to life
+with code finally the designs are ready
+for implementation developers will now
+use the UI specs to start building the
+actual product turning what was once a
+series of wireframes and High Fidelity
+designs into a fully functional digital
+product and that's it for this video if
+you found it helpful make sure to give
+it a thumbs up and subscribe for more
+insightful content on uxui design
+
+---
+
+you see designers who seem to dominate
+the ux UI design world creating stunning
+apps and websites that attract thousands
+of likes and admiration it feels like
+they have a special talent for Designing
+things their users instantly love right
+the truth is you just don't know what
+they know no one has shown you the cheat
+codes the secrets that the top 1% of
+designers know but you don't however
+everything is about to change today
+you're going to level up you will learn
+a few powerful UI design tips through
+practical real life examples that will
+show you how to design and think like a
+senior uxui designer it's time to go
+from a junior or beginner uxui designer
+and join the top 1% of designers so if
+you're ready to take your design game to
+the next level keep watching all right
+here's the scenario imagine you're
+designing a sleep tracking app your goal
+is to collect daily data on how many
+hours to use her let's call her Emily
+slept last night you also want to assign
+a quality rating such as great good
+neutral poor or bad based on the number
+of hours to help Emily understand how
+her sleep duration relates to Sleep
+Quality sounds simple enough right let's
+look at how a typical Junior designer
+might approach this but here's the kind
+of design you might see from someone
+just starting out clean straightforward
+navigation check big title at the top
+that says how long would you say you
+slept yesterday check below that we've
+got five options Emily can choose from
+ranging from great to bad each linked to
+a specific number of sleep hours these
+selections are made with radio buttons
+and the selected state is highlighted in
+the app's primary color now at first
+glance you might be thinking hey this
+works and sure it's it does the job it's
+functional it's clean and the design is
+easy to follow but hold on let's think
+about it is this the kind of app that's
+going to Delight Emily and keep her
+engaged every single day does it make
+her feel something or is it just another
+simple data entry task does this design
+accurately represent the goal of helping
+Emily understand how her sleep duration
+affects her overall quality of rest I
+think we know the answer to that now
+let's take a look at how a slightly more
+experienced designer would approach this
+design how about something like this
+this already looks much better right
+let's understand why first let's talk
+about the title we've made two important
+changes here
+personalization we added hi Emily to
+personalize The Experience people
+respond more positively when they feel
+recognized and even something as simple
+as using their name can enhance
+engagement clarity and simplicity we
+revised the title to how long did you
+sleep last night users prefer language
+that is conversational and easy to
+process and this phrasing feels natural
+reducing friction in the interaction now
+let's talk about how we reorganized the
+layout in the previous version the state
+labels great good and bad were more
+prominent than the actual hours slept
+but here we've shifted the emphasis to
+the hours this follows the principle of
+visual hierarchy where the most critical
+information the hours is given more
+prominence the state labels still
+provide useful feedback but they are
+secondary this ensures that users focus
+on inputting the correct number of hours
+first before reflecting on the quality
+the radio buttons are now placed on the
+left side this aligns with the F pattern
+in natural reading order which users are
+accustomed to by placing the interaction
+controls on the left we ensure use can
+quickly and intuitively make their
+selection without unnecessary eye
+movement or cognitive load we've added
+emojis next to each sleep option to make
+the experience more fun and relatable
+instead of just numbers and words the
+Emojis bring a bit of personality to the
+app making it easier for users to
+connect emotionally with their choices
+the Emojis also visually reinforce the
+idea that more sleep leads to better
+outcomes for example a happy Emoji is
+tied to longer sleep while an upset
+Emoji is linked to Shorter durations
+this makes it easy for users to
+instantly understand what each option
+represents encouraging healthier sleep
+habits in a way that feels natural and
+engaging we've also made the selected
+State much more distinct by changing the
+text color and making the Emoji larger
+for the selected option we're adding
+system feedback good feedback lets users
+know their input has been registered and
+provides a satisfying resp responsive
+interaction all right this design was a
+step up from the first one but we're not
+done yet let's take it to the next level
+and create an interface that feels not
+only functional but also fun and
+intuitive to interact with how about
+something like this instead of a basic
+list we now have a curved slider that
+makes the experience more fun and
+engaging it feels less like filling out
+a form and more like a journey letting
+Emily slide through her options in a
+natural satisfying way Emily can swipe
+between sleep options making the
+experience more intuitive and satisfying
+than clicking a button swiping feels
+natural on mobile devices making the
+interaction smoother and more mobile
+friendly the selected option is now
+entered and enlarged making it clear
+which sleep duration Emily has chosen
+the size contrast guides her Focus
+reducing confusion the large emoji and
+bold text give immediate feedback is
+this the only other option no it's not
+let's look at something different to
+make it feel even more personal for
+Emily what about this design in this
+version the selected state is now front
+and center right in the middle making it
+the most prominent part of the screen
+this isn't just a small detail it's an
+essential part of the design when Emily
+selects an option it's highlighted
+visually with the larger emoji that
+gives immediate feedback the Emoji in
+the middle not only shills Emily
+selection but it also reinforces her
+choice with positive feedback whether
+her sleep was good or something else
+this centralized feedback combined with
+encouraging text like your sleep was
+good aimed for 8 hours for the best rest
+makes the experience more motivational
+and informative for Emily as Emily
+selects different options both the Emoji
+and the feedback change dynamically this
+adds an element of fun and
+personalization the app isn't just
+collect data it's giving realtime
+responses that help Emily understand her
+sleep patterns better now let me show
+you one more option for Designing this
+experience in this design the selected
+Emoji stays right in the middle giving
+Emily immediate visual feedback about
+how well she slept but this time we've
+taken it up a notch by adding a slider
+below the Emoji making the experience
+more interactive for Emily as Emily
+slides through the Sleep durations the
+Emoji and feedback text dynamically
+change in real time creating a more
+engaging experience for instance here
+she can see that she slept 2 hours more
+than the night before which adds a layer
+of personalization and helps Emily feel
+more connected to her progress this type
+of interaction brings Emily closer to
+her sleep data making it feel more like
+a personal Journey rather than just a
+task compare this to the previous design
+I think this version takes interaction
+to the next level now I want to make
+this video a bit more interactive for
+you too pause the video and tell me in
+the comments which design I designed you
+like the most and add a reason why do
+you prefer option A for its clean and
+simple design is option b more your
+style with its Dynamic swipeable
+interaction maybe you like option C for
+its Emoji selection and encouraging
+feedback or does option D stand out with
+its interactive slider and sleep
+comparison I'm really curious to hear
+which one stands out to you and why
+write it in the comments I've got even
+more tips for you in this video but as
+you've seen so far even small tweaks can
+turn a good design into a great one the
+reality is becoming a great designer
+takes years of learning and even then
+you might still be missing some key
+elements to consistently create
+beautiful designs that's exactly why we
+created the UI ux Playbook a
+comprehensive guide packed with over 100
+actionable tips principles and
+strategies that can take your designs to
+the next level and save you many years
+of frustration and failures The Playbook
+has received five-star reviews from more
+than 10,000 people who have already
+downloaded the free preview or grab the
+full version don't miss out on this
+opportunity to learn how to create
+beautiful designs yourself just click
+the link in the description to get your
+copy and if you stay until the end I'll
+give you a special gift now let's shift
+gears and take a look at the world of
+Finance picture something like this
+you've designed a stunning banking app
+with a clean modern interface that users
+love imagine the possibilities when your
+app not only looks great but also offers
+a seamless user experience you can find
+the full tutorial for creating this
+beautiful banking app design including
+the source files in our ux UI design
+Mastery course now imagine you need to
+design payment experience a flow where
+users can easily transfer money to their
+friends Michaela Jenny and Rachel so
+let's get back to our home on our mobile
+app and click on at the bottom to go to
+the transfer screen to see how an
+average Junior designer would design it
+we have a basic layout with two buttons
+and redundant text it's a simple design
+that you can say in a way works but
+let's see how a more senior designer
+would design this experience this is
+much better now let's compare this to a
+design from a junior designer instead of
+cluttering the screen with unnecessary
+text or multiple options we've used the
+space more efficiently we added a recent
+recipient section along with the search
+bar by doing this we eliminated the need
+for a separate choose from history
+button and streamlined it to just one
+clear call to action this design Choice
+does a few key things it lets users see
+people they've recently transferred
+money to making the process faster and
+more intuitive it reduces interaction
+cost a key the UI design principle
+you'll learn about in our UI ux Playbook
+every unnecessary action you remove from
+the process improves the user experience
+this senior level design not only looks
+cleaner but it also leverages important
+ux principles to create a more seamless
+and userfriendly experience so let's
+dive deeper into the transaction process
+now imagine your app supports
+transferring funds in different
+currencies here's how a junior designer
+might approach design of the transfer
+screen there are two separate Fields one
+for selecting the currency and another
+for entering the transfer amount this
+layout works and technically it gets the
+job done but it's not optimized for the
+user's experience now let's see how I
+would improve this what about this this
+instantly feels better first you need to
+think from the users's perspective
+what's the most important task they want
+to complete entering the transfer amount
+so I've made this the focus of the
+screen making it larger and more
+prominent to immediately draw the user's
+attention on the other hand selecting
+the currency is a secondary action the
+currency selector is tucked neatly into
+the corner of the amount input field
+making it available but not distracting
+this assumes the user will most likely
+transfer money in the same currency most
+of the time so the emphasis remains on
+the amount this minimizes distractions
+and keeps the interface Focus focused on
+the task at hand now let's take it a
+step further and enhance the user
+experience even more how would you do
+that I would do it by giving users a
+clear visual cue of who they're sending
+money to incorporating a profile photo
+or even just an icon next to the
+recipient's name an account number does
+more than just personalize the
+transaction it Taps into the principle
+of recognition over recall instead of
+having to remember specific details like
+account numbers users can quickly
+recognize familiar faces or icons making
+the process more intuitive and reliable
+this subtle addition helps users feel
+confident that they're sending money to
+the right person reducing the risk of
+accidental transfers now we can take
+this a step further by adding your new
+balance section directly after the
+transfer amount this addition gives
+users instant feedback on how the
+transaction will affect their account
+balance so not only does it allow them
+to see their current balance but it also
+shows what their New Balance will be
+after the transaction is complete this
+improves transparency and helps users
+feel more in control of their finances
+minimizing any surprises after sending
+money sadly you will find that many
+banking apps miss this feature now let's
+imagine the user has multiple accounts
+perhaps a business account a personal
+account or even a joint account in this
+scenario it's important to clearly show
+which account the payment is coming from
+to avoid any confusion we can Implement
+a simple yet effective solution
+displaying both the sender account and
+the recipient's account prominently
+during the transaction this ensures the
+user knows exactly which account will be
+deducted whether it's their personal
+business or joint account by doing this
+we give the user a clear overview of
+their accounts and reduce the chance of
+Errors they can easily switch between
+accounts before finalizing the
+transaction making the process both
+intuitive and flexible you can really
+see the big difference in how a Junior
+and senior designer would approach the
+same experience as a senior uxui
+designer Your Role goes beyond just
+creating visually appealing designs you
+have a deep understanding of your target
+audience their needs frustrations and
+motivations you step into their shoes
+considering the environment and context
+in which they'll use your product by
+doing this you don't just design
+interfaces you craft intuitive user
+centered experiences that solve real
+problems and make interaction seamless
+now let's move on to the final tip offer
+selection instead of manual input
+imagine your designing an onboarding
+screen for your product and you want to
+ask the user for their job title here's
+how an average designer might handle
+this this design has a text field where
+the user has to manually type in their
+answer while it gets the job done it's
+not the best approach why because it
+requires more effort from the user and
+introduces the possibility of tyos
+inconsistent responses or frustration
+with thinking of the right title now
+let's see how a senior uxui designer
+would handle this instead of a manual
+input field I would add a selection of
+the most common job titles users can
+simply tap their role making the process
+faster and easier I also brought in some
+personality by incorporating icons next
+to each option for those whose job title
+wasn't listed we included another option
+allowing them to either input their own
+title or select it as a general option
+when designing you can play with
+different layouts to add more visual
+appeal But ultimately you always have to
+prioritize the user experience we put a
+lot of effort into creating this video
+and it would mean the world to us if you
+could support it by sharing or leaving a
+comment and because you you stayed until
+the end I have a special offer for you
+use code awesome 50 to get 50% off on
+either our Playbook or the design
+Mastery course thank you for watching
+and I wish you a beautiful day
+
+---
+hello and welcome back because you loved
+our first video on top UI design tips
+we've created part two for you which
+will be even more exciting the truth is
+you don't need a design background
+special talents or a University degree
+to create beautiful UI designs by
+mastering the key principles tips and
+tricks anyone can create exceptional UI
+designs that people love whether you're
+a designer developer marketer or simply
+curious about UI design these tips are
+for you let's dive into today's tips and
+keep pushing ing Your Design skills to
+the next level tip number one experiment
+with creative layouts the traditional
+approach of a vertical list of
+text-based options can sometimes come
+across as Bland and unengaging the
+standard layout offers limited
+opportunities for visual differentiation
+and while it provides Clarity it doesn't
+always contribute to a memorable user
+experience what if we could break free
+from the constraints of the typical list
+of options layout an exciting
+alternative is to reimagine them as
+selectable cards this approach adds a
+new layer of interaction and visual
+appeal to the user interface each card
+can feature labels colors and even icons
+or images providing more context and
+richness to the options presented such
+an approach not only increases the
+aesthetic appeal but also AIDS in making
+the information more digestible and the
+interface more
+engaging tip number two reduce user
+barrier by exposing content directly
+imagine this you're scrolling through a
+new app and the first thing you see is a
+big banner saying discover 100 plus
+recipes selected by our chefs it sounds
+exciting but it's also an extra step you
+have to tap on it to see the actual
+recipes that's the interaction cost in
+action which we can Define as the
+cognitive physical and time effort a
+user has to exert to reach their goal in
+today's fast-paced world users are
+looking for immediate value by hiding
+content behind banners you're creating
+an unnecessary barrier between the user
+and the value your app provides
+this interaction cost may seem trivial
+but it can add up especially when the
+user is new to the app and unsure about
+investing time and effort in it instead
+imagine this you open the same app but
+this time you immediately see a curated
+list of top 10 recommended recipes no
+tapping needed the content is right
+there this does a couple of things it
+adds quick value the user instantly sees
+the value your app provides making them
+more likely to engage further it reduces
+friction
+the fewer steps a user has to take to
+reach their goal the better the user
+experience that means increased user
+attention and more interaction within
+your app it adds relevancy when you
+expose content directly you have the
+opportunity to showcase the most
+relevant or popular items making it more
+likely that the user will find something
+that interests them right away tip
+number three design for the thumb Zone
+mobile devices are often operated using
+just one hand and primarily the thumb
+therefore when you're designing a mobile
+interface it's important to keep the tum
+zones in mind this is the area of the
+screen easily reachable with the thumb
+placing key elements like buttons
+navigation links and calls to action
+within the thumb Zone makes it easier
+for users to interact with your Design
+Elements positioned outside of this area
+can be difficult to reach and could lead
+to user frustration or misclicks so when
+you're laying out your design make sure
+the most used features are easily
+accessible within the thumb Zone by
+doing so you enhance usability and make
+your interface more userfriendly let's
+have a look at two UI design examples in
+the first screen the CTA is located
+outside of the thumb Zone which means
+that users would need to stretch or
+adjust their grip to reach it this can
+cause frustration and inconvenience
+especially for users who are on the go
+or have limited mobility in the second
+screen the CTA is thoughtfully
+positioned within the thumb Zone which
+is a common area where users thumbs
+naturally rest when holding their mobile
+devices tip number four turn empty
+States into opportunities when a user
+encounters an empty State it's like
+hitting a roadblock an empty screen with
+no guidance or actionable steps can
+leave them feeling lost and frustrated
+it's a missed opportunity to guide and
+engage users a bare empty State such as
+a screen simply saying you have no
+projects fails to provide users with any
+value or Direction it's a dead end that
+can make users feel stuck and unsure of
+what to do next next conversely a
+well-designed empty State can be a
+powerful tool to educate engage and
+encourage users to take action it's a
+chance to turn a potential negative
+experience into a positive one for
+example an empty state that says start
+managing your projects and stay
+organized immediately offers a solution
+to the user's problem it doesn't stop
+there though with an accompanying
+illustration it becomes visually
+appealing and less daunting by adding
+actionable tips like invite team members
+to collaborate on a project for better
+communication and set deadlines for
+tasks to keep everyone on track it
+provides clear steps for the user to
+take finally a CTA button saying create
+new project gives them a direct way to
+take action last but not least tip
+number five use visual
+cues we could have presented all these
+tips in a Texton format but we chose to
+use visual examples why because visuals
+make your learning and any user's
+interaction with a design far more
+engaging and memorable visual cues do
+more than just add flare or personality
+to your designs they help users
+understand your message faster and
+enhance overall user experience by
+making information easier to grasp to
+show the impact visual cues can have
+compare the following designs the first
+one without the visual cues versus the
+second one with the visual cues a huge
+difference right now let's have a look
+at another example of using visual cues
+to design better UI for email messages
+in the first design you can see a UI
+that doesn't apply the principle of
+visual cues while this UI design is
+functional there are opportunities to
+enhance the user experience and improve
+the overall usability of the email inbox
+even more using icons with a set of
+colors and a first initial letter in the
+middle could be a creative and Visually
+appealing way to represent senders in an
+email inbox or messaging app a more
+effective way to represent senders is to
+use images of people and logos of
+companies with that users can easily
+identify the sender and quickly
+understand the context of the message
+love these tips then consider joining
+more than 8,000 amazing designers
+marketers and developers who have
+already downloaded the uiux design
+Playbook and unlocked more than 90
+awesome UI design tips tricks and
+strategies let us know in the comment if
+you wanted to see part three that is all
+for today keep designing beautiful
+things and I will see you in the next
+one have a beautiful day
+---
+If your bottom navigation looks like
+this or this or even this, you need to
+watch this video because right now your
+users are probably suffering. Every time
+they open your app, they feel like this.
+A bad bottom navigation doesn't just
+look messy and unappealing. It makes
+your app frustrating to use and
+confusing to navigate. And when that
+happens, users don't just get annoyed,
+they leave and find something better.
+But here's the good news. Fixing this is
+easier than you think if you know the
+right UI design principles. And today
+I'm going to show you exactly how to
+design a bottom navigation bar that's
+not just good, but so intuitive and
+smooth that people will love using your
+app. These are the same design
+principles used by the best apps in the
+world. And by the end of this video,
+you'll know exactly how to design a
+bottom navbar that feels amazing. Oh,
+and stick around till the end because
+there's one big mistake that even pro
+designers keep making. And trust me, you
+don't want to be that designer. Now, one
+thing that can really take your bottom
+navigation to the next level is adding
+subtle micro interactions like this.
+Looks great, right? It's those small
+details that make an app feel polished
+and responsive. But before you get too
+excited about animations, there's
+something even more important. the
+fundamentals because if you don't get
+the basics right, no amount of fancy
+micro interactions will save your
+navigation. So, let's start from the
+ground up. When you open a mobile app,
+you'll usually see two types of
+navigation. Top navigation, which sits
+at the top, and bottom navigation, which
+sits at the bottom of your screen. They
+look similar on both iOS and Android.
+But here's something that confuses a lot
+of designers. On iOS, it's called a tab
+bar. On Android, it's called bottom
+navigation. Throughout this video, I'll
+just call it the bottom navigation bar
+to keep it simple. Now, a lot of
+designers think the bottom navigation
+bar is just buttons at the bottom, but
+the truth is it's so much more. It's
+actually the backbone of your app's
+usability. Here's why. Your bottom
+navigation bar represents the top level
+structure of your app. It tells users
+what's important and helps them move
+quickly between the core sections. And
+here's something you really need to
+understand. This is prime real estate.
+Your bottom navigation is one of the
+most tapped, most used areas in your
+entire app. So, every icon, every label,
+every micro interaction, you have to be
+strategic because a well-designed bottom
+navigation can make your app feel
+effortless. A bad one, it drives people
+away. So, how do you decide what to put
+in your bottom navigation bar? Let's
+break it down step by step. Tip:
+Prioritize the most important and
+frequently used screens or actions. The
+bottom navigation should only contain
+the most essential destinations in your
+app. The core features users interact
+with most often. Good candidates for
+bottomnav. Home, main feed, dashboard,
+or landing screen. Search, discover, if
+users frequently search or browse
+content. Add, create, if users regularly
+add posts, messages, or content.
+Messages, notifications. If social
+interaction is a big part of the app,
+profile, user account settings, history,
+and saved content. Bad candidates for
+bottomnav. Help. Fact. It needs to be in
+profile or side menu. Log out. No one
+logs out that frequently. Keep it
+elsewhere. Legal pages, privacy policy,
+terms, etc. Nobody needs these at their
+fingertips. Introducing elements like a
+back or forward button or even logos
+which are traditionally part of the top
+navigation in the bottom navigation bar
+is a practice best avoided. This
+approach aligns with Jacob's law which
+suggests that users spend most of their
+time on other websites or apps.
+Therefore, they prefer your site or app
+to work the same way as others they
+already know. Cluttering the bottom
+navigation with elements typically found
+at the top can confuse users as it goes
+against the familiar navigation patterns
+they're accustomed to. On the other
+hand, including a call toaction CTA
+button in the bottom navigation is a
+smart move. These buttons are usually
+placed in the center of prominence and
+ease of access. CTAs like create an
+order or post serve a dual purpose. They
+stand out to the user, encouraging
+action, and their central positioning
+makes them easily reachable, especially
+on larger devices. Tip: Understand who
+are your users before you design
+anything, especially your bottom
+navigation. You need to know who your
+users are, who's your target audience
+because this will shape everything about
+your design choices. Ask yourself, how
+comfortable are they with technology?
+How old are they? What problems are you
+helping them solve? What devices do they
+use? Why does this matter? Because even
+small decisions like adding labels to
+your icons depend on your users. If your
+audience is younger and techsavvy, you
+might get away with minimalist approach
+and show just icons. But if your users
+are older and less familiar with apps,
+labels below icons can make navigation
+clearer and help them feel more
+confident using your app. Tip: Choose
+the right sizes, padding, and margins.
+Creating the right autonomy for your
+bottom navigation is like crafting a
+tailorade suit. It needs to fit
+perfectly with the device it's designed
+for. In the image, you can see detailed
+properties for navigation on the iPhone
+14 and iPhone 15 Pro. But these are
+guidelines, not rigid rules. The key is
+to adapt and experiment to find what
+works best for each device. Why does
+this matter? Well, on smaller devices, a
+more compact navigation bar might be
+more appropriate. A bulky bar can eat up
+valuable screen space, making the app
+feel cramped. The goal is to find the
+right balance between visibility and
+accessibility without overshadowing the
+main content. Generally, an icon size of
+24 pixels strikes a good balance. It's
+large enough to be recognizable but
+doesn't dominate the screen. The home
+indicator, that dark bar at the bottom,
+typically takes up around 34 pixels.
+When it comes to labels, the sweet spot
+is around 10 to 12 pixels. Smaller text
+can cause accessibility issues, making
+it hard for some users to read. On the
+flip side, larger text can create
+clutter and draw attention away from the
+main content. Remember, labels are there
+to guide, not to overshadow. Designing
+for two to three mobile device widths is
+a good practice. It ensures your
+navigation bar looks great and functions
+well across a range of devices. If
+you're designing a bottom navigation bar
+for modern smartphones, especially on
+iPhones and Android devices without
+physical buttons, there's one detail
+that many junior designers forget. the
+home indicator. That thin line at the
+bottom of the screen, that's the home
+indicator. It lets users swipe up to go
+back to the home screen, and it sits
+right below your bottom navigation bar.
+So, here's what you need to know. You
+should not modify or hide the home
+indicator. You should not overlap your
+navigation bar onto it. Why does this
+matter? Because if your bottom
+navigation is too low or feels cramped
+against the home indicator, users might
+accidentally trigger the home indicator
+when trying to tap your nav icons. Find
+your app harder to use, especially
+one-handed. Feel like your design is
+broken or unfinished. What to do
+instead? Respect the devices safe area,
+also called the safe zone. Make sure
+your bottom navigation sits above the
+home indicator so there's enough
+spacing. Test it on a real device. Use
+Figma Mirror to see your design directly
+on your phone. What looks good in Figma
+on your screen can feel completely
+different when you're actually tapping
+it on a real phone. Tip: Limit the
+number of tabs to five. Having too many
+tabs in the bottom navigation can lead
+to a cluttered and confusing user
+experience. Overloading the space with
+excessive options not only makes each
+tab smaller and harder to accurately
+tap, especially on mobile devices, but
+also overwhelms users with too many
+choices. This can lead to what's known
+as choice paralysis, where users find it
+difficult to make a decision because of
+the sheer number of options presented to
+them. The golden rule, aim for three to
+five tabs, max six tabs. This range is
+the sweet spot for bottom navigation. It
+gives users enough options without
+crowding the space. With fewer tabs,
+each one has more breathing room, making
+them easier to tap and reducing
+accidental clicks. This also makes your
+app feel more organized and easier to
+navigate. Focus on what matters most.
+Choose tabs that are essential to your
+app's core functions and what users
+access most often. This way, your users
+have everything they need at their
+fingertip without the extra clutter.
+Tip: Design thumb friendly tap areas. A
+common convention is to use a tap area
+that is large enough to be easily tapped
+with a thumb. This usually means having
+a tap area of at least 44 pixels x 44
+pixels. This size is not just a random
+choice. It's based on the average size
+of a human thumb, which ensures that
+most users can comfortably and
+accurately tap the navigation items
+without accidentally hitting the wrong
+one. Why is this important? First, it
+improves the overall usability of your
+app. Users are likely to navigate using
+their thumbs, especially on smaller
+devices. A larger tap area reduces the
+chance of errors and frustration, making
+the app more userfriendly. Second, it
+enhances accessibility. Not all users
+have the same level of dexterity, and a
+generous tap area ensures that the app
+is more accessible to people with
+varying motor abilities. In contrast, a
+smaller tap area, like 24 pixels x 24
+pixels, might lead to frequent mistaps
+and a poor user experience. Enjoying the
+tips so far? That's awesome. But let's
+be real, watching a few tips is great,
+but what is really going to make a
+difference is knowing how to put it all
+together. That's where a lot of
+designers get stuck. You pick up bits
+and pieces, but when you sit down to
+design, something still feels off.
+That's exactly why we created the UIUX
+playbook to give you clear, practical
+techniques and real examples that show
+you how to design UIs that look clean,
+modern, and professional so your work
+stands out and looks right every time.
+We've had so much amazing feedback from
+designers who said that after reading
+the playbook, they went from struggling
+with designs that just didn't look right
+to creating work that looks amazing and
+that they're finally proud to share. If
+you want to check it out, there's a
+special discount for you. Use level up
+40 at checkout to get 40% off. And if
+you're curious, you can also download a
+free preview first. You'll find
+everything linked in the description
+below. Tip: Differentiate active and
+inactive states. Differentiating the
+active state in bottom navigation is
+essential for creating a clean user
+experience. It's about making it
+immediately obvious to the user where
+they are in the app. A smart way to do
+this is to change the style and color of
+the active icon. Imagine an icon that
+shifts from an outline to a filled
+version along with a noticeable change
+in color. This visual cue instantly
+draws the user's attention to their
+current location. To further enhance
+this distinction, you can also make the
+labeled text for the active icon darker
+and thicker. This simple adjustment
+reinforces the user's focus on the
+active state. The combination of a
+transformed icon style, a standout
+color, and bolder text works effectively
+to differentiate the active tab from the
+inactive ones. Conversely, a design that
+only alters the text, leaving the icon
+unchanged, might not be distinct enough.
+In such cases, users might take longer
+to identify their current position in
+the app, potentially leading to a slower
+and more frustrating navigation
+experience. It's important to strike a
+balance and ensure that the active state
+stands out clearly for effortless
+navigation. It's also perfectly
+acceptable to keep the icon outlined
+instead of filling it in as long as you
+change its color. The key is to apply at
+least two visual changes, such as
+adjusting the icon's color and making
+the text bolder. This dual change
+ensures users can effortlessly
+distinguish between active and inactive
+tabs, enhancing their navigation
+experience in your app. Tip: Choose
+simple and familiar icons. When
+selecting icons for your bottom
+navigation bar, the best approach is to
+prioritize familiarity and simplicity.
+Choose icons that users can instantly
+recognize and that accurately represent
+their function. A classic example is
+using a magnifying glass for the search
+function. It's a universally understood
+symbol, making it far more effective
+than less familiar options like
+binoculars. The simplicity of each icon
+is also key. Complex designs or overly
+artistic interpretations can confuse
+users. The goal is to enable users to
+understand and navigate your app with
+minimal effort or thought. Simple icons
+achieve this by being easy to identify
+at a glance. Tip: Keep navigation labels
+short and sweet. When it comes to
+designing your bottom navigation bar,
+less is often more. Opt for concise
+single line labels to keep the design
+neat and effective. Avoid long labels
+that spill over into two lines. They can
+clutter the screen and overwhelm your
+users. They also tend to make the
+navigation bar too big, which can throw
+off the balance of your app's layout.
+Short labels keep things simple, helping
+users make quicker, more instinctive
+choices. They also contribute to a
+clean, contemporary aesthetic, ensuring
+your app is both stylish and functional.
+Tip: Keep it clean and simple. A
+cluttered or overwhelming design can
+hurt the user experience. Avoid adding
+unnecessary elements like boxes around
+your tabs as these can create visual
+noise. Instead, strive for a clean,
+minimalist look that guides users
+effortlessly through your app. The goal
+is to design a navigation bar that's
+intuitive and unobtrusive, allowing
+users to focus on what matters most, the
+content of your app. Tip: Stick to one
+icon style except for the selected
+state. Mixing filled and outline icons
+in the same navigation bar is like
+inviting guests to a black tie event
+only to have someone show up in
+beachwear. To avoid this visual
+mismatch, stick to a consistent style of
+icons throughout your navigation. If you
+decide on outline icons, use them
+consistently across all tabs. This
+creates a harmonious and visually
+balanced look. However, there's a clever
+exception, the selected state. here.
+Switching an outline icon to a filled
+version is a fantastic way to highlight
+the active tab. It's like giving that
+tab a special badge of honor, making it
+stand out in a subtle yet effective way.
+Also, be mindful of the complexity of
+your icons. Consistency isn't just about
+style, it's also about complexity. If
+one icon is simple and clean, the others
+should follow suit. Mixing a minimal
+icon with a more detailed one can throw
+off the visual harmony of your
+navigation bar. Tip: Avoid using too
+many colors. Using too many colors in
+your bottom navigation or giving each
+tab its own color may seem like a fun
+idea, but it usually does more harm than
+good. Instead of helping users, it
+creates visual chaos. Suddenly,
+navigation becomes a guessing game of
+colors rather than something that feels
+natural and easy. Here's the thing. You
+want your navigation to feel like part
+of the app, seamless, not loud. When
+every tab is a different color, it pulls
+attention away from what actually
+matters, the content. It can even mess
+with your brand's look, making your app
+feel less polished and harder to
+recognize. The better approach, stick to
+your brand's color palette. Keep it
+simple and consistent. That way, your
+navigation feels clean, your app feels
+professional, and your brand stays
+strong. Tip: Use notification badges in
+bottom navigation to highlight updates.
+Using notification badges in your bottom
+navigation bar is a great way to signal
+new updates or messages to users. These
+badges can be simple colored circles, or
+they can include numbers to indicate the
+quantity of new updates. Badges should
+be small enough to stay subtle, but
+large enough to be noticeable. Placing
+them in the top right corner of the icon
+is a common practice, as it's naturally
+eye-catching. Here's a pro tip. Adding
+an outline around the badge can make it
+stand out even more and give it a
+polished look. If you're using numbers
+within the badge to indicate the count
+of new updates, ensure they are easy to
+read. Avoid overly small or stylized
+fonts that might be hard to decipher at
+a glance. Choose a badge color that
+stands out against the navigation bar
+and icon colors, yet still feels
+consistent with the overall app design.
+Finally, only use badges for essential
+notifications. Overloading users with
+badges for every minor update can lead
+to notification fatigue, reducing the
+effectiveness of this feature. Tip:
+Experiment with creative layouts, but
+with usability being your priority.
+While standard layouts are tried and
+tested for usability, stepping outside
+the box with a creative and beautiful
+design can give your app a distinctive
+edge. The key is to strike a balance
+between aesthetics and usability. You
+can add value to your app by
+experimenting with different shapes,
+positions, or even dynamic interactions
+for your bottom navigation. Maybe you're
+thinking about a unique icon arrangement
+or an unconventional bar shape. These
+creative touches can make your app
+memorable. However, here's a word of
+caution. Never sacrifice usability for
+aesthetics. For instance, while an
+unconventional layout may look stunning,
+if it confuses users or makes navigation
+harder, it can do more harm than good.
+All right, let's make this a little bit
+more interactive. I want you to pause
+the video right now and head to the
+comment section. Tell me which bottom
+navigation design you like the most. Is
+it option A, clean and simple? Option B,
+with that sleek line above the active
+tab, option C, minimalist with a smooth,
+interactive feel, or option D with a
+more distinctive custom look. Drop your
+favorites in the comments, A, B, C, or
+D, and tell me why. I'm curious to see
+which style you prefer.
+Tip: Separate bottom navigation from
+main content. Remember when I mentioned
+you should stick around till the end
+because there's one big mistake that
+even pro designers keep making? Well,
+here it is. Not separating the bottom
+navigation from the main content. Adding
+a subtle soft outline or a one pixel
+border around the navigation bar can
+create a gentle but clear separation.
+This method is unobtrusive yet effective
+at visually distinguishing the
+navigation area as a distinct element.
+Tip: You can use background color to
+separate bottom navigation from main
+content. Another approach is to
+differentiate the background colors of
+the bottom navigation and the main
+screen. For instance, if your main
+screen is white, consider using a light
+gray for the navigation bar. This
+contrast creates a sense of depth,
+making the navigation area feel like a
+distinct interactive element of the app.
+Using a shadow is also a great way to
+achieve this separation. A small soft
+shadow above the navigation bar can
+create an elevated effect, giving the
+impression that the navigation is
+floating above the rest of the content.
+However, it's important to keep the
+shadow subtle. An overly large or harsh
+shadow can draw attention away from the
+content and detract from the sleekness
+of your design. Tip: Choose neutral
+colors and avoid using too many colors
+in both your top and bottom navigation.
+It's best to keep the navigation colors
+neutral, such as white, gray, or dark
+tones. This approach ensures that the
+navigation doesn't distract from the
+main content of the app. By reserving
+brighter or primary colors for key
+actions on the main screen, you help
+those elements stand out and draw
+attention to what matters most. It's
+also important to avoid using too many
+different colors between the top and
+bottom navigation bars. This can lead to
+a disjointed visual experience and
+distract users from the app's content.
+Keeping a consistent color palette
+between these two elements creates a
+cohesive and harmonous design. When
+choosing colors for your navigation,
+it's crucial to consider how they
+complement your app's overall theme and
+branding. While neutral colors like
+white, gray, or dark shades are
+generally recommended for their
+versatility and subtlety, it's perfectly
+fine to opt for a different color if it
+enhances your brand's identity. However,
+the color should not be so bright or
+overpowering that it overwhelms the main
+content or disrupts the user's focus. It
+should complement the primary colors
+used on the main screen, enhancing key
+actions and content rather than
+competing with them. By the way,
+everything that you have learned so far
+here is from our UX UI design mastery
+course, where we have more than 50
+lessons like this one, all designed to
+take you from a beginner to a UX UI
+design pro. If you want to know more,
+the link's in the description. Tip:
+Avoid poor contrast for inactive states.
+A common pitfall is using poor contrast
+for inactive icons and labels, making
+them difficult to see or understand,
+especially for users with visual
+impairments. It's important to strike a
+balance between visibility and
+distinction. Instead of opting for
+drastically different colors, consider
+slightly reducing the opacity of
+inactive elements. This approach
+maintains a cohesive color scheme while
+clearly differentiating active and
+inactive states. A good starting point
+is to aim for an opacity level that is
+noticeable yet not too faint. The web
+content accessibility guidelines
+recommend a minimum contrast ratio of
+3:1 for graphical elements and user
+interface components. To make sure your
+color choices meet accessibility
+standards, use tools like the web aim
+contrast checker. Tip: Add sleek micro
+interactions. Now that you mastered all
+important fundamentals and your bottom
+navigation bar has a solid base, it's
+time to take it completely to the next
+level to absolutely delight your users
+and make them go, "Wow!" A lot of
+beginner designers skip this. Their
+bottom navigation is just static. You
+tap and it changes, but there's no
+feeling. It's like pressing a light
+switch with no click. Micro interactions
+and smooth transitions make your bottom
+navigation feel responsive, polished,
+and honestly just more fun to use. Tip
+one, tap feedback. When a user taps an
+icon, show a quick visual response like
+a color change, scale up, or a ripple
+effect. Tip two, when switching between
+tabs, don't just snap to the next one.
+Add a small sliding underline or animate
+the icon smoothly into place. Tip three,
+transitions between screens. When a user
+switches screens, don't make it feel
+like they teleported, add a soft fade,
+or a sides slide transition. It makes
+navigation feel connected. These little
+details, they're what separating boring
+designs from apps that feel amazing. So,
+next time you design a bottom
+navigation, don't just make it work,
+make it feel great. If you made it all
+the way to the end, congratulations. You
+now know how to design a perfect bottom
+navigation bar. and hopefully your
+navigation will never look like this
+ever again. I really hope you enjoyed
+this video. If you did, it would mean a
+lot if you shared it with others. Let's
+make every bottom navigation bar out
+there awesome. Also, let me know in the
+comments which tip was your favorite.
+I'd love to hear what you found most
+helpful. Thanks for watching and I'll
+see you in the next one. Have an amazing
