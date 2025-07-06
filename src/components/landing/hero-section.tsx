@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LANDING_CONTENT } from "@/constants/landing";
+import Link from "next/link";
 
 export function HeroSection() {
   const { hero } = LANDING_CONTENT;
@@ -44,12 +45,16 @@ export function HeroSection() {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-8">
-          <Button size="lg" className="w-full sm:w-auto">
-            {hero.cta.primary}
-          </Button>
-          <Button variant="outline" size="lg" className="w-full sm:w-auto">
-            {hero.cta.secondary}
-          </Button>
+          <Link href={hero.cta.primary_link} className="w-full sm:w-auto">
+            <Button className="w-full sm:w-auto">
+              {hero.cta.primary}
+            </Button>
+          </Link>
+          <Link href={hero.cta.secondary_link} className="w-full sm:w-auto">
+            <Button variant="outline" className="w-full sm:w-auto">
+              {hero.cta.secondary}
+            </Button>
+          </Link>
         </div>
       </div>
     </section>

@@ -8,6 +8,8 @@ export const LANDING_CONTENT = {
     announcement: "New: Project Embedding & Collaboration Features",
     cta: {
       primary: "Go to Dashboard",
+      primary_link: "/dashboard",
+      secondary_link: "/learn-more",
       secondary: "Learn More"
     }
   },
