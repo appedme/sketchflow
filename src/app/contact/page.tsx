@@ -16,7 +16,7 @@ export default function ContactPage() {
               Get in Touch
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Have questions about SketchFlow? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+              Have questions about SketchFlow? We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
             </p>
           </div>
 
@@ -26,7 +26,7 @@ export default function ContactPage() {
               <CardHeader>
                 <CardTitle>Send us a message</CardTitle>
                 <CardDescription>
-                  Fill out the form below and we'll get back to you within 24 hours.
+                  Fill out the form below and we&apos;ll get back to you within 24 hours.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -88,7 +88,7 @@ export default function ContactPage() {
                     <div>
                       <h3 className="font-semibold">Email</h3>
                       <p className="text-muted-foreground">support@sketchflow.com</p>
-                      <p className="text-sm text-muted-foreground">We'll respond within 24 hours</p>
+                      <p className="text-sm text-muted-foreground">We&apos;ll respond within 24 hours</p>
                     </div>
                   </div>
                   

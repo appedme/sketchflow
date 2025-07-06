@@ -3,21 +3,17 @@
 import { redirect } from 'next/navigation';
 
 export async function createProject(formData: FormData) {
-  // Extract form data
-  const projectName = formData.get('projectName') as string;
-  const projectDescription = formData.get('projectDescription') as string;
-  const projectCategory = formData.get('projectCategory') as string;
-  const projectVisibility = formData.get('projectVisibility') as string;
-  const templateId = formData.get('templateId') as string;
-
   // In a real app, you would:
-  // 1. Validate the data
+  // 1. Extract and validate form data
   // 2. Save to database
   // 3. Create initial project structure
   // 4. Set up permissions based on visibility
 
   // For now, we'll simulate creating a project and redirect
   const projectId = Math.random().toString(36).substr(2, 9);
+  
+  // Simulate using form data (in real app, this would be used for project creation)
+  console.log('Creating project with data:', Object.fromEntries(formData));
   
   // Simulate database save delay
   await new Promise(resolve => setTimeout(resolve, 1000));
