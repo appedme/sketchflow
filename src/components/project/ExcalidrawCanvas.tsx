@@ -38,6 +38,18 @@ export function ExcalidrawCanvas({
     viewModeEnabled: false,
     zenModeEnabled: false,
     gridSize: null,
+    name: projectName,
+    currentItemStrokeColor: "#1e40af",
+    currentItemBackgroundColor: "#dbeafe",
+    currentItemFillStyle: "hachure",
+    currentItemStrokeWidth: 2,
+    currentItemRoughness: 1,
+    currentItemOpacity: 100,
+    currentItemFontFamily: 1,
+    currentItemFontSize: 20,
+    currentItemTextAlign: "left",
+    currentItemStartArrowhead: null,
+    currentItemEndArrowhead: "arrow",
   });
   const [files, setFiles] = useState<BinaryFiles>({});
   const [libraryItems, setLibraryItems] = useState<LibraryItems>([]);
@@ -106,7 +118,6 @@ export function ExcalidrawCanvas({
 
   const handleLibraryChange = useCallback((libraryItems: LibraryItems) => {
     setLibraryItems(libraryItems);
-    // Save library to localStorage
     localStorage.setItem(`excalidraw-library-${projectId}`, JSON.stringify(libraryItems));
   }, [projectId]);
 
@@ -133,7 +144,6 @@ export function ExcalidrawCanvas({
       
       if (blob.type === "excalidrawlib") {
         if (excalidrawAPI && blob.data.libraryItems) {
-          // Merge with existing library items
           const mergedLibrary = [...libraryItems, ...blob.data.libraryItems];
           
           excalidrawAPI.updateLibrary({
@@ -274,6 +284,22 @@ export function ExcalidrawCanvas({
           files,
           libraryItems
         }}
+        UIOptions={{
+          canvasActions: {
+            loadScene: false,
+            export: false,
+            saveToActiveFile: false,
+            toggleTheme: false,
+            clearCanvas: false,
+          },
+          tools: {
+            image: true,
+          },
+        }}
+        langCode="en"
+        gridModeEnabled={false}
+        theme="light"
+        name={`SketchFlow - ${projectName}`}
       >
         <MainMenu>
           <MainMenu.Item onSelect={triggerSceneImport}>
@@ -297,89 +323,170 @@ export function ExcalidrawCanvas({
           </MainMenu.Item>
           <MainMenu.Separator />
           <MainMenu.DefaultItems.Help />
+          <MainMenu.Item onSelect={() => window.open('https://sketchflow.space/help', '_blank')}>
+            SketchFlow Help
+          </MainMenu.Item>
         </MainMenu>
         
         <WelcomeScreen>
           <WelcomeScreen.Center>
-            <WelcomeScreen.Center.Logo />
-            <WelcomeScreen.Center.Heading>
-              Welcome to {projectName}
-            </WelcomeScreen.Center.Heading>
-            <WelcomeScreen.Center.Menu>
-              <WelcomeScreen.Center.MenuItemLoadScene />
-              <WelcomeScreen.Center.MenuItemHelp />
-            </WelcomeScreen.Center.Menu>
+            <div className="flex flex-col items-center">
+              <div className="mb-6">
+                {/* <div className="w-full h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 3L21 21M3 21L21 3" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                    <path d="M12 8L16 12L12 16L8 12L12 8Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div> */}
+                <h1 className="text-3xl font-bold text-gray-900 text-center">SketchFlow</h1>
+                <p className="text-gray-600 text-center mt-2">Document your ideas visually</p>
+              </div>
+{/*               
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-center">
+                <h2 className="text-xl font-semibold text-blue-900 mb-1">{projectName}</h2>
+                <p className="text-blue-700 text-sm">Start sketching your ideas</p>
+              </div>
+              
+              <div className="flex gap-3">
+                <button 
+                  onClick={triggerSceneImport}
+                  className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium text-gray-700 flex items-center gap-2"
+                >
+                  Load Scene
+                </button>
+                <button 
+                  onClick={triggerLibraryImport}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center gap-2"
+                >
+                  Import Library
+                </button>
+              </div> */}
+              
+              <div className="mt-6 text-center">
+                <p className="text-gray-500 text-sm mb-2">Quick Tips:</p>
+                <div className="text-xs text-gray-400 space-y-1">
+                  <p>Press R for rectangle, C for circle</p>
+                  <p>Hold Shift to maintain proportions</p>
+                  <p>Use Ctrl+Z to undo</p>
+                </div>
+              </div>
+            </div>
           </WelcomeScreen.Center>
         </WelcomeScreen>
 
         <Sidebar name="library">
           <Sidebar.Header>
-            <div className="flex items-center justify-between p-2">
-              <span className="font-medium">Library ({libraryItems.length})</span>
-              <div className="flex gap-1">
-                <button 
-                  onClick={triggerLibraryImport}
-                  className="text-blue-600 hover:text-blue-800 text-xs px-2 py-1 rounded hover:bg-blue-50"
-                  title="Import library file"
-                >
-                  Import
-                </button>
-                <button 
-                  onClick={exportLibrary}
-                  className="text-green-600 hover:text-green-800 text-xs px-2 py-1 rounded hover:bg-green-50"
-                  title="Export library"
-                  disabled={libraryItems.length === 0}
-                >
-                  Export
-                </button>
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-3 border-b">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M4 19.5C4 18.1193 5.11929 17 6.5 17H20" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M6.5 2H20V22H6.5C5.11929 22 4 20.8807 4 19.5V4.5C4 3.11929 5.11929 2 6.5 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <span className="font-semibold text-gray-800">Library</span>
+                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                    {libraryItems.length}
+                  </span>
+                </div>
+                <div className="flex gap-1">
+                  <button 
+                    onClick={triggerLibraryImport}
+                    className="text-blue-600 hover:text-blue-800 text-xs px-2 py-1 rounded-md hover:bg-blue-100 transition-colors"
+                    title="Import library file"
+                  >
+                    Import
+                  </button>
+                  <button 
+                    onClick={exportLibrary}
+                    className="text-purple-600 hover:text-purple-800 text-xs px-2 py-1 rounded-md hover:bg-purple-100 transition-colors"
+                    title="Export library"
+                    disabled={libraryItems.length === 0}
+                  >
+                    Export
+                  </button>
+                </div>
               </div>
             </div>
           </Sidebar.Header>
-          <div className="p-2">
+          <div className="p-3">
             {libraryItems.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <div className="text-2xl mb-2">Library</div>
-                <div className="text-sm">No library items yet</div>
-                <div className="text-xs mt-1 mb-3">Import .excalidrawlib files or add items from the canvas</div>
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 19.5C4 18.1193 5.11929 17 6.5 17H20" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M6.5 2H20V22H6.5C5.11929 22 4 20.8807 4 19.5V4.5C4 3.11929 5.11929 2 6.5 2Z" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <h3 className="font-medium text-gray-900 mb-2">No library items yet</h3>
+                <p className="text-sm text-gray-600 mb-4">Import .excalidrawlib files or create your own library items</p>
                 <button 
                   onClick={triggerLibraryImport}
-                  className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+                  className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-sm"
                 >
                   Import Library
                 </button>
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                  <p className="text-xs text-blue-700">
+                    <strong>Tip:</strong> Select elements on the canvas and add them to your library for reuse!
+                  </p>
+                </div>
               </div>
             ) : (
-              <div className="space-y-2">
-                <div className="text-xs text-gray-600 mb-2">
-                  Click on any item to add it to the canvas
-                </div>
-                {libraryItems.map((item: any, index: number) => (
-                  <div 
-                    key={index} 
-                    className="p-2 border rounded hover:bg-gray-50 cursor-pointer"
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-gray-600">Click any item to add to canvas</p>
+                  <button 
                     onClick={() => {
-                      if (excalidrawAPI && item.elements) {
-                        excalidrawAPI.addElementsFromLibrary(item.elements);
+                      if (confirm('Clear all library items?')) {
+                        setLibraryItems([]);
+                        localStorage.removeItem(`excalidraw-library-${projectId}`);
                       }
                     }}
+                    className="text-xs text-red-500 hover:text-red-700"
                   >
-                    <div className="text-xs text-gray-600">
-                      Library Item {index + 1}
-                    </div>
-                    {item.elements && (
-                      <div className="text-xs text-gray-400">
-                        {item.elements.length} element(s)
+                    Clear All
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 gap-2">
+                  {libraryItems.map((item: any, index: number) => (
+                    <div 
+                      key={index} 
+                      className="group p-3 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-all duration-200 hover:shadow-sm"
+                      onClick={() => {
+                        if (excalidrawAPI && item.elements) {
+                          excalidrawAPI.addElementsFromLibrary(item.elements);
+                        }
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-sm font-medium text-gray-800 group-hover:text-blue-800">
+                            Item {index + 1}
+                          </div>
+                          {item.elements && (
+                            <div className="text-xs text-gray-500">
+                              {item.elements.length} element{item.elements.length !== 1 ? 's' : ''}
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-blue-500 group-hover:text-blue-700">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 5V19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                ))}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
         </Sidebar>
       </Excalidraw>
       
-      {/* Hidden file inputs */}
       <input
         ref={fileInputRef}
         type="file"
