@@ -12,6 +12,7 @@ export default function LandingPage() {
         <FeaturesSection />
       </main>
       <Footer />
+      
     </div>
   );
 }
