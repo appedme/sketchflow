@@ -9,9 +9,9 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-inter)"],
-        heading: ["var(--font-poppins)"],
-        poppins: ["var(--font-poppins)"],
+        sans: ["var(--font-nunito)"],
+        heading: ["var(--font-nunito)"],
+        nunito: ["var(--font-nunito)"],
       },
     },
   },
