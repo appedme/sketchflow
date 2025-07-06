@@ -51,6 +51,7 @@ export const LANDING_CONTENT = {
       { label: "Home", href: "/" },
       { label: "Features", href: "#features" },
       { label: "Use Cases", href: "#use-cases" },
+      { label: "Pricing", href: "/pricing" },
       { label: "Contact", href: "/contact" }
     ],
     auth: {

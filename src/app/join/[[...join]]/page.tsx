@@ -20,6 +20,7 @@ export default function JoinPage() {
               card: "shadow-lg border",
             }
           }}
+          afterSignUpUrl="/dashboard"
           redirectUrl="/dashboard"
           signInUrl="/sign-in"
         />
