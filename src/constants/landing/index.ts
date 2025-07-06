@@ -50,11 +50,14 @@ export const LANDING_CONTENT = {
     links: [
       { label: "Home", href: "/" },
       { label: "Features", href: "#features" },
-      { label: "Contact", href: "#contact" }
+      { label: "Use Cases", href: "#use-cases" },
+      { label: "Contact", href: "/contact" }
     ],
     auth: {
       dashboard: "Dashboard",
-      profile: "Profile"
+      profile: "Profile",
+      signIn: "Sign In",
+      join: "Join"
     }
   }
 } as const;
