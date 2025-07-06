@@ -6,6 +6,7 @@ import { ProjectWorkspaceLoading } from './ProjectWorkspaceLoading';
 import { DocumentPanel } from './DocumentPanel';
 import { Button } from '@/components/ui/button';
 import { PanelLeftOpen, PanelLeftClose, FileText, Share, Save } from 'lucide-react';
+import { DocumentationPanel } from './DocumentationPanel';
 
 // Dynamically import Excalidraw to avoid SSR issues
 const ExcalidrawCanvas = dynamic(
@@ -47,10 +48,7 @@ export function ProjectWorkspace({
           <h1 className="font-semibold text-lg text-gray-900">{projectName}</h1>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" className="gap-2">
-            <FileText className="w-4 h-4" />
-            Templates
-          </Button>
+           
           <Button variant="outline" size="sm" className="gap-2">
             <Share className="w-4 h-4" />
             Share
@@ -70,13 +68,18 @@ export function ProjectWorkspace({
           isReadOnly={isReadOnly}
         />
         
-        {/* Future: Docs panel will slide in from left when showDocumentPanel is true */}
+        {/* Documentation Panel */}
         {showDocumentPanel && (
-          <div className="absolute left-0 top-0 w-96 h-full bg-white border-r border-gray-200 shadow-lg z-20">
-            <div className="p-4">
-              <h2 className="font-semibold mb-4">Documentation</h2>
-              <p className="text-gray-600">Documentation panel coming soon...</p>
-            </div>
+          <div className="absolute left-0 top-0 w-2/3 h-full bg-white border-r border-gray-200 shadow-lg z-20">
+            <DocumentationPanel
+              projectId={projectId}
+              onSplitView={(itemId, itemType) => {
+                // Handle split view - show both doc and canvas
+                console.log('Split view requested for:', itemId, itemType);
+                // You can implement split view logic here
+              }}
+              onClosePanel={() => setShowDocumentPanel(false)}
+            />
           </div>
         )}
       </div>
