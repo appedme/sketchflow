@@ -19,6 +19,7 @@ import {
   LibraryItems 
 } from "@excalidraw/excalidraw/types";
 import "@excalidraw/excalidraw/index.css";
+import "../../styles/excalidraw-custom.css";
 
 interface ExcalidrawCanvasProps {
   projectId: string;
@@ -270,7 +271,7 @@ export function ExcalidrawCanvas({
   }, []);
 
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full relative">
       <Excalidraw
         ref={(api: ExcalidrawImperativeAPI) => setExcalidrawAPI(api)}
         onChange={handleChange}
@@ -295,6 +296,7 @@ export function ExcalidrawCanvas({
           tools: {
             image: true,
           },
+          dockedSidebarBreakpoint: 0, // Always show sidebar
         }}
         langCode="en"
         gridModeEnabled={false}

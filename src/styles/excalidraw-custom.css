@@ -1,0 +1,190 @@
+/* Custom Excalidraw Styles for SketchFlow */
+
+/* Move toolbar to the right side */
+/* .excalidraw .App-toolbar {
+  position: fixed !important;
+  top: 50% !important;
+  right: 20px !important;
+  left: auto !important;
+  transform: translateY(-50%) !important;
+  flex-direction: column !important;
+  width: 60px !important;
+  height: auto !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  padding: 8px !important;
+  gap: 4px !important;
+  z-index: 100 !important;
+} */
+
+/* Style toolbar buttons */
+/* .excalidraw .App-toolbar button {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 12px !important;
+  margin: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+}
+
+.excalidraw .App-toolbar button:hover {
+  background: rgba(59, 130, 246, 0.1) !important;
+  transform: scale(1.05) !important;
+} */
+
+/* .excalidraw .App-toolbar button.active,
+.excalidraw .App-toolbar button[aria-pressed="true"] {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+} */
+
+/* Style toolbar separators */
+/* .excalidraw .App-toolbar .App-toolbar__divider {
+  width: 32px !important;
+  height: 1px !important;
+  background: rgba(156, 163, 175, 0.3) !important;
+  margin: 4px auto !important;
+} */
+
+/* Custom menu bar styling */
+/* .excalidraw .App-menu {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  padding: 4px !important;
+}
+
+.excalidraw .App-menu_top {
+  border-radius: 12px 12px 0 0 !important;
+}
+
+.excalidraw .App-menu_bottom {
+  border-radius: 0 0 12px 12px !important;
+} */
+
+/* Style menu buttons */
+/* .excalidraw .App-menu button {
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  margin: 2px !important;
+  background: transparent !important;
+  border: none !important;
+  transition: all 0.2s ease !important;
+  font-weight: 500 !important;
+}
+
+.excalidraw .App-menu button:hover {
+  background: rgba(59, 130, 246, 0.1) !important;
+  color: #3b82f6 !important;
+} */
+
+/* Style the main menu trigger */
+/* .excalidraw .App-menu_top .App-menu__trigger {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6) !important;
+  color: white !important;
+  border-radius: 10px !important;
+  padding: 8px 16px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3) !important;
+}
+
+.excalidraw .App-menu_top .App-menu__trigger:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4) !important;
+}
+
+.excalidraw .sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.excalidraw .sidebar::-webkit-scrollbar-track {
+  background: rgba(156, 163, 175, 0.1);
+  border-radius: 3px;
+}
+
+.excalidraw .sidebar::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  border-radius: 3px;
+}
+
+.excalidraw .sidebar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+}
+
+.excalidraw .App-canvas {
+  background: #fafafa !important;
+}
+
+.excalidraw .App-toolbar-content .zoom-actions {
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  display: flex !important;
+  gap: 8px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 12px !important;
+  padding: 8px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.excalidraw .zoom-actions button {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+}
+
+.excalidraw .zoom-actions button:hover {
+  background: rgba(59, 130, 246, 0.1) !important;
+  color: #3b82f6 !important;
+}
+
+.excalidraw .App-toolbar-content {
+  position: relative !important;
+}
+
+.excalidraw .Island {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.excalidraw .sidebar .sidebar-header {
+  border-radius: 12px 12px 0 0 !important;
+}
+
+.excalidraw button:focus-visible {
+  outline: 2px solid #3b82f6 !important;
+  outline-offset: 2px !important;
+}
+
+@media (max-width: 768px) {
+  .excalidraw .App-toolbar {
+    right: 10px !important;
+    width: 50px !important;
+  }
+  
+  .excalidraw .App-toolbar button {
+    width: 38px !important;
+    height: 38px !important;
+  }
+} */
