@@ -9,7 +9,7 @@ export function useAutoSave(
 ) {
   const [lastSaved, setLastSaved] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  const saveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const saveProject = useCallback(async () => {
     if (isSaving) return;

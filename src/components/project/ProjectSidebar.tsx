@@ -3,7 +3,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import type { ExcalidrawElement, AppState } from "@excalidraw/excalidraw";
+import type { AppState } from "@excalidraw/excalidraw/types";
+import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import { Eye, EyeOff, Lock, Unlock } from "lucide-react";
 
 interface ProjectSidebarProps {

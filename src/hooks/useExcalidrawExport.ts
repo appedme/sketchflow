@@ -2,11 +2,13 @@
 
 import { useCallback } from 'react';
 import { exportToCanvas, exportToSvg } from "@excalidraw/excalidraw";
+import type { AppState, ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
+import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 
 export function useExcalidrawExport(
-  excalidrawAPI: unknown,
-  elements: unknown[],
-  appState: Record<string, unknown>,
+  excalidrawAPI: ExcalidrawImperativeAPI | null,
+  elements: readonly ExcalidrawElement[],
+  appState: Partial<AppState>,
   projectName: string
 ) {
   const exportCanvas = useCallback(async (type: "png" | "svg" | "json") => {
@@ -25,7 +27,7 @@ export function useExcalidrawExport(
             getDimensions: () => ({ width: 1920, height: 1080 })
           });
           
-          canvas.toBlob((blob) => {
+          canvas.toBlob((blob: Blob | null) => {
             if (blob) {
               const url = URL.createObjectURL(blob);
               const link = document.createElement("a");

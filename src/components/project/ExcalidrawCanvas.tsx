@@ -11,13 +11,13 @@ import {
   exportToSvg,
   exportToBlob
 } from "@excalidraw/excalidraw";
-import { 
+import type { 
   ExcalidrawImperativeAPI, 
-  ExcalidrawElement, 
   AppState, 
   BinaryFiles,
   LibraryItems 
 } from "@excalidraw/excalidraw/types";
+import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import "@excalidraw/excalidraw/index.css";
 import "../../styles/excalidraw-custom.css";
 
@@ -38,7 +38,7 @@ export function ExcalidrawCanvas({
     theme: "light",
     viewModeEnabled: false,
     zenModeEnabled: false,
-    gridSize: null,
+    gridSize: undefined,
     name: projectName,
     currentItemStrokeColor: "#1e40af",
     currentItemBackgroundColor: "#dbeafe",
@@ -143,7 +143,7 @@ export function ExcalidrawCanvas({
     try {
       const blob = await loadSceneOrLibraryFromBlob(file, null, null);
       
-      if (blob.type === "excalidrawlib") {
+      if (blob.type === "application/vnd.excalidrawlib+json") {
         if (excalidrawAPI && blob.data.libraryItems) {
           const mergedLibrary = [...libraryItems, ...blob.data.libraryItems];
           
@@ -168,7 +168,7 @@ export function ExcalidrawCanvas({
     try {
       const blob = await loadSceneOrLibraryFromBlob(file, null, null);
       
-      if (blob.type === "excalidraw") {
+      if (blob.type === "application/vnd.excalidraw+json") {
         if (excalidrawAPI && blob.data) {
           excalidrawAPI.updateScene({
             elements: blob.data.elements || [],
@@ -273,7 +273,7 @@ export function ExcalidrawCanvas({
   return (
     <div className="h-full w-full relative">
       <Excalidraw
-        ref={(api: ExcalidrawImperativeAPI) => setExcalidrawAPI(api)}
+        excalidrawAPI={(api: ExcalidrawImperativeAPI) => setExcalidrawAPI(api)}
         onChange={handleChange}
         onLibraryChange={handleLibraryChange}
         initialData={{
@@ -312,7 +312,9 @@ export function ExcalidrawCanvas({
           </MainMenu.Item>
           <MainMenu.DefaultItems.Export />
           <MainMenu.DefaultItems.SaveAsImage />
-          <MainMenu.DefaultItems.ClearCanvas onSelect={clearCanvas} />
+          <MainMenu.Item onSelect={clearCanvas}>
+            Clear Canvas
+          </MainMenu.Item>
           <MainMenu.Separator />
           <MainMenu.DefaultItems.ToggleTheme />
           <MainMenu.DefaultItems.ChangeCanvasBackground />
@@ -458,7 +460,9 @@ export function ExcalidrawCanvas({
                       className="group p-3 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-all duration-200 hover:shadow-sm"
                       onClick={() => {
                         if (excalidrawAPI && item.elements) {
-                          excalidrawAPI.addElementsFromLibrary(item.elements);
+                          excalidrawAPI.updateScene({
+                            elements: [...elements, ...item.elements],
+                          });
                         }
                       }}
                     >

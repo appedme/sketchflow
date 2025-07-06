@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useCallback, useEffect } from 'react';
-// Types will be inferred from usage
+import type { ExcalidrawImperativeAPI, AppState } from "@excalidraw/excalidraw/types";
+import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 
-export function useProjectState(projectId: string, excalidrawAPI: unknown) {
-  const [elements, setElements] = useState<unknown[]>([]);
-  const [appState, setAppState] = useState<Record<string, unknown>>({
+export function useProjectState(projectId: string, excalidrawAPI: ExcalidrawImperativeAPI | null) {
+  const [elements, setElements] = useState<readonly ExcalidrawElement[]>([]);
+  const [appState, setAppState] = useState<Partial<AppState>>({
     viewBackgroundColor: "#ffffff",
     currentItemFontFamily: 1,
     currentItemFontSize: 16,
@@ -15,7 +16,7 @@ export function useProjectState(projectId: string, excalidrawAPI: unknown) {
     currentItemStrokeWidth: 2,
     currentItemRoughness: 1,
     currentItemOpacity: 100,
-    gridSize: null,
+    gridSize: undefined,
     theme: "light",
   });
   
