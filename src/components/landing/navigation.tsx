@@ -16,7 +16,7 @@ export function Navigation() {
         <div className="flex items-center justify-between h-16">
           {/* Brand */}
           <div className="flex items-center gap-2">
-            <span className="text-xl font-bold">{navigation.brand}</span>
+            <span className="text-xl font-heading font-bold brand-text">{navigation.brand}</span>
             <Badge variant="outline" className="text-xs">BETA</Badge>
           </div>
 

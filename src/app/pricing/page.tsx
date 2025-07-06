@@ -98,7 +98,7 @@ export default function PricingPage() {
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
+            <h1 className="text-4xl md:text-5xl font-heading font-bold tracking-tight hero-text mb-4">
               Simple, Transparent Pricing
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
@@ -180,7 +180,7 @@ export default function PricingPage() {
           {/* Enterprise Section */}
           <div className="bg-muted/50 rounded-lg p-8 mb-20">
             <div className="text-center">
-              <h2 className="text-3xl font-bold mb-4">Need something more?</h2>
+              <h2 className="text-3xl font-heading font-bold mb-4">Need something more?</h2>
               <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
                 For large organizations with specific requirements, we offer custom enterprise solutions 
                 with dedicated support, advanced security, and tailored integrations.

@@ -18,7 +18,7 @@ export function HeroSection() {
         {/* Brand and Beta */}
         <div className="space-y-2">
           <div className="flex items-center justify-center gap-3">
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
+            <h1 className="text-4xl md:text-6xl font-heading font-bold tracking-tight hero-text">
               SketchFlow
             </h1>
             <Badge variant="outline" className="text-xs">
@@ -29,10 +29,10 @@ export function HeroSection() {
 
         {/* Hero Title */}
         <div className="space-y-4">
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
+          <h2 className="text-3xl md:text-5xl font-heading font-bold tracking-tight hero-text">
             {hero.title}
           </h2>
-          <h3 className="text-2xl md:text-4xl font-bold tracking-tight text-muted-foreground">
+          <h3 className="text-2xl md:text-4xl font-heading font-semibold tracking-tight text-muted-foreground">
             {hero.subtitle}
           </h3>
         </div>
