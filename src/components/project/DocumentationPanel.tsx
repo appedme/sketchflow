@@ -18,7 +18,8 @@ import {
   X,
   Save,
   Eye,
-  EyeOff
+  EyeOff,
+  Maximize2
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -44,13 +45,17 @@ interface Canvas {
 interface DocumentationPanelProps {
   projectId: string;
   onSplitView: (itemId: string, itemType: 'document' | 'canvas') => void;
+  onFullScreen: (itemId: string, itemType: 'document' | 'canvas') => void;
   onClosePanel: () => void;
+  selectedItemId?: string;
 }
 
 export function DocumentationPanel({
   projectId,
   onSplitView,
-  onClosePanel
+  onFullScreen,
+  onClosePanel,
+  selectedItemId
 }: DocumentationPanelProps) {
   const [documents, setDocuments] = useState<Document[]>([
     {
@@ -90,7 +95,18 @@ export function DocumentationPanel({
     }
   ]);
 
-  const [selectedItem, setSelectedItem] = useState<Document | Canvas | null>(documents[0]);
+  // Mock data for documents and canvases
+  const mockDocuments = documents;
+  const mockCanvases = canvases;
+
+  const [selectedItem, setSelectedItem] = useState<Document | Canvas | null>(() => {
+    if (selectedItemId) {
+      const foundDoc = mockDocuments.find(doc => doc.id === selectedItemId);
+      const foundCanvas = mockCanvases.find(canvas => canvas.id === selectedItemId);
+      return foundDoc || foundCanvas || null;
+    }
+    return documents[0] || null;
+  });
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'all' | 'documents' | 'canvases'>('all');
   const [isEditing, setIsEditing] = useState(false);
@@ -209,7 +225,7 @@ export function DocumentationPanel({
   return (
     <div className="h-full flex flex-col bg-white">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+      {/* <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
             <FileText className="w-4 h-4 text-white" />
@@ -246,7 +262,7 @@ export function DocumentationPanel({
             <X className="w-4 h-4" />
           </Button>
         </div>
-      </div>
+      </div> */}
 
       <div className="flex-1 flex min-h-0">
         {/* Sidebar */}
@@ -317,6 +333,18 @@ export function DocumentationPanel({
                         </div>
                       </div>
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onFullScreen(item.id, item.type);
+                          }}
+                          className="w-6 h-6 p-0"
+                          title="Open in full screen"
+                        >
+                          <Maximize2 className="w-3 h-3" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -435,6 +463,15 @@ export function DocumentationPanel({
                   <Button
                     variant="ghost"
                     size="sm"
+                    onClick={() => onFullScreen(selectedItem.id, selectedItem.type)}
+                    className="gap-2"
+                  >
+                    <Maximize2 className="w-4 h-4" />
+                    Full Screen
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => onSplitView(selectedItem.id, selectedItem.type)}
                     className="gap-2"
                   >
@@ -469,13 +506,23 @@ export function DocumentationPanel({
                       <p className="text-sm text-gray-600 mb-4">
                         This canvas contains {(selectedItem as Canvas).elements.length} elements
                       </p>
-                      <Button
-                        onClick={() => onSplitView(selectedItem.id, selectedItem.type)}
-                        className="gap-2"
-                      >
-                        <SplitSquareHorizontal className="w-4 h-4" />
-                        Open in Split View
-                      </Button>
+                      <div className="flex gap-2 justify-center">
+                        <Button
+                          onClick={() => onFullScreen(selectedItem.id, selectedItem.type)}
+                          variant="outline"
+                          className="gap-2"
+                        >
+                          <Maximize2 className="w-4 h-4" />
+                          Full Screen
+                        </Button>
+                        <Button
+                          onClick={() => onSplitView(selectedItem.id, selectedItem.type)}
+                          className="gap-2"
+                        >
+                          <SplitSquareHorizontal className="w-4 h-4" />
+                          Split View
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 )}
