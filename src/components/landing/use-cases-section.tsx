@@ -1,12 +1,17 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Code, Building, GraduationCap, Calendar } from "lucide-react";
+import { Code, Building, GraduationCap, Calendar, Palette, Search, PenTool, User } from "lucide-react";
 import { LANDING_CONTENT } from "@/constants/landing";
+import { cn } from "@/lib/utils";
 
 const iconMap = {
   Code,
   Building,
   GraduationCap,
   Calendar,
+  Palette,
+  Search,
+  PenTool,
+  User,
 } as const;
 
 export function UseCasesSection() {
@@ -20,7 +25,7 @@ export function UseCasesSection() {
             Perfect for Every Use Case
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            From software development to education, SketchFlow adapts to your visual collaboration needs
+            From software development to personal organization, SketchFlow adapts to your visual project needs
           </p>
         </div>
 

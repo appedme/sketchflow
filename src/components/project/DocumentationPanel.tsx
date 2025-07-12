@@ -22,6 +22,7 @@ import {
   Maximize2
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PlateDocumentEditor } from './PlateDocumentEditor';
 
 interface Document {
   id: string;
@@ -225,7 +226,7 @@ export function DocumentationPanel({
   return (
     <div className="h-full flex flex-col bg-white">
       {/* Header */}
-      {/* <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50 flex-shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
             <FileText className="w-4 h-4 text-white" />
@@ -258,11 +259,13 @@ export function DocumentationPanel({
             variant="ghost"
             size="sm"
             onClick={onClosePanel}
+            className="gap-2"
           >
             <X className="w-4 h-4" />
+            Close
           </Button>
         </div>
-      </div> */}
+      </div>
 
       <div className="flex-1 flex min-h-0">
         {/* Sidebar */}
@@ -396,108 +399,71 @@ export function DocumentationPanel({
         <div className="flex-1 flex flex-col">
           {selectedItem ? (
             <>
-              {/* Content Header */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${selectedItem.type === 'document'
-                      ? 'bg-blue-100 text-blue-600'
-                      : 'bg-purple-100 text-purple-600'
-                    }`}>
-                    {selectedItem.type === 'document' ? (
-                      <FileText className="w-4 h-4" />
-                    ) : (
+              {/* Content Header - Only show for canvas items since document editor has its own header */}
+              {selectedItem.type === 'canvas' && (
+                <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-purple-100 text-purple-600">
                       <CanvasIcon className="w-4 h-4" />
-                    )}
+                    </div>
+                    <div>
+                      <h1 className="font-semibold text-lg text-gray-900">
+                        {selectedItem.title}
+                      </h1>
+                      <p className="text-sm text-gray-500">
+                        Updated {formatDate(selectedItem.updatedAt)}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h1 className="font-semibold text-lg text-gray-900">
-                      {isEditing ? (
-                        <Input
-                          value={editingTitle}
-                          onChange={(e) => setEditingTitle(e.target.value)}
-                          className="font-semibold text-lg border-none shadow-none p-0 h-auto"
-                        />
-                      ) : (
-                        selectedItem.title
-                      )}
-                    </h1>
-                    <p className="text-sm text-gray-500">
-                      Updated {formatDate(selectedItem.updatedAt)}
-                    </p>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onFullScreen(selectedItem.id, selectedItem.type)}
+                      className="gap-2"
+                    >
+                      <Maximize2 className="w-4 h-4" />
+                      Full Screen
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onSplitView(selectedItem.id, selectedItem.type)}
+                      className="gap-2"
+                    >
+                      <SplitSquareHorizontal className="w-4 h-4" />
+                      Split View
+                    </Button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {selectedItem.type === 'document' && (
-                    <>
-                      {isEditing ? (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setIsEditing(false)}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={saveDocument}
-                            className="gap-2"
-                          >
-                            <Save className="w-4 h-4" />
-                            Save
-                          </Button>
-                        </>
-                      ) : (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={startEditing}
-                          className="gap-2"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                          Edit
-                        </Button>
-                      )}
-                    </>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onFullScreen(selectedItem.id, selectedItem.type)}
-                    className="gap-2"
-                  >
-                    <Maximize2 className="w-4 h-4" />
-                    Full Screen
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onSplitView(selectedItem.id, selectedItem.type)}
-                    className="gap-2"
-                  >
-                    <SplitSquareHorizontal className="w-4 h-4" />
-                    Split View
-                  </Button>
-                </div>
-              </div>
+              )}
 
               {/* Content Body */}
-              <div className="flex-1 p-4 overflow-y-auto">
+              <div className="flex-1 overflow-hidden">
                 {selectedItem.type === 'document' ? (
-                  isEditing ? (
-                    <Textarea
-                      value={editingContent}
-                      onChange={(e) => setEditingContent(e.target.value)}
-                      className="w-full h-full resize-none border-none shadow-none p-0 font-mono text-sm"
-                      placeholder="Write your document content here..."
-                    />
-                  ) : (
-                    <div className="prose prose-sm max-w-none">
-                      <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">
-                        {(selectedItem as Document).content}
-                      </pre>
-                    </div>
-                  )
+                  <PlateDocumentEditor
+                    title={selectedItem.title}
+                    content={(selectedItem as Document).content}
+                    isEditing={isEditing}
+                    onTitleChange={(newTitle) => {
+                      setEditingTitle(newTitle);
+                      const updatedDoc: Document = {
+                        ...selectedItem as Document,
+                        title: newTitle,
+                        updatedAt: new Date()
+                      };
+                      setDocuments(prev => prev.map(doc =>
+                        doc.id === selectedItem.id ? updatedDoc : doc
+                      ));
+                      setSelectedItem(updatedDoc);
+                    }}
+                    onContentChange={(newContent) => {
+                      setEditingContent(newContent);
+                    }}
+                    onSave={saveDocument}
+                    onEdit={startEditing}
+                    onCancel={() => setIsEditing(false)}
+                  />
                 ) : (
                   <div className="flex items-center justify-center h-full text-gray-500">
                     <div className="text-center">

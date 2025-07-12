@@ -4,8 +4,8 @@ export const LANDING_CONTENT = {
     badge: "BETA",
     title: "Powerful diagramming & documentation",
     subtitle: "Without Limits",
-    description: "SketchFlow combines powerful diagramming, documentation, and real-time collaboration in one seamless platform. Create, share, and collaborate on visual projects with your team—anywhere, anytime.",
-    announcement: "New: Project Embedding & Collaboration Features",
+    description: "SketchFlow combines powerful diagramming, documentation, and project management in one seamless platform. Create, organize, and manage your visual projects with ease anywhere, anytime.",
+    announcement: "New: Project Embedding & Export Features",
     cta: {
       primary: "Go to Dashboard",
       primary_link: "/dashboard",
@@ -43,8 +43,28 @@ export const LANDING_CONTENT = {
     },
     {
       title: "Project Management",
-      description: "Plan projects with Gantt charts, timelines, and visual project roadmaps to keep teams aligned.",
+      description: "Plan and organize your projects with Gantt charts, timelines, and visual project roadmaps to stay on track.",
       icon: "Calendar"
+    },
+    {
+      title: "UI/UX Design",
+      description: "Design user interfaces, create wireframes, and prototype user experiences with intuitive visual tools.",
+      icon: "Palette"
+    },
+    {
+      title: "Research & Analysis",
+      description: "Organize research findings, create mind maps, and visualize data relationships for better insights.",
+      icon: "Search"
+    },
+    {
+      title: "Content Planning",
+      description: "Plan content strategies, create editorial calendars, and organize creative workflows efficiently.",
+      icon: "PenTool"
+    },
+    {
+      title: "Personal Organization",
+      description: "Organize personal goals, create habit trackers, and visualize life planning with customizable templates.",
+      icon: "User"
     }
   ],
   navigation: {

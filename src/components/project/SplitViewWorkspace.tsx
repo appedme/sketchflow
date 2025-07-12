@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { X, Maximize2, Minimize2 } from 'lucide-react';
 import { DocumentationPanel } from './DocumentationPanel';
+import { SplitViewDocumentEditor } from './SplitViewDocumentEditor';
 import dynamic from 'next/dynamic';
 
 const ExcalidrawCanvas = dynamic(
@@ -80,11 +81,7 @@ export function SplitViewWorkspace({
           leftExpanded ? 'w-full' : rightExpanded ? 'w-0' : 'w-1/2'
         } transition-all duration-300 border-r border-gray-200 bg-white overflow-hidden`}>
           {leftItemType === 'document' ? (
-            <DocumentationPanel
-              projectId={projectId}
-              onSplitView={() => {}}
-              onClosePanel={() => {}}
-            />
+            <SplitViewDocumentEditor documentId={leftItemId || projectId} />
           ) : (
             <ExcalidrawCanvas
               projectId={leftItemId || projectId}
@@ -103,11 +100,7 @@ export function SplitViewWorkspace({
               projectName={`${projectName} - Right Canvas`}
             />
           ) : (
-            <DocumentationPanel
-              projectId={projectId}
-              onSplitView={() => {}}
-              onClosePanel={() => {}}
-            />
+            <SplitViewDocumentEditor documentId={rightItemId || projectId} />
           )}
         </div>
       </div>

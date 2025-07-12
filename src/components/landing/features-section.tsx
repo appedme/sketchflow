@@ -19,7 +19,7 @@ export function FeaturesSection() {
             Powerful Features
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Everything you need to create, collaborate, and share your visual projects
+            Everything you need to create, organize, and share your visual projects
           </p>
         </div>
 

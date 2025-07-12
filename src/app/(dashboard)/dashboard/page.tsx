@@ -1,7 +1,7 @@
 import { currentUser } from '@clerk/nextjs/server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, FileText, Users, Share } from "lucide-react";
+import { Plus, FileText, FolderOpen, Bookmark } from "lucide-react";
 import Link from "next/link";
 
 export default async function DashboardPage() {
@@ -17,7 +17,7 @@ export default async function DashboardPage() {
               Welcome back, {user?.firstName || 'there'}!
             </h1>
             <p className="text-muted-foreground">
-              Manage your visual projects and collaborate with your team.
+              Manage your visual projects and organize your ideas.
             </p>
           </div>
 
@@ -31,7 +31,7 @@ export default async function DashboardPage() {
                   </div>
                   <CardTitle className="text-lg">New Project</CardTitle>
                   <CardDescription>
-                    Start a new visual collaboration project
+                    Start a new visual project
                   </CardDescription>
                 </CardHeader>
               </Card>
@@ -52,11 +52,11 @@ export default async function DashboardPage() {
             <Card className="cursor-pointer hover:shadow-lg transition-shadow">
               <CardHeader className="text-center">
                 <div className="mx-auto mb-4 w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Users className="w-6 h-6 text-primary" />
+                  <Bookmark className="w-6 h-6 text-primary" />
                 </div>
-                <CardTitle className="text-lg">Team Workspace</CardTitle>
+                <CardTitle className="text-lg">Saved Projects</CardTitle>
                 <CardDescription>
-                  Access shared projects and team resources
+                  Access your bookmarked and favorite projects
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -82,10 +82,10 @@ export default async function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-center py-12">
-                <Share className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <FolderOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No projects yet</h3>
                 <p className="text-muted-foreground mb-4">
-                  Create your first project to start collaborating visually
+                  Create your first project to start organizing your ideas visually
                 </p>
                 <Link href="/dashboard/new-project">
                   <Button>
