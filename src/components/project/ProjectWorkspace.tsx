@@ -7,6 +7,7 @@ import { DocumentPanel } from './DocumentPanel';
 import { Button } from '@/components/ui/button';
 import { PanelLeftOpen, PanelLeftClose, FileText, Share, Save } from 'lucide-react';
 import { DocumentationPanel } from './DocumentationPanel';
+import { ShareDialog } from './ShareDialog';
 
 // Dynamically import Excalidraw to avoid SSR issues
 const ExcalidrawCanvas = dynamic(
@@ -48,11 +49,7 @@ export function ProjectWorkspace({
           <h1 className="font-semibold text-lg text-gray-900">{projectName}</h1>
         </div>
         <div className="flex items-center gap-2">
-           
-          <Button variant="outline" size="sm" className="gap-2">
-            <Share className="w-4 h-4" />
-            Share
-          </Button>
+          <ShareDialog projectId={projectId} projectName={projectName} />
           <Button size="sm" className="gap-2">
             <Save className="w-4 h-4" />
             Save
