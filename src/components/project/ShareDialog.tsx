@@ -115,7 +115,7 @@ export function ShareDialog({ projectId, projectName }: ShareDialogProps) {
         </DialogHeader>
 
         <Tabs defaultValue="share" className="flex-1">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="share" className="gap-2">
               <Share className="w-4 h-4" />
               Share Link
@@ -123,10 +123,6 @@ export function ShareDialog({ projectId, projectName }: ShareDialogProps) {
             <TabsTrigger value="embed" className="gap-2">
               <Code className="w-4 h-4" />
               Embed Code
-            </TabsTrigger>
-            <TabsTrigger value="preview" className="gap-2">
-              <Eye className="w-4 h-4" />
-              Preview
             </TabsTrigger>
           </TabsList>
 
@@ -309,54 +305,6 @@ export function ShareDialog({ projectId, projectName }: ShareDialogProps) {
             </div>
           </TabsContent>
 
-          <TabsContent value="preview" className="mt-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold">Live Preview</h3>
-                  <p className="text-sm text-muted-foreground">
-                    See how your embedded project will look
-                  </p>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => window.open(embedUrl, "_blank")}
-                  className="gap-2"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  Open in New Tab
-                </Button>
-              </div>
-
-              <div className="border rounded-lg overflow-hidden bg-muted/20">
-                <div className="bg-muted px-3 py-2 text-sm font-medium border-b">
-                  Preview ({currentDimensions.width} x {currentDimensions.height})
-                </div>
-                <div className="p-4 flex justify-center">
-                  <div 
-                    className="border rounded shadow-sm bg-white overflow-hidden"
-                    style={{
-                      width: Math.min(currentDimensions.width, 600),
-                      height: Math.min(currentDimensions.height, 400),
-                    }}
-                  >
-                    <iframe
-                      src={`${embedUrl}?toolbar=${showToolbar}&edit=${allowEdit}`}
-                      width="100%"
-                      height="100%"
-                      frameBorder="0"
-                      title={`${projectName} Preview`}
-                      className="w-full h-full"
-                    />
-                  </div>
-                </div>
-                <div className="bg-muted px-3 py-2 text-xs text-muted-foreground border-t">
-                  This is a scaled preview. Actual embed will use the dimensions specified in settings.
-                </div>
-              </div>
-            </div>
-          </TabsContent>
         </Tabs>
       </DialogContent>
     </Dialog>

@@ -20,33 +20,7 @@ interface SplitViewDocumentEditorProps {
   documentId: string;
 }
 
-// Simple default value for new documents
-const getDefaultValue = (content: string): any[] => {
-  if (!content.trim()) {
-    return [
-      {
-        type: 'p',
-        children: [{ text: '' }],
-      }
-    ];
-  }
-  
-  // Simple text to paragraph conversion
-  return [
-    {
-      type: 'p',
-      children: [{ text: content }],
-    }
-  ];
-};
-
-// Convert Plate value back to text
-const plateValueToText = (value: any[]): string => {
-  return value.map((node: any) => {
-    const text = node.children?.map((child: any) => child.text || '').join('') || '';
-    return text;
-  }).join('\n\n');
-};
+// Using simple PlateEditor component
 
 export function SplitViewDocumentEditor({ documentId }: SplitViewDocumentEditorProps) {
   // Mock document data - in real app, fetch from database
@@ -61,18 +35,12 @@ export function SplitViewDocumentEditor({ documentId }: SplitViewDocumentEditorP
 
   const [isEditing, setIsEditing] = useState(false);
   const [editingTitle, setEditingTitle] = useState(document.title);
-  const [editorValue, setEditorValue] = useState<any[]>(() => getDefaultValue(document.content));
-
-  const handleEditorChange = (value: any[]) => {
-    setEditorValue(value);
-  };
 
   const handleSave = () => {
-    const text = plateValueToText(editorValue);
     const updatedDoc = {
       ...document,
       title: editingTitle,
-      content: text,
+      content: 'Document content', // PlateEditor manages its own content
       updatedAt: new Date()
     };
     setDocument(updatedDoc);
@@ -81,13 +49,11 @@ export function SplitViewDocumentEditor({ documentId }: SplitViewDocumentEditorP
 
   const handleEdit = () => {
     setEditingTitle(document.title);
-    setEditorValue(getDefaultValue(document.content));
     setIsEditing(true);
   };
 
   const handleCancel = () => {
     setEditingTitle(document.title);
-    setEditorValue(getDefaultValue(document.content));
     setIsEditing(false);
   };
 
@@ -152,12 +118,7 @@ export function SplitViewDocumentEditor({ documentId }: SplitViewDocumentEditorP
 
       {/* Editor Content */}
       <div className="flex-1 overflow-hidden p-4">
-        <PlateEditor 
-          value={editorValue}
-          onChange={isEditing ? handleEditorChange : undefined}
-          placeholder={isEditing ? "Start writing..." : undefined}
-          readOnly={!isEditing}
-        />
+        <PlateEditor />
       </div>
     </div>
   );

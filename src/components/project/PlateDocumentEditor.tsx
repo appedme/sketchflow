@@ -24,33 +24,7 @@ interface PlateDocumentEditorProps {
   onCancel: () => void;
 }
 
-// Simple default value for new documents
-const getDefaultValue = (content: string): any[] => {
-  if (!content.trim()) {
-    return [
-      {
-        type: 'p',
-        children: [{ text: '' }],
-      }
-    ];
-  }
-  
-  // Simple text to paragraph conversion
-  return [
-    {
-      type: 'p',
-      children: [{ text: content }],
-    }
-  ];
-};
-
-// Convert Plate value back to text
-const plateValueToText = (value: any[]): string => {
-  return value.map((node: any) => {
-    const text = node.children?.map((child: any) => child.text || '').join('') || '';
-    return text;
-  }).join('\n\n');
-};
+// Using simple PlateEditor component
 
 export function PlateDocumentEditor({
   title,
@@ -62,23 +36,7 @@ export function PlateDocumentEditor({
   onEdit,
   onCancel,
 }: PlateDocumentEditorProps) {
-  const [editorValue, setEditorValue] = useState<any[]>(() => 
-    getDefaultValue(content)
-  );
   const [editingTitle, setEditingTitle] = useState(title);
-
-  // Update editor value when content changes
-  useEffect(() => {
-    const newValue = getDefaultValue(content);
-    setEditorValue(newValue);
-  }, [content]);
-
-  const handleEditorChange = (value: any[]) => {
-    setEditorValue(value);
-    // Convert back to simple text for now
-    const text = plateValueToText(value);
-    onContentChange(text);
-  };
 
   const handleSave = () => {
     onTitleChange(editingTitle);
@@ -87,7 +45,6 @@ export function PlateDocumentEditor({
 
   const handleCancel = () => {
     setEditingTitle(title);
-    setEditorValue(getDefaultValue(content));
     onCancel();
   };
 
@@ -122,11 +79,7 @@ export function PlateDocumentEditor({
 
         {/* Read-only content */}
         <div className="flex-1 p-4 overflow-y-auto">
-          <PlateEditor 
-            value={editorValue}
-            placeholder="Start writing your document..."
-            readOnly={true}
-          />
+          <PlateEditor />
         </div>
       </div>
     );
@@ -168,12 +121,7 @@ export function PlateDocumentEditor({
 
       {/* Editor */}
       <div className="flex-1 overflow-hidden p-4">
-        <PlateEditor 
-          value={editorValue}
-          onChange={handleEditorChange}
-          placeholder="Start writing your document..."
-          readOnly={false}
-        />
+        <PlateEditor />
       </div>
     </div>
   );

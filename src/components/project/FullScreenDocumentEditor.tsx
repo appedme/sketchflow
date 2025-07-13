@@ -8,33 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Save, Edit3, ArrowLeft, SplitSquareHorizontal, FileText } from 'lucide-react';
 
-// Simple default value for new documents
-const getDefaultValue = (content: string): any[] => {
-  if (!content.trim()) {
-    return [
-      {
-        type: 'p',
-        children: [{ text: '' }],
-      }
-    ];
-  }
-  
-  // Simple text to paragraph conversion
-  return [
-    {
-      type: 'p',
-      children: [{ text: content }],
-    }
-  ];
-};
-
-// Convert Plate value back to text
-const plateValueToText = (value: any[]): string => {
-  return value.map((node: any) => {
-    const text = node.children?.map((child: any) => child.text || '').join('') || '';
-    return text;
-  }).join('\n\n');
-};
+// Using simple PlateEditor component
 
 interface Document {
   id: string;
@@ -69,18 +43,12 @@ export function FullScreenDocumentEditor({
 
   const [isEditing, setIsEditing] = useState(true); // Start in edit mode for full screen
   const [editingTitle, setEditingTitle] = useState(document.title);
-  const [editorValue, setEditorValue] = useState<any[]>(() => getDefaultValue(document.content));
-
-  const handleEditorChange = (value: any[]) => {
-    setEditorValue(value);
-  };
 
   const handleSave = () => {
-    const text = plateValueToText(editorValue);
     const updatedDoc = {
       ...document,
       title: editingTitle,
-      content: text,
+      content: 'Document content', // PlateEditor manages its own content
       updatedAt: new Date()
     };
     setDocument(updatedDoc);
@@ -89,13 +57,11 @@ export function FullScreenDocumentEditor({
 
   const handleEdit = () => {
     setEditingTitle(document.title);
-    setEditorValue(getDefaultValue(document.content));
     setIsEditing(true);
   };
 
   const handleCancel = () => {
     setEditingTitle(document.title);
-    setEditorValue(getDefaultValue(document.content));
     setIsEditing(false);
   };
 
@@ -185,12 +151,7 @@ export function FullScreenDocumentEditor({
 
         {/* Editor */}
         <div className="flex-1 overflow-hidden p-6">
-          <PlateEditor 
-            value={editorValue}
-            onChange={isEditing ? handleEditorChange : undefined}
-            placeholder={isEditing ? "Start writing your document..." : undefined}
-            readOnly={!isEditing}
-          />
+          <PlateEditor />
         </div>
       </div>
     </div>
