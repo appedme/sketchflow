@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { PlateEditor } from '@/components/editor/plate-editor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,18 +46,17 @@ interface Document {
 }
 
 interface FullScreenDocumentEditorProps {
+  projectId: string;
   documentId: string;
   projectName: string;
-  onBack: () => void;
-  onSplitView: (itemId: string, itemType: 'document' | 'canvas') => void;
 }
 
 export function FullScreenDocumentEditor({
+  projectId,
   documentId,
   projectName,
-  onBack,
-  onSplitView
 }: FullScreenDocumentEditorProps) {
+  const router = useRouter();
   // Mock document data - in real app, fetch from database
   const [document, setDocument] = useState<Document>({
     id: documentId,
@@ -107,7 +107,7 @@ export function FullScreenDocumentEditor({
           <Button
             variant="ghost"
             size="sm"
-            onClick={onBack}
+            onClick={() => router.push(`/project/${projectId}`)}
             className="gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -125,7 +125,7 @@ export function FullScreenDocumentEditor({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => onSplitView(documentId, 'document')}
+            onClick={() => router.push(`/project/${projectId}/split?left=${documentId}&leftType=document&right=${projectId}&rightType=canvas`)}
             className="gap-2"
           >
             <SplitSquareHorizontal className="w-4 h-4" />

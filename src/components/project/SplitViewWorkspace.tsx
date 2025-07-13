@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { X, Maximize2, Minimize2 } from 'lucide-react';
 import { DocumentationPanel } from './DocumentationPanel';
@@ -22,7 +23,6 @@ interface SplitViewWorkspaceProps {
   leftItemType?: 'document' | 'canvas';
   rightItemId?: string;
   rightItemType?: 'document' | 'canvas';
-  onClose: () => void;
 }
 
 export function SplitViewWorkspace({
@@ -32,8 +32,8 @@ export function SplitViewWorkspace({
   leftItemType = 'document',
   rightItemId,
   rightItemType = 'canvas',
-  onClose
 }: SplitViewWorkspaceProps) {
+  const router = useRouter();
   const [leftExpanded, setLeftExpanded] = useState(false);
   const [rightExpanded, setRightExpanded] = useState(false);
 
@@ -67,7 +67,7 @@ export function SplitViewWorkspace({
           <Button
             variant="ghost"
             size="sm"
-            onClick={onClose}
+            onClick={() => router.push(`/project/${projectId}`)}
           >
             <X className="w-4 h-4" />
           </Button>

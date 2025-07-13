@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -45,6 +46,7 @@ export function DocumentationPanel({
   onFullScreen,
   onClosePanel,
 }: DocumentationPanelProps) {
+  const router = useRouter();
   const [documents, setDocuments] = useState<Document[]>([
     {
       id: '1',
@@ -113,8 +115,22 @@ export function DocumentationPanel({
       updatedAt: new Date(),
     };
     setDocuments(prev => [newDoc, ...prev]);
-    // Automatically open in full screen for editing
-    onFullScreen(newDoc.id, 'document');
+    // Navigate to new document in full screen
+    router.push(`/project/${projectId}/document/${newDoc.id}`);
+  };
+
+  const handleSplitView = (item: Document | Canvas) => {
+    const itemType = item.type;
+    const route = `/project/${projectId}/split?left=${item.id}&leftType=${itemType}&right=${projectId}&rightType=canvas`;
+    router.push(route);
+  };
+
+  const handleFullScreen = (item: Document | Canvas) => {
+    if (item.type === 'document') {
+      router.push(`/project/${projectId}/document/${item.id}`);
+    } else {
+      router.push(`/project/${projectId}/canvas/${item.id}`);
+    }
   };
 
   const handleItemClick = (item: Document | Canvas) => {
@@ -235,7 +251,7 @@ export function DocumentationPanel({
                 <div className="flex gap-2">
                   <Button
                     size="sm"
-                    onClick={() => onSplitView(selectedItem.id, selectedItem.type)}
+                    onClick={() => handleSplitView(selectedItem)}
                     className="flex-1 gap-2"
                   >
                     <SplitSquareHorizontal className="w-4 h-4" />
@@ -244,7 +260,7 @@ export function DocumentationPanel({
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => onFullScreen(selectedItem.id, selectedItem.type)}
+                    onClick={() => handleFullScreen(selectedItem)}
                     className="flex-1 gap-2"
                   >
                     <Maximize2 className="w-4 h-4" />
