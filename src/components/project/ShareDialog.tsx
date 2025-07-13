@@ -4,47 +4,75 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { 
   Share, 
   Copy, 
-  Mail, 
-  MessageSquare, 
-  Twitter, 
-  Linkedin, 
-  Facebook,
-  Code,
-  Eye,
-  Edit,
-  Settings,
   Check,
   Globe,
   Lock,
-  Users
+  Code,
+  Eye,
+  ExternalLink,
+  Mail,
+  Twitter,
+  Linkedin
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface ShareDialogProps {
   projectId: string;
   projectName: string;
-  children?: React.ReactNode;
 }
 
-export function ShareDialog({ projectId, projectName, children }: ShareDialogProps) {
+export function ShareDialog({ projectId, projectName }: ShareDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
-  const [accessLevel, setAccessLevel] = useState<"view" | "edit">("view");
-  const [visibility, setVisibility] = useState<"public" | "team" | "private">("team");
+  const [isPublic, setIsPublic] = useState(false);
+  const [embedSize, setEmbedSize] = useState("medium");
+  const [showToolbar, setShowToolbar] = useState(true);
+  const [allowEdit, setAllowEdit] = useState(false);
 
-  // Generate share URLs
-  const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
-  const shareUrl = `${baseUrl}/project/${projectId}`;
-  const viewOnlyUrl = `${shareUrl}?mode=view`;
+  const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://sketchflow.space";
+  const projectUrl = `${baseUrl}/project/${projectId}`;
   const embedUrl = `${baseUrl}/embed/project/${projectId}`;
+  
+  const embedDimensions = {
+    small: { width: 600, height: 400 },
+    medium: { width: 800, height: 600 },
+    large: { width: 1200, height: 800 }
+  };
 
-  const handleCopy = async (text: string, type: string) => {
+  const currentDimensions = embedDimensions[embedSize as keyof typeof embedDimensions];
+
+  const generateEmbedCode = () => {
+    const params = new URLSearchParams({
+      toolbar: showToolbar.toString(),
+      edit: allowEdit.toString(),
+    });
+    
+    return `<iframe
+  src="${embedUrl}?${params.toString()}"
+  width="${currentDimensions.width}"
+  height="${currentDimensions.height}"
+  frameborder="0"
+  allowfullscreen
+  title="${projectName}">
+</iframe>`;
+  };
+
+  const copyToClipboard = async (text: string, type: string) => {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(type);
@@ -54,295 +82,277 @@ export function ShareDialog({ projectId, projectName, children }: ShareDialogPro
     }
   };
 
-  const shareOptions = [
-    {
-      name: "Email",
-      icon: Mail,
-      action: () => {
-        const subject = encodeURIComponent(`Check out this project: ${projectName}`);
-        const body = encodeURIComponent(`I'd like to share this project with you: ${shareUrl}`);
-        window.open(`mailto:?subject=${subject}&body=${body}`);
-      }
-    },
-    {
-      name: "Slack",
-      icon: MessageSquare,
-      action: () => {
-        const text = encodeURIComponent(`Check out this project: ${projectName} - ${shareUrl}`);
-        window.open(`https://slack.com/intl/en-in/help/articles/201330736-Add-links-to-messages?text=${text}`);
-      }
-    },
-    {
-      name: "Twitter",
-      icon: Twitter,
-      action: () => {
-        const text = encodeURIComponent(`Check out this project: ${projectName}`);
-        const url = encodeURIComponent(shareUrl);
-        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`);
-      }
-    },
-    {
-      name: "LinkedIn",
-      icon: Linkedin,
-      action: () => {
-        const url = encodeURIComponent(shareUrl);
-        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`);
-      }
-    },
-    {
-      name: "Facebook",
-      icon: Facebook,
-      action: () => {
-        const url = encodeURIComponent(shareUrl);
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`);
-      }
-    }
-  ];
-
-  const embedSizes = [
-    { name: "Small", width: 600, height: 400 },
-    { name: "Medium", width: 800, height: 600 },
-    { name: "Large", width: 1200, height: 800 },
-    { name: "Custom", width: 0, height: 0 }
-  ];
-
-  const [selectedSize, setSelectedSize] = useState(embedSizes[1]);
-  const [customWidth, setCustomWidth] = useState(800);
-  const [customHeight, setCustomHeight] = useState(600);
-
-  const getEmbedCode = () => {
-    const width = selectedSize.name === "Custom" ? customWidth : selectedSize.width;
-    const height = selectedSize.name === "Custom" ? customHeight : selectedSize.height;
+  const shareToSocial = (platform: string) => {
+    const text = `Check out this project: ${projectName}`;
+    const url = projectUrl;
     
-    return `<iframe 
-  src="${embedUrl}" 
-  width="${width}" 
-  height="${height}" 
-  frameborder="0" 
-  allowfullscreen>
-</iframe>`;
+    const shareUrls = {
+      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
+      email: `mailto:?subject=${encodeURIComponent(projectName)}&body=${encodeURIComponent(text + "\n\n" + url)}`,
+    };
+
+    if (shareUrls[platform as keyof typeof shareUrls]) {
+      window.open(shareUrls[platform as keyof typeof shareUrls], "_blank");
+    }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        {children || (
-          <Button variant="outline" size="sm" className="gap-2">
-            <Share className="w-4 h-4" />
-            Share
-          </Button>
-        )}
+        <Button variant="outline" size="sm" className="gap-2">
+          <Share className="w-4 h-4" />
+          Share
+        </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Share className="w-5 h-5" />
-            Share "{projectName}"
+            Share Project
           </DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="share" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="share">Share Options</TabsTrigger>
-            <TabsTrigger value="embed">Embed</TabsTrigger>
+        <Tabs defaultValue="share" className="flex-1">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="share" className="gap-2">
+              <Share className="w-4 h-4" />
+              Share Link
+            </TabsTrigger>
+            <TabsTrigger value="embed" className="gap-2">
+              <Code className="w-4 h-4" />
+              Embed Code
+            </TabsTrigger>
+            <TabsTrigger value="preview" className="gap-2">
+              <Eye className="w-4 h-4" />
+              Preview
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="share" className="space-y-6">
-            {/* Visibility Settings */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium">Project Visibility</h3>
-              <div className="flex gap-2">
-                <Button
-                  variant={visibility === "public" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setVisibility("public")}
-                  className="gap-2"
-                >
-                  <Globe className="w-4 h-4" />
-                  Public
-                </Button>
-                <Button
-                  variant={visibility === "team" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setVisibility("team")}
-                  className="gap-2"
-                >
-                  <Users className="w-4 h-4" />
-                  Team
-                </Button>
-                <Button
-                  variant={visibility === "private" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setVisibility("private")}
-                  className="gap-2"
-                >
-                  <Lock className="w-4 h-4" />
-                  Private
-                </Button>
+          <TabsContent value="share" className="space-y-6 mt-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold">Project Visibility</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Control who can access your project
+                  </p>
+                </div>
+                <Badge variant={isPublic ? "default" : "secondary"} className="gap-1">
+                  {isPublic ? <Globe className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
+                  {isPublic ? "Public" : "Private"}
+                </Badge>
               </div>
-            </div>
 
-            <Separator />
-
-            {/* Access Level */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium">Access Level</h3>
-              <div className="flex gap-2">
-                <Button
-                  variant={accessLevel === "view" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setAccessLevel("view")}
-                  className="gap-2"
-                >
-                  <Eye className="w-4 h-4" />
-                  View Only
-                </Button>
-                <Button
-                  variant={accessLevel === "edit" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setAccessLevel("edit")}
-                  className="gap-2"
-                >
-                  <Edit className="w-4 h-4" />
-                  Can Edit
-                </Button>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Share URL */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium">Share Link</h3>
-              <div className="flex gap-2">
-                <Input
-                  value={accessLevel === "view" ? viewOnlyUrl : shareUrl}
-                  readOnly
-                  className="flex-1"
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="public-access"
+                  checked={isPublic}
+                  onCheckedChange={setIsPublic}
                 />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleCopy(accessLevel === "view" ? viewOnlyUrl : shareUrl, "url")}
-                  className="gap-2"
-                >
-                  {copied === "url" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                  {copied === "url" ? "Copied!" : "Copy"}
-                </Button>
+                <Label htmlFor="public-access">
+                  Make project publicly accessible
+                </Label>
               </div>
-            </div>
 
-            <Separator />
+              <Separator />
 
-            {/* Social Share Options */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium">Share via</h3>
-              <div className="grid grid-cols-5 gap-3">
-                {shareOptions.map((option) => (
+              <div className="space-y-3">
+                <Label htmlFor="share-url">Share URL</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="share-url"
+                    value={projectUrl}
+                    readOnly
+                    className="flex-1"
+                  />
                   <Button
-                    key={option.name}
+                    variant="outline"
+                    onClick={() => copyToClipboard(projectUrl, "url")}
+                    className="gap-2"
+                  >
+                    {copied === "url" ? (
+                      <Check className="w-4 h-4" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
+                    {copied === "url" ? "Copied!" : "Copy"}
+                  </Button>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-3">
+                <h4 className="font-medium">Share on social media</h4>
+                <div className="flex gap-2">
+                  <Button
                     variant="outline"
                     size="sm"
-                    onClick={option.action}
-                    className="flex flex-col gap-1 h-auto py-3"
+                    onClick={() => shareToSocial("twitter")}
+                    className="gap-2"
                   >
-                    <option.icon className="w-5 h-5" />
-                    <span className="text-xs">{option.name}</span>
+                    <Twitter className="w-4 h-4" />
+                    Twitter
                   </Button>
-                ))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => shareToSocial("linkedin")}
+                    className="gap-2"
+                  >
+                    <Linkedin className="w-4 h-4" />
+                    LinkedIn
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => shareToSocial("email")}
+                    className="gap-2"
+                  >
+                    <Mail className="w-4 h-4" />
+                    Email
+                  </Button>
+                </div>
               </div>
             </div>
           </TabsContent>
 
-          <TabsContent value="embed" className="space-y-6">
-            {/* Embed Size Options */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium">Embed Size</h3>
-              <div className="grid grid-cols-2 gap-2">
-                {embedSizes.map((size) => (
-                  <Button
-                    key={size.name}
-                    variant={selectedSize.name === size.name ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedSize(size)}
-                    className="justify-start"
-                  >
-                    {size.name}
-                    {size.width > 0 && (
-                      <Badge variant="secondary" className="ml-2">
-                        {size.width}×{size.height}
-                      </Badge>
-                    )}
-                  </Button>
-                ))}
+          <TabsContent value="embed" className="space-y-6 mt-6">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold">Embed Settings</h3>
+                <p className="text-sm text-muted-foreground">
+                  Customize how your project appears when embedded
+                </p>
               </div>
-            </div>
 
-            {/* Custom Size Inputs */}
-            {selectedSize.name === "Custom" && (
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Width (px)</label>
-                  <Input
-                    type="number"
-                    value={customWidth}
-                    onChange={(e) => setCustomWidth(Number(e.target.value))}
-                    min="300"
-                    max="1920"
-                  />
+                  <Label htmlFor="embed-size">Size</Label>
+                  <Select value={embedSize} onValueChange={setEmbedSize}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="small">Small (600x400)</SelectItem>
+                      <SelectItem value="medium">Medium (800x600)</SelectItem>
+                      <SelectItem value="large">Large (1200x800)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
+
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Height (px)</label>
-                  <Input
-                    type="number"
-                    value={customHeight}
-                    onChange={(e) => setCustomHeight(Number(e.target.value))}
-                    min="200"
-                    max="1080"
-                  />
+                  <Label>Options</Label>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="show-toolbar"
+                        checked={showToolbar}
+                        onCheckedChange={setShowToolbar}
+                      />
+                      <Label htmlFor="show-toolbar" className="text-sm">
+                        Show toolbar
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="allow-edit"
+                        checked={allowEdit}
+                        onCheckedChange={setAllowEdit}
+                      />
+                      <Label htmlFor="allow-edit" className="text-sm">
+                        Allow editing
+                      </Label>
+                    </div>
+                  </div>
                 </div>
               </div>
-            )}
 
-            <Separator />
+              <Separator />
 
-            {/* Embed Code */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium">Embed Code</h3>
-              <div className="relative">
-                <pre className="bg-muted p-4 rounded-md text-sm overflow-x-auto">
-                  <code>{getEmbedCode()}</code>
-                </pre>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="embed-code">Embed Code</Label>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copyToClipboard(generateEmbedCode(), "embed")}
+                    className="gap-2"
+                  >
+                    {copied === "embed" ? (
+                      <Check className="w-4 h-4" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
+                    {copied === "embed" ? "Copied!" : "Copy Code"}
+                  </Button>
+                </div>
+                <Textarea
+                  id="embed-code"
+                  value={generateEmbedCode()}
+                  readOnly
+                  className="font-mono text-sm min-h-[120px]"
+                />
+              </div>
+
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <h4 className="font-medium mb-2">Embed Preview</h4>
+                <div className="text-sm text-muted-foreground">
+                  Dimensions: {currentDimensions.width} x {currentDimensions.height}px
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Toolbar: {showToolbar ? "Enabled" : "Disabled"} | Editing: {allowEdit ? "Enabled" : "Disabled"}
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="preview" className="mt-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold">Live Preview</h3>
+                  <p className="text-sm text-muted-foreground">
+                    See how your embedded project will look
+                  </p>
+                </div>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleCopy(getEmbedCode(), "embed")}
-                  className="absolute top-2 right-2 gap-2"
+                  onClick={() => window.open(embedUrl, "_blank")}
+                  className="gap-2"
                 >
-                  {copied === "embed" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                  {copied === "embed" ? "Copied!" : "Copy"}
+                  <ExternalLink className="w-4 h-4" />
+                  Open in New Tab
                 </Button>
               </div>
-            </div>
 
-            <Separator />
-
-            {/* Embed Preview */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium">Preview</h3>
-              <div className="border rounded-md p-4 bg-muted/50">
-                <div 
-                  className="bg-white border rounded shadow-sm mx-auto"
-                  style={{
-                    width: Math.min(selectedSize.name === "Custom" ? customWidth : selectedSize.width, 400),
-                    height: Math.min(selectedSize.name === "Custom" ? customHeight : selectedSize.height, 300) * 0.6,
-                    maxWidth: "100%"
-                  }}
-                >
-                  <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
-                    <Code className="w-6 h-6 mr-2" />
-                    Embedded Project Preview
+              <div className="border rounded-lg overflow-hidden bg-muted/20">
+                <div className="bg-muted px-3 py-2 text-sm font-medium border-b">
+                  Preview ({currentDimensions.width} x {currentDimensions.height})
+                </div>
+                <div className="p-4 flex justify-center">
+                  <div 
+                    className="border rounded shadow-sm bg-white overflow-hidden"
+                    style={{
+                      width: Math.min(currentDimensions.width, 600),
+                      height: Math.min(currentDimensions.height, 400),
+                    }}
+                  >
+                    <iframe
+                      src={`${embedUrl}?toolbar=${showToolbar}&edit=${allowEdit}`}
+                      width="100%"
+                      height="100%"
+                      frameBorder="0"
+                      title={`${projectName} Preview`}
+                      className="w-full h-full"
+                    />
                   </div>
+                </div>
+                <div className="bg-muted px-3 py-2 text-xs text-muted-foreground border-t">
+                  This is a scaled preview. Actual embed will use the dimensions specified in settings.
                 </div>
               </div>
             </div>
