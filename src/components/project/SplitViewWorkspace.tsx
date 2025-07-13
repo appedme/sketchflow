@@ -1,9 +1,14 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { X, Maximize2, Minimize2 } from 'lucide-react';
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 import { DocumentationPanel } from './DocumentationPanel';
 import { SplitViewDocumentEditor } from './SplitViewDocumentEditor';
 import dynamic from 'next/dynamic';
@@ -36,6 +41,43 @@ export function SplitViewWorkspace({
   const router = useRouter();
   const [leftExpanded, setLeftExpanded] = useState(false);
   const [rightExpanded, setRightExpanded] = useState(false);
+  
+  // Storage key for persisting panel sizes
+  const storageKey = `split-view-${projectId}-${leftItemId}-${rightItemId}`;
+  
+  // Load saved panel sizes from localStorage
+  const [leftPanelSize, setLeftPanelSize] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(storageKey);
+      return saved ? JSON.parse(saved).leftSize : 50;
+    }
+    return 50;
+  });
+
+  // Save panel sizes to localStorage
+  const handlePanelResize = (sizes: number[]) => {
+    const [leftSize, rightSize] = sizes;
+    setLeftPanelSize(leftSize);
+    
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(storageKey, JSON.stringify({
+        leftSize,
+        rightSize,
+        timestamp: Date.now()
+      }));
+    }
+  };
+
+  // Handle expand/collapse functionality
+  const handleLeftExpand = () => {
+    setLeftExpanded(!leftExpanded);
+    setRightExpanded(false);
+  };
+
+  const handleRightExpand = () => {
+    setRightExpanded(!rightExpanded);
+    setLeftExpanded(false);
+  };
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
@@ -49,7 +91,7 @@ export function SplitViewWorkspace({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setLeftExpanded(!leftExpanded)}
+            onClick={handleLeftExpand}
             disabled={rightExpanded}
           >
             {leftExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -58,7 +100,7 @@ export function SplitViewWorkspace({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setRightExpanded(!rightExpanded)}
+            onClick={handleRightExpand}
             disabled={leftExpanded}
           >
             {rightExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -75,34 +117,75 @@ export function SplitViewWorkspace({
       </div>
 
       {/* Split Content */}
-      <div className="flex-1 flex">
-        {/* Left Panel */}
-        <div className={`${
-          leftExpanded ? 'w-full' : rightExpanded ? 'w-0' : 'w-1/2'
-        } transition-all duration-300 border-r border-gray-200 bg-white overflow-hidden`}>
-          {leftItemType === 'document' ? (
-            <SplitViewDocumentEditor documentId={leftItemId || projectId} />
-          ) : (
-            <ExcalidrawCanvas
-              projectId={leftItemId || projectId}
-              projectName={`${projectName} - Left Canvas`}
-            />
-          )}
-        </div>
+      <div className="flex-1 overflow-hidden">
+        {leftExpanded || rightExpanded ? (
+          // Full screen mode - show only one panel
+          <div className="h-full bg-white">
+            {leftExpanded ? (
+              leftItemType === 'document' ? (
+                <SplitViewDocumentEditor documentId={leftItemId || projectId} />
+              ) : (
+                <ExcalidrawCanvas
+                  projectId={leftItemId || projectId}
+                  projectName={`${projectName} - Left Canvas`}
+                />
+              )
+            ) : (
+              rightItemType === 'canvas' ? (
+                <ExcalidrawCanvas
+                  projectId={rightItemId || projectId}
+                  projectName={`${projectName} - Right Canvas`}
+                />
+              ) : (
+                <SplitViewDocumentEditor documentId={rightItemId || projectId} />
+              )
+            )}
+          </div>
+        ) : (
+          // Split view mode - resizable panels
+          <ResizablePanelGroup
+            direction="horizontal"
+            className="h-full"
+            onLayout={handlePanelResize}
+          >
+            {/* Left Panel */}
+            <ResizablePanel 
+              defaultSize={leftPanelSize}
+              minSize={20}
+              maxSize={80}
+              className="bg-white overflow-hidden"
+            >
+              {leftItemType === 'document' ? (
+                <SplitViewDocumentEditor documentId={leftItemId || projectId} />
+              ) : (
+                <ExcalidrawCanvas
+                  projectId={leftItemId || projectId}
+                  projectName={`${projectName} - Left Canvas`}
+                />
+              )}
+            </ResizablePanel>
 
-        {/* Right Panel */}
-        <div className={`${
-          rightExpanded ? 'w-full' : leftExpanded ? 'w-0' : 'w-1/2'
-        } transition-all duration-300 bg-white overflow-hidden`}>
-          {rightItemType === 'canvas' ? (
-            <ExcalidrawCanvas
-              projectId={rightItemId || projectId}
-              projectName={`${projectName} - Right Canvas`}
-            />
-          ) : (
-            <SplitViewDocumentEditor documentId={rightItemId || projectId} />
-          )}
-        </div>
+            {/* Resizable Handle */}
+            <ResizableHandle withHandle />
+
+            {/* Right Panel */}
+            <ResizablePanel 
+              defaultSize={100 - leftPanelSize}
+              minSize={20}
+              maxSize={80}
+              className="bg-white overflow-hidden"
+            >
+              {rightItemType === 'canvas' ? (
+                <ExcalidrawCanvas
+                  projectId={rightItemId || projectId}
+                  projectName={`${projectName} - Right Canvas`}
+                />
+              ) : (
+                <SplitViewDocumentEditor documentId={rightItemId || projectId} />
+              )}
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        )}
       </div>
     </div>
   );
