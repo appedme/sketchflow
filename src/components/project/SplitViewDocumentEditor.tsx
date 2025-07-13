@@ -2,32 +2,10 @@
 
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { Plate, usePlateEditor, type Value } from 'platejs/react';
-import { BasicBlocksKit } from '@/components/editor/plugins/basic-blocks-kit';
-import { BasicMarksKit } from '@/components/editor/plugins/basic-marks-kit';
-import { AutoformatKit } from '@/components/editor/plugins/autoformat-kit';
-import { ExitBreakKit } from '@/components/editor/plugins/exit-break-kit';
-import { LinkKit } from '@/components/editor/plugins/link-kit';
-import { ListKit } from '@/components/editor/plugins/list-kit';
-import { MarkdownKit } from '@/components/editor/plugins/markdown-kit';
-import { FloatingToolbarKit } from '@/components/editor/plugins/floating-toolbar-kit';
-import { Editor, EditorContainer } from '@/components/ui/editor';
-import { FloatingToolbar } from '@/components/ui/floating-toolbar';
+import { PlateEditor } from '@/components/editor/plate-editor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Save, Edit3, FileText } from 'lucide-react';
-
-// Simplified plugin set for split view document editing
-const SplitViewDocumentEditorKit = [
-  ...BasicBlocksKit,
-  ...BasicMarksKit,
-  ...LinkKit,
-  ...ListKit,
-  ...AutoformatKit,
-  ...ExitBreakKit,
-  ...MarkdownKit,
-  ...FloatingToolbarKit,
-];
 
 interface Document {
   id: string;
@@ -42,63 +20,31 @@ interface SplitViewDocumentEditorProps {
   documentId: string;
 }
 
-// Convert markdown content to Plate value
-const markdownToPlateValue = (markdown: string): Value => {
-  const lines = markdown.split('\n');
-  const value: Value = [];
-  
-  for (const line of lines) {
-    if (line.startsWith('# ')) {
-      value.push({
-        type: 'h1',
-        children: [{ text: line.slice(2) }],
-      });
-    } else if (line.startsWith('## ')) {
-      value.push({
-        type: 'h2',
-        children: [{ text: line.slice(3) }],
-      });
-    } else if (line.startsWith('### ')) {
-      value.push({
-        type: 'h3',
-        children: [{ text: line.slice(4) }],
-      });
-    } else if (line.trim() === '') {
-      continue;
-    } else {
-      value.push({
+// Simple default value for new documents
+const getDefaultValue = (content: string): any[] => {
+  if (!content.trim()) {
+    return [
+      {
         type: 'p',
-        children: [{ text: line }],
-      });
-    }
+        children: [{ text: '' }],
+      }
+    ];
   }
   
-  if (value.length === 0) {
-    value.push({
+  // Simple text to paragraph conversion
+  return [
+    {
       type: 'p',
-      children: [{ text: '' }],
-    });
-  }
-  
-  return value;
+      children: [{ text: content }],
+    }
+  ];
 };
 
-// Convert Plate value back to markdown
-const plateValueToMarkdown = (value: Value): string => {
+// Convert Plate value back to text
+const plateValueToText = (value: any[]): string => {
   return value.map((node: any) => {
     const text = node.children?.map((child: any) => child.text || '').join('') || '';
-    
-    switch (node.type) {
-      case 'h1':
-        return `# ${text}`;
-      case 'h2':
-        return `## ${text}`;
-      case 'h3':
-        return `### ${text}`;
-      case 'p':
-      default:
-        return text;
-    }
+    return text;
   }).join('\n\n');
 };
 
@@ -107,7 +53,7 @@ export function SplitViewDocumentEditor({ documentId }: SplitViewDocumentEditorP
   const [document, setDocument] = useState<Document>({
     id: documentId,
     title: 'Project Overview',
-    content: '# Project Overview\n\nThis document contains the main project information and requirements.\n\n## Goals\n- Create intuitive user interface\n- Implement real-time collaboration\n- Ensure scalable architecture',
+    content: 'This document contains the main project information and requirements.\n\nGoals:\n- Create intuitive user interface\n- Implement real-time collaboration\n- Ensure scalable architecture',
     type: 'document',
     createdAt: new Date('2024-01-15'),
     updatedAt: new Date('2024-01-20')
@@ -115,22 +61,18 @@ export function SplitViewDocumentEditor({ documentId }: SplitViewDocumentEditorP
 
   const [isEditing, setIsEditing] = useState(false);
   const [editingTitle, setEditingTitle] = useState(document.title);
-  const [editorValue, setEditorValue] = useState<Value>(() => markdownToPlateValue(document.content));
+  const [editorValue, setEditorValue] = useState<any[]>(() => getDefaultValue(document.content));
 
-  const editor = usePlateEditor({
-    plugins: SplitViewDocumentEditorKit,
-    value: editorValue,
-    onChange: (newValue) => {
-      setEditorValue(newValue);
-    },
-  });
+  const handleEditorChange = (value: any[]) => {
+    setEditorValue(value);
+  };
 
   const handleSave = () => {
-    const markdown = plateValueToMarkdown(editorValue);
+    const text = plateValueToText(editorValue);
     const updatedDoc = {
       ...document,
       title: editingTitle,
-      content: markdown,
+      content: text,
       updatedAt: new Date()
     };
     setDocument(updatedDoc);
@@ -139,13 +81,13 @@ export function SplitViewDocumentEditor({ documentId }: SplitViewDocumentEditorP
 
   const handleEdit = () => {
     setEditingTitle(document.title);
-    setEditorValue(markdownToPlateValue(document.content));
+    setEditorValue(getDefaultValue(document.content));
     setIsEditing(true);
   };
 
   const handleCancel = () => {
     setEditingTitle(document.title);
-    setEditorValue(markdownToPlateValue(document.content));
+    setEditorValue(getDefaultValue(document.content));
     setIsEditing(false);
   };
 
@@ -209,18 +151,13 @@ export function SplitViewDocumentEditor({ documentId }: SplitViewDocumentEditorP
       </div>
 
       {/* Editor Content */}
-      <div className="flex-1 overflow-hidden">
-        <Plate editor={editor}>
-          <EditorContainer variant="default" className="h-full">
-            <Editor 
-              variant="none"
-              readOnly={!isEditing}
-              placeholder={isEditing ? "Start writing..." : undefined}
-              className="h-full p-4 text-sm"
-            />
-            {isEditing && <FloatingToolbar />}
-          </EditorContainer>
-        </Plate>
+      <div className="flex-1 overflow-hidden p-4">
+        <PlateEditor 
+          value={editorValue}
+          onChange={isEditing ? handleEditorChange : undefined}
+          placeholder={isEditing ? "Start writing..." : undefined}
+          readOnly={!isEditing}
+        />
       </div>
     </div>
   );
