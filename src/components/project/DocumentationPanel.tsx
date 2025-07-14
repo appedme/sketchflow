@@ -134,18 +134,15 @@ export function DocumentationPanel({ projectId, projectName }: DocumentationPane
   return (
     <div className="h-full flex flex-col bg-white">
       {/* Header */}
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{projectName}</h1>
-            <p className="text-gray-500 mt-1">Project documentation and canvases</p>
-          </div>
+          <h1 className="text-xl font-semibold text-gray-900">{projectName}</h1>
           <div className="flex gap-2">
-            <Button onClick={createNewDocument} className="gap-2">
+            <Button onClick={createNewDocument} size="sm" className="gap-2">
               <Plus className="w-4 h-4" />
               New Document
             </Button>
-            <Button onClick={createNewCanvas} variant="outline" className="gap-2">
+            <Button onClick={createNewCanvas} size="sm" variant="outline" className="gap-2">
               <Plus className="w-4 h-4" />
               New Canvas
             </Button>
@@ -165,7 +162,7 @@ export function DocumentationPanel({ projectId, projectName }: DocumentationPane
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto">
         {isLoading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -199,11 +196,11 @@ export function DocumentationPanel({ projectId, projectName }: DocumentationPane
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="divide-y divide-gray-200">
             {filteredItems.map((item) => (
               <div
                 key={item.id}
-                className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow cursor-pointer group"
+                className="p-4 hover:bg-gray-50 transition-colors cursor-pointer group"
                 onClick={() => {
                   if (item.type === 'document') {
                     router.push(`/project/${projectId}/document/${item.id}`);
@@ -212,24 +209,42 @@ export function DocumentationPanel({ projectId, projectName }: DocumentationPane
                   }
                 }}
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
                     {item.type === 'document' ? (
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <FileText className="w-5 h-5 text-blue-600" />
+                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <FileText className="w-4 h-4 text-blue-600" />
                       </div>
                     ) : (
-                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <CanvasIcon className="w-5 h-5 text-purple-600" />
+                      <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <CanvasIcon className="w-4 h-4 text-purple-600" />
                       </div>
                     )}
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors truncate">
                         {item.title}
                       </h3>
-                      <p className="text-sm text-gray-500 capitalize">
-                        {item.type}
-                      </p>
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <span className="capitalize">{item.type}</span>
+                        <span>•</span>
+                        <span>
+                          {formatDistanceToNow(new Date(item.updatedAt), { addSuffix: true })}
+                        </span>
+                        {item.type === 'document' && (
+                          <>
+                            <span>•</span>
+                            <span className="truncate max-w-xs">
+                              {item.contentText || 'No content'}
+                            </span>
+                          </>
+                        )}
+                        {item.type === 'canvas' && (
+                          <>
+                            <span>•</span>
+                            <span>{item.elements?.length || 0} elements</span>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                   
@@ -245,6 +260,7 @@ export function DocumentationPanel({ projectId, projectName }: DocumentationPane
                           router.push(`/project/${projectId}/canvas/${item.id}`);
                         }
                       }}
+                      className="h-8 w-8 p-0"
                     >
                       <Maximize2 className="w-4 h-4" />
                     </Button>
@@ -259,31 +275,11 @@ export function DocumentationPanel({ projectId, projectName }: DocumentationPane
                         const rightType = item.type === 'document' ? 'canvas' : 'document';
                         router.push(`/project/${projectId}/split?left=${leftId}&leftType=${leftType}&right=${rightId}&rightType=${rightType}`);
                       }}
+                      className="h-8 w-8 p-0"
                     >
                       <SplitSquareHorizontal className="w-4 h-4" />
                     </Button>
                   </div>
-                </div>
-
-                <div className="mb-4">
-                  {item.type === 'document' ? (
-                    <p className="text-sm text-gray-600 line-clamp-3">
-                      {item.contentText || 'No content'}
-                    </p>
-                  ) : (
-                    <p className="text-sm text-gray-600">
-                      {item.elements?.length || 0} elements
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span>
-                    Updated {formatDistanceToNow(new Date(item.updatedAt), { addSuffix: true })}
-                  </span>
-                  <span className="capitalize">
-                    {item.type}
-                  </span>
                 </div>
               </div>
             ))}

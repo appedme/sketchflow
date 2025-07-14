@@ -27,6 +27,7 @@ interface DocumentContextType {
   saving: boolean;
   setTitle: (title: string) => void;
   setContent: (content: string) => void;
+  saveDocument: () => Promise<void>;
   mutateDocument: () => void;
 }
 
@@ -68,12 +69,48 @@ export function DocumentProvider({ children, documentId }: DocumentProviderProps
     }
   }, [document]);
 
+  // Manual save function
+  const saveDocument = async () => {
+    if (!document || !user?.id) return;
+    
+    try {
+      setSaving(true);
+      const response = await fetch(`/api/documents/${documentId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: title,
+          contentText: content,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save document');
+      }
+
+      const updatedDoc = await response.json();
+
+      // Update the cache with the response
+      mutate(`/api/documents/${documentId}`, updatedDoc, false);
+      
+    } catch (error) {
+      console.error('Failed to save document:', error);
+      // You could add a toast notification here
+      alert('Failed to save document. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   // Auto-save when title or content changes
   useEffect(() => {
     if (!document || !user?.id) return;
     if (debouncedTitle === document.title && debouncedContent === document.contentText) return;
     
-    const saveDocument = async () => {
+    const autoSave = async () => {
       try {
         setSaving(true);
         const response = await fetch(`/api/documents/${documentId}`, {
@@ -100,13 +137,13 @@ export function DocumentProvider({ children, documentId }: DocumentProviderProps
         }, false);
         
       } catch (error) {
-        console.error('Failed to save document:', error);
+        console.error('Failed to auto-save document:', error);
       } finally {
         setSaving(false);
       }
     };
     
-    saveDocument();
+    autoSave();
   }, [debouncedTitle, debouncedContent, document, documentId, user?.id, mutateDocument]);
 
   const isLoading = !document && !error;
@@ -122,6 +159,7 @@ export function DocumentProvider({ children, documentId }: DocumentProviderProps
         saving,
         setTitle,
         setContent,
+        saveDocument,
         mutateDocument,
       }}
     >
