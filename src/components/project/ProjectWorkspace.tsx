@@ -41,6 +41,22 @@ export function ProjectWorkspace({
     id: string;
     type: 'document' | 'canvas';
   } | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      // Trigger save for the current canvas
+      const event = new CustomEvent('excalidraw-save');
+      window.dispatchEvent(event);
+      
+      // Show feedback
+      setTimeout(() => setSaving(false), 1000);
+    } catch (error) {
+      console.error('Save failed:', error);
+      setSaving(false);
+    }
+  };
 
   // Handle split view mode
   if (splitViewMode && splitViewItem) {
@@ -142,9 +158,9 @@ export function ProjectWorkspace({
         </div>
         <div className="flex items-center gap-2">
           <ShareDialog projectId={projectId} projectName={projectName} />
-          <Button size="sm" className="gap-2">
+          <Button size="sm" className="gap-2" onClick={handleSave} disabled={saving}>
             <Save className="w-4 h-4" />
-            Save
+            {saving ? 'Saving...' : 'Save'}
           </Button>
         </div>
       </div>

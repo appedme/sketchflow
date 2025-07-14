@@ -122,9 +122,28 @@ export function DocumentationPanel({
       };
       setDocuments(prev => [transformedDoc, ...prev]);
       // Navigate to new document in full screen
-      router.push(`/project/${projectId}/document/${newDoc.id}`);
+      onFullScreen(newDoc.id, 'document');
     } catch (error) {
       console.error('Failed to create document:', error);
+    }
+  };
+
+  const handleCreateCanvas = async () => {
+    try {
+      const newCanvas = await createCanvas(projectId, 'New Canvas');
+      const transformedCanvas: Canvas = {
+        id: newCanvas.id,
+        title: newCanvas.title,
+        type: 'canvas',
+        elements: newCanvas.elements || [],
+        createdAt: new Date(newCanvas.createdAt),
+        updatedAt: new Date(newCanvas.updatedAt),
+      };
+      setCanvases(prev => [transformedCanvas, ...prev]);
+      // Navigate to new canvas in full screen
+      onFullScreen(newCanvas.id, 'canvas');
+    } catch (error) {
+      console.error('Failed to create canvas:', error);
     }
   };
 
@@ -155,6 +174,10 @@ export function DocumentationPanel({
           <Button size="sm" onClick={handleCreateDocument} className="gap-2">
             <Plus className="w-4 h-4" />
             New Doc
+          </Button>
+          <Button size="sm" variant="outline" onClick={handleCreateCanvas} className="gap-2">
+            <CanvasIcon className="w-4 h-4" />
+            New Canvas
           </Button>
           <Button variant="ghost" size="sm" onClick={onClosePanel}>
             <X className="w-4 h-4" />

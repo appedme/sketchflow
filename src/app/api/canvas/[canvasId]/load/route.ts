@@ -14,11 +14,24 @@ export async function GET(
     }
 
     const { canvasId } = await params;
+
+    // Get the specific canvas
     const canvas = await getCanvas(canvasId, userId);
+    console.log('Found canvas:', canvas ? { id: canvas.id, title: canvas.title, hasElements: !!canvas.elements } : 'none');
     
     if (!canvas) {
-      return NextResponse.json({ error: 'Canvas not found' }, { status: 404 });
+      return NextResponse.json({ 
+        elements: [], 
+        appState: {}, 
+        files: {} 
+      });
     }
+
+    console.log('Returning canvas data:', {
+      elementsLength: Array.isArray(canvas.elements) ? canvas.elements.length : 'not array',
+      hasAppState: !!canvas.appState,
+      hasFiles: !!canvas.files
+    });
 
     return NextResponse.json({
       elements: canvas.elements || [],
@@ -26,7 +39,7 @@ export async function GET(
       files: canvas.files || {}
     });
   } catch (error) {
-    console.error('Error fetching canvas:', error);
+    console.error('Error loading canvas:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

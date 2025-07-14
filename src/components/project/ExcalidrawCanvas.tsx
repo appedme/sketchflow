@@ -24,14 +24,22 @@ import "../../styles/excalidraw-custom.css";
 interface ExcalidrawCanvasProps {
   projectId: string;
   projectName: string;
+  canvasId?: string;
   isReadOnly?: boolean;
 }
 
 export function ExcalidrawCanvas({ 
   projectId, 
-  projectName 
+  projectName,
+  canvasId
 }: ExcalidrawCanvasProps) {
   const [excalidrawAPI, setExcalidrawAPI] = useState<ExcalidrawImperativeAPI | null>(null);
+  const [initialData, setInitialData] = useState<{
+    elements: readonly ExcalidrawElement[];
+    appState: Partial<AppState>;
+    files: BinaryFiles;
+    libraryItems: LibraryItems;
+  } | null>(null);
   const [elements, setElements] = useState<readonly ExcalidrawElement[]>([]);
   const [appState, setAppState] = useState<Partial<AppState>>({
     collaborators: new Map(),
@@ -56,34 +64,216 @@ export function ExcalidrawCanvas({
   const [libraryItems, setLibraryItems] = useState<LibraryItems>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const sceneFileInputRef = useRef<HTMLInputElement>(null);
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Manual save function
+  const saveCanvas = useCallback(async () => {
+    try {
+      const canvasData = {
+        elements,
+        appState,
+        files
+      };
+      
+      // Save to localStorage as backup
+      const storageKey = canvasId ? `excalidraw-canvas-${canvasId}` : `excalidraw-${projectId}`;
+      localStorage.setItem(storageKey, JSON.stringify(canvasData));
+      
+      // Save to backend database via API route
+      const apiUrl = canvasId 
+        ? `/api/canvas/${canvasId}/save`
+        : `/api/canvas/project/${projectId}/save`;
+        
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          elements,
+          appState,
+          files
+        })
+      });
+      
+      if (response.ok) {
+        console.log('Canvas saved successfully to database');
+      } else {
+        throw new Error('Failed to save to database');
+      }
+    } catch (error) {
+      console.error('Failed to save canvas:', error);
+      // Fallback to localStorage only if database save fails
+    }
+  }, [projectId, canvasId, elements, appState, files]);
+
+  // Listen for save events from toolbar
+  useEffect(() => {
+    const handleSaveEvent = () => {
+      saveCanvas();
+    };
+    
+    window.addEventListener('excalidraw-save', handleSaveEvent);
+    return () => window.removeEventListener('excalidraw-save', handleSaveEvent);
+  }, [saveCanvas]);
 
   // Load saved data on mount
   useEffect(() => {
-    const savedData = localStorage.getItem(`excalidraw-${projectId}`);
-    if (savedData) {
+    const loadCanvasData = async () => {
       try {
-        const parsed = JSON.parse(savedData);
-        if (parsed.elements) {
-          setElements(convertToExcalidrawElements(parsed.elements));
-        }
-        if (parsed.appState) {
-          setAppState({
-            ...parsed.appState,
-            collaborators: new Map(),
+        // Try to load from database first
+        const apiUrl = canvasId 
+          ? `/api/canvas/${canvasId}/load`
+          : `/api/canvas/project/${projectId}/load`;
+          
+        const response = await fetch(apiUrl);
+        if (response.ok) {
+          const canvasData = await response.json() as {
+            elements?: any[];
+            appState?: any;
+            files?: BinaryFiles;
+          };
+          console.log('Loaded canvas data from database:', {
+            elementsCount: canvasData.elements?.length || 0,
+            hasAppState: !!canvasData.appState,
+            hasFiles: !!canvasData.files
           });
-        }
-        if (parsed.files) {
-          setFiles(parsed.files);
+          
+          let loadedElements: readonly ExcalidrawElement[] = [];
+          let loadedAppState: Partial<AppState> = {
+            collaborators: new Map(),
+            theme: "light" as const,
+            viewBackgroundColor: "#ffffff",
+            name: projectName,
+            currentItemStrokeColor: "#1e40af",
+            currentItemBackgroundColor: "#dbeafe",
+            currentItemFillStyle: "hachure" as const,
+            currentItemStrokeWidth: 2,
+            currentItemRoughness: 1,
+            currentItemOpacity: 100,
+            currentItemFontFamily: 1,
+            currentItemFontSize: 20,
+            currentItemTextAlign: "left" as const,
+            currentItemStartArrowhead: null,
+            currentItemEndArrowhead: "arrow" as const,
+          };
+          let loadedFiles: BinaryFiles = {};
+          
+          if (canvasData.elements && canvasData.elements.length > 0) {
+            loadedElements = convertToExcalidrawElements(canvasData.elements);
+            console.log('Converted elements:', loadedElements);
+            setElements(loadedElements);
+          }
+          
+          if (canvasData.appState) {
+            loadedAppState = {
+              ...loadedAppState,
+              ...canvasData.appState,
+              collaborators: new Map(), // Always reset collaborators
+              theme: (canvasData.appState.theme || "light") as "light" | "dark",
+            };
+            console.log('Setting app state:', loadedAppState);
+            setAppState(loadedAppState);
+          }
+          
+          if (canvasData.files) {
+            loadedFiles = canvasData.files;
+            setFiles(loadedFiles);
+          }
+          
+          // Set initial data for Excalidraw component
+          setInitialData({
+            elements: loadedElements,
+            appState: loadedAppState,
+            files: loadedFiles,
+            libraryItems: []
+          });
+          
+          return; // Successfully loaded from database
         }
       } catch (error) {
-        console.error('Failed to load saved data:', error);
+        console.error('Failed to load from database:', error);
       }
+      
+      // Fallback to localStorage
+      const storageKey = canvasId ? `excalidraw-canvas-${canvasId}` : `excalidraw-${projectId}`;
+      const savedData = localStorage.getItem(storageKey);
+      if (savedData) {
+        try {
+          const parsed = JSON.parse(savedData);
+          let loadedElements: readonly ExcalidrawElement[] = [];
+          let loadedAppState: Partial<AppState> = {
+            collaborators: new Map(),
+            theme: "light" as const,
+            viewBackgroundColor: "#ffffff",
+            name: projectName,
+          };
+          let loadedFiles: BinaryFiles = {};
+          
+          if (parsed.elements) {
+            loadedElements = convertToExcalidrawElements(parsed.elements);
+            setElements(loadedElements);
+          }
+          if (parsed.appState) {
+            loadedAppState = {
+              ...loadedAppState,
+              ...parsed.appState,
+              collaborators: new Map(),
+              theme: (parsed.appState.theme || "light") as "light" | "dark",
+            };
+            setAppState(loadedAppState);
+          }
+          if (parsed.files) {
+            loadedFiles = parsed.files;
+            setFiles(loadedFiles);
+          }
+          
+          // Set initial data for Excalidraw component
+          setInitialData({
+            elements: loadedElements,
+            appState: loadedAppState,
+            files: loadedFiles,
+            libraryItems: []
+          });
+        } catch (error) {
+          console.error('Failed to load saved data:', error);
+        }
+      } else {
+        // No saved data, set empty initial data
+        setInitialData({
+          elements: [],
+          appState: {
+            collaborators: new Map(),
+            theme: "light" as const,
+            viewBackgroundColor: "#ffffff",
+            name: projectName,
+          },
+          files: {},
+          libraryItems: []
+        });
+      }
+    };
+    
+    loadCanvasData();
+  }, [projectId, canvasId, projectName]);
+
+  // Force update Excalidraw when API is ready and we have initial data
+  useEffect(() => {
+    if (excalidrawAPI && initialData && initialData.elements && initialData.elements.length > 0) {
+      console.log('Forcing Excalidraw update with initial data:', initialData);
+      setTimeout(() => {
+        excalidrawAPI.updateScene({
+          elements: initialData.elements,
+        });
+      }, 100);
     }
-  }, [projectId]);
+  }, [excalidrawAPI, initialData]);
+
 
   // Load library items on mount
   useEffect(() => {
-    const savedLibrary = localStorage.getItem(`excalidraw-library-${projectId}`);
+    const storageKey = canvasId ? `excalidraw-library-canvas-${canvasId}` : `excalidraw-library-${projectId}`;
+    const savedLibrary = localStorage.getItem(storageKey);
     if (savedLibrary) {
       try {
         const parsed = JSON.parse(savedLibrary);
@@ -92,7 +282,7 @@ export function ExcalidrawCanvas({
         console.error('Failed to load library:', error);
       }
     }
-  }, [projectId]);
+  }, [projectId, canvasId]);
 
   // Auto-save functionality
   useEffect(() => {
@@ -103,9 +293,10 @@ export function ExcalidrawCanvas({
         files,
         timestamp: Date.now()
       };
-      localStorage.setItem(`excalidraw-${projectId}`, JSON.stringify(saveData));
+      const storageKey = canvasId ? `excalidraw-canvas-${canvasId}` : `excalidraw-${projectId}`;
+      localStorage.setItem(storageKey, JSON.stringify(saveData));
     }
-  }, [elements, appState, files, projectId]);
+  }, [elements, appState, files, projectId, canvasId]);
 
   const handleChange = useCallback((
     elements: readonly ExcalidrawElement[], 
@@ -115,12 +306,58 @@ export function ExcalidrawCanvas({
     setElements(elements);
     setAppState(appState);
     setFiles(files);
-  }, []);
+    
+    // Auto-save to localStorage immediately
+    const dataToSave = {
+      elements,
+      appState: {
+        ...appState,
+        collaborators: undefined, // Don't save collaborators
+      },
+      files,
+    };
+    
+    const storageKey = canvasId ? `excalidraw-canvas-${canvasId}` : `excalidraw-${projectId}`;
+    localStorage.setItem(storageKey, JSON.stringify(dataToSave));
+    
+    // Debounced auto-save to database
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+    }
+    
+    autoSaveTimeoutRef.current = setTimeout(async () => {
+      try {
+        // Auto-save to backend database via API route
+        const apiUrl = canvasId 
+          ? `/api/canvas/${canvasId}/save`
+          : `/api/canvas/project/${projectId}/save`;
+          
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            elements,
+            appState,
+            files
+          })
+        });
+        
+        if (response.ok) {
+          console.log('Canvas auto-saved to database');
+        }
+      } catch (error) {
+        console.error('Auto-save failed:', error);
+      }
+    }, 3000); // Auto-save after 3 seconds of inactivity
+  }, [projectId, canvasId]);
 
   const handleLibraryChange = useCallback((libraryItems: LibraryItems) => {
     setLibraryItems(libraryItems);
-    localStorage.setItem(`excalidraw-library-${projectId}`, JSON.stringify(libraryItems));
-  }, [projectId]);
+    const storageKey = canvasId ? `excalidraw-library-canvas-${canvasId}` : `excalidraw-library-${projectId}`;
+    localStorage.setItem(storageKey, JSON.stringify(libraryItems));
+  }, [projectId, canvasId]);
 
   const resetCanvas = useCallback(() => {
     if (excalidrawAPI) {
@@ -272,19 +509,23 @@ export function ExcalidrawCanvas({
 
   return (
     <div className="h-full w-full relative">
+      {/* Debug info - remove in production */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="absolute top-2 right-2 z-50 bg-black bg-opacity-75 text-white text-xs p-2 rounded">
+          <div>Project: {projectId}</div>
+          {canvasId && <div>Canvas: {canvasId}</div>}
+          <div>Elements: {elements.length}</div>
+          <div>Initial Data: {initialData ? 'Loaded' : 'Loading...'}</div>
+          <div>API: {excalidrawAPI ? 'Ready' : 'Not Ready'}</div>
+        </div>
+      )}
+      
       <Excalidraw
+        key={`excalidraw-${projectId}-${canvasId || 'main'}-${initialData ? 'loaded' : 'loading'}`}
         excalidrawAPI={(api: ExcalidrawImperativeAPI) => setExcalidrawAPI(api)}
         onChange={handleChange}
         onLibraryChange={handleLibraryChange}
-        initialData={{
-          elements,
-          appState: {
-            ...appState,
-            collaborators: new Map(),
-          },
-          files,
-          libraryItems
-        }}
+        initialData={initialData}
         UIOptions={{
           canvasActions: {
             loadScene: false,

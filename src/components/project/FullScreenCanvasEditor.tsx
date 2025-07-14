@@ -60,7 +60,8 @@ export function FullScreenCanvasEditor({
       {/* Full Screen Canvas Content */}
       <div className="flex-1">
         <ExcalidrawCanvas
-          projectId={canvasId}
+          projectId={projectId}
+          canvasId={canvasId}
           projectName={projectName}
           isReadOnly={false}
         />

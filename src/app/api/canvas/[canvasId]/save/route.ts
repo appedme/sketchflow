@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { getCanvas } from '@/lib/actions/canvases';
+import { updateCanvas } from '@/lib/actions/canvases';
 
-export async function GET(
+export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ canvasId: string }> }
 ) {
@@ -13,20 +13,23 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const requestData = await request.json() as {
+      elements: any[];
+      appState: any;
+      files: any;
+    };
+    const { elements, appState, files } = requestData;
     const { canvasId } = await params;
-    const canvas = await getCanvas(canvasId, userId);
-    
-    if (!canvas) {
-      return NextResponse.json({ error: 'Canvas not found' }, { status: 404 });
-    }
 
-    return NextResponse.json({
-      elements: canvas.elements || [],
-      appState: canvas.appState || {},
-      files: canvas.files || {}
+    // Update the specific canvas
+    await updateCanvas(canvasId, elements, appState, files, userId);
+
+    return NextResponse.json({ 
+      success: true, 
+      canvasId 
     });
   } catch (error) {
-    console.error('Error fetching canvas:', error);
+    console.error('Error saving canvas:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -116,6 +116,9 @@ export async function getCanvases(projectId: string, userId: string) {
       .select({
         id: canvases.id,
         title: canvases.title,
+        elements: canvases.elements,
+        appState: canvases.appState,
+        files: canvases.files,
         version: canvases.version,
         createdBy: canvases.createdBy,
         createdAt: canvases.createdAt,
