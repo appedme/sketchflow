@@ -6,10 +6,11 @@ import { getDb } from '@/lib/db/connection';
 import { canvases, projects, projectCollaborators, type NewCanvas } from '@/lib/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 
-export async function createCanvas(projectId: string, title: string, elements?: any, appState?: any) {
-  const { userId } = await auth();
+export async function createCanvas(projectId: string, title: string, elements?: any, appState?: any, files?: any, userId?: string) {
+  const { userId: authUserId } = await auth();
+  const currentUserId = userId || authUserId;
   
-  if (!userId) {
+  if (!currentUserId) {
     throw new Error('User not authenticated');
   }
 
@@ -23,7 +24,7 @@ export async function createCanvas(projectId: string, title: string, elements?: 
       .where(
         and(
           eq(projectCollaborators.projectId, projectId),
-          eq(projectCollaborators.userId, userId)
+          eq(projectCollaborators.userId, currentUserId)
         )
       )
       .limit(1);
@@ -62,16 +63,16 @@ export async function createCanvas(projectId: string, title: string, elements?: 
       title,
       elements: defaultElements,
       appState: defaultAppState,
-      files: {},
+      files: files || {},
       version: 1,
-      createdBy: userId,
+      createdBy: currentUserId,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
-    await db.insert(canvases).values(newCanvas);
+    const [createdCanvas] = await db.insert(canvases).values(newCanvas).returning();
 
-    return { success: true, canvasId };
+    return createdCanvas;
   } catch (error) {
     console.error('Error creating canvas:', error);
     throw new Error('Failed to create canvas');

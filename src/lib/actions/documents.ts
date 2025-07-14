@@ -166,7 +166,7 @@ export async function getDocument(documentId: string, userId: string) {
   }
 }
 
-export async function updateDocument(documentId: string, content: any, title?: string, userId?: string) {
+export async function updateDocument(documentId: string, updateData: { title?: string; contentText?: string; content?: any }, userId?: string) {
   const { userId: authUserId } = await auth();
   const currentUserId = userId || authUserId;
   
@@ -206,26 +206,32 @@ export async function updateDocument(documentId: string, content: any, title?: s
       throw new Error('Insufficient permissions');
     }
 
-    // Extract text content for search
-    const contentText = extractTextFromContent(content);
-
     const updates: any = {
-      content,
-      contentText,
       version: docData.version + 1,
       updatedAt: new Date().toISOString(),
     };
 
-    if (title) {
-      updates.title = title;
+    if (updateData.title !== undefined) {
+      updates.title = updateData.title;
     }
 
-    await db
+    if (updateData.contentText !== undefined) {
+      updates.contentText = updateData.contentText;
+    }
+
+    if (updateData.content !== undefined) {
+      updates.content = updateData.content;
+      // Extract text content for search if content is provided
+      updates.contentText = extractTextFromContent(updateData.content);
+    }
+
+    const [updatedDoc] = await db
       .update(documents)
       .set(updates)
-      .where(eq(documents.id, documentId));
+      .where(eq(documents.id, documentId))
+      .returning();
 
-    return { success: true };
+    return updatedDoc;
   } catch (error) {
     console.error('Error updating document:', error);
     throw new Error('Failed to update document');

@@ -5,14 +5,14 @@ import { useUser } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, FileText, Folder, Search } from 'lucide-react';
-import { getDocuments, createDocument, updateDocument } from '@/lib/actions/documents';
+import { Plus, FileText, Folder, Search, Save } from 'lucide-react';
 import { useDebounce } from '@/hooks/use-debounce';
+import useSWR, { mutate } from 'swr';
 
 interface Document {
   id: string;
   title: string;
-  content: string;
+  contentText: string;
   type: 'document';
   createdAt: string;
   updatedAt: string;
@@ -22,193 +22,234 @@ interface DocumentPanelProps {
   projectId: string;
 }
 
+const fetcher = async (url: string) => {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Failed to fetch');
+  return res.json();
+};
+
 export function DocumentPanel({ projectId }: DocumentPanelProps) {
   const { user } = useUser();
-  const [documents, setDocuments] = useState<Document[]>([]);
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [localTitle, setLocalTitle] = useState('');
+  const [localContent, setLocalContent] = useState('');
+
+  // Fetch documents with SWR
+  const { data: documents = [], error, isLoading } = useSWR(
+    user?.id ? `/api/projects/${projectId}/documents` : null,
+    fetcher
+  );
 
   // Debounce document updates
-  const debouncedTitle = useDebounce(selectedDoc?.title || '', 1000);
-  const debouncedContent = useDebounce(selectedDoc?.content || '', 2000);
+  const debouncedTitle = useDebounce(localTitle, 1000);
+  const debouncedContent = useDebounce(localContent, 2000);
 
-  // Load documents from backend
+  // Initialize local state when document is selected
   useEffect(() => {
-    const loadDocuments = async () => {
-      if (!user?.id) return;
-      
-      try {
-        setLoading(true);
-        const docsData = await getDocuments(projectId, user.id);
-        const transformedDocs: Document[] = docsData.map(doc => ({
-          id: doc.id,
-          title: doc.title,
-          content: doc.contentText || '',
-          type: 'document' as const,
-          createdAt: doc.createdAt,
-          updatedAt: doc.updatedAt,
-        }));
-        setDocuments(transformedDocs);
-        if (transformedDocs.length > 0 && !selectedDoc) {
-          setSelectedDoc(transformedDocs[0]);
-        }
-      } catch (error) {
-        console.error('Failed to load documents:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    loadDocuments();
-  }, [projectId, user?.id]);
+    if (selectedDoc) {
+      setLocalTitle(selectedDoc.title);
+      setLocalContent(selectedDoc.contentText || '');
+    }
+  }, [selectedDoc]);
 
   // Auto-save document changes
   useEffect(() => {
-    if (selectedDoc && (debouncedTitle || debouncedContent)) {
-      const saveDocument = async () => {
-        try {
-          setSaving(true);
-          await updateDocument(selectedDoc.id, selectedDoc.content, selectedDoc.title);
-        } catch (error) {
-          console.error('Failed to save document:', error);
-        } finally {
-          setSaving(false);
-        }
-      };
-      
-      saveDocument();
-    }
-  }, [debouncedTitle, debouncedContent, selectedDoc]);
+    if (!selectedDoc || !user?.id) return;
+    if (debouncedTitle === selectedDoc.title && debouncedContent === selectedDoc.contentText) return;
+    
+    const saveDocument = async () => {
+      try {
+        setSaving(true);
+        const response = await fetch(`/api/documents/${selectedDoc.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: debouncedTitle,
+            contentText: debouncedContent,
+          }),
+        });
 
-  const filteredDocs = documents.filter(doc => 
-    doc.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+        if (!response.ok) throw new Error('Failed to save');
 
-  const handleCreateDocument = async () => {
+        // Update the cache
+        mutate(`/api/projects/${projectId}/documents`);
+        
+      } catch (error) {
+        console.error('Failed to save document:', error);
+      } finally {
+        setSaving(false);
+      }
+    };
+    
+    saveDocument();
+  }, [debouncedTitle, debouncedContent, selectedDoc, user?.id, projectId]);
+
+  const createNewDocument = async () => {
+    if (!user?.id) return;
+    
     try {
-      const newDoc = await createDocument(projectId, 'New Document');
-      const transformedDoc: Document = {
-        id: newDoc.id,
-        title: newDoc.title,
-        content: newDoc.contentText || '',
-        type: 'document',
-        createdAt: newDoc.createdAt,
-        updatedAt: newDoc.updatedAt,
-      };
-      setDocuments(prev => [transformedDoc, ...prev]);
-      setSelectedDoc(transformedDoc);
+      const response = await fetch(`/api/projects/${projectId}/documents`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'New Document',
+          contentText: '',
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to create document');
+
+      const newDoc = await response.json();
+      
+      // Update the cache
+      mutate(`/api/projects/${projectId}/documents`);
+      
+      // Select the new document
+      setSelectedDoc(newDoc);
     } catch (error) {
       console.error('Failed to create document:', error);
     }
   };
 
-  return (
-    <div className="h-full flex flex-col">
-      {/* Document Panel Header */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold text-gray-900">Documents</h2>
-          <Button size="sm" onClick={handleCreateDocument} className="gap-2">
-            <Plus className="w-4 h-4" />
-            New Doc
-          </Button>
-        </div>
-        
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <Input
-            placeholder="Search documents..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-      </div>
+  const filteredDocuments = documents.filter((doc: Document) =>
+    doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (doc.contentText && doc.contentText.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
+  if (error) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <p className="text-red-500">Failed to load documents</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-full flex">
       {/* Document List */}
-      <div className="flex-1 flex">
-        {/* Sidebar with document list */}
-        <div className="w-1/3 border-r border-gray-200 bg-gray-50">
-          <div className="p-2">
-            {loading ? (
-              <div className="p-3 text-center text-gray-500">Loading documents...</div>
-            ) : filteredDocs.length === 0 ? (
-              <div className="p-3 text-center text-gray-500">
-                <FileText className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                <p className="text-sm">No documents yet</p>
-                <p className="text-xs">Create your first document</p>
-              </div>
-            ) : (
-              filteredDocs.map((doc) => (
-                <div
-                  key={doc.id}
-                  onClick={() => setSelectedDoc(doc)}
-                  className={`p-3 rounded-lg cursor-pointer mb-1 flex items-center gap-2 ${
-                    selectedDoc?.id === doc.id 
-                      ? 'bg-blue-100 border border-blue-200' 
-                      : 'hover:bg-gray-100'
-                  }`}
-                >
-                  <FileText className="w-4 h-4 text-gray-500" />
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm truncate">{doc.title}</div>
-                    <div className="text-xs text-gray-500 truncate">
-                      {doc.content.substring(0, 30)}...
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
+      <div className="w-80 border-r border-gray-200 flex flex-col bg-gray-50">
+        {/* Header */}
+        <div className="p-4 border-b border-gray-200 bg-white">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+              <Folder className="w-4 h-4" />
+              Documents
+            </h2>
+            <Button
+              onClick={createNewDocument}
+              size="sm"
+              className="gap-1"
+            >
+              <Plus className="w-4 h-4" />
+              New
+            </Button>
+          </div>
+          
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              placeholder="Search documents..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
           </div>
         </div>
 
-        {/* Document Editor */}
-        <div className="flex-1 p-4">
-          {selectedDoc ? (
-            <div className="h-full flex flex-col">
-              <div className="flex items-center justify-between mb-4">
-                <Input
-                  value={selectedDoc.title}
-                  onChange={(e) => {
-                    const updatedDocs = documents.map(doc =>
-                      doc.id === selectedDoc.id ? { ...doc, title: e.target.value } : doc
-                    );
-                    setDocuments(updatedDocs);
-                    setSelectedDoc({ ...selectedDoc, title: e.target.value });
-                  }}
-                  className="font-semibold text-lg border-none shadow-none p-0 flex-1"
-                  placeholder="Document title..."
-                />
-                {saving && (
-                  <div className="text-xs text-gray-500 ml-2">Saving...</div>
-                )}
-              </div>
-              
-              <Textarea
-                value={selectedDoc.content}
-                onChange={(e) => {
-                  const updatedDocs = documents.map(doc =>
-                    doc.id === selectedDoc.id ? { ...doc, content: e.target.value } : doc
-                  );
-                  setDocuments(updatedDocs);
-                  setSelectedDoc({ ...selectedDoc, content: e.target.value });
-                }}
-                className="flex-1 resize-none border-none shadow-none p-0"
-                placeholder="Start writing your document..."
-              />
+        {/* Document List */}
+        <div className="flex-1 overflow-y-auto">
+          {isLoading ? (
+            <div className="p-4 text-center text-gray-500">
+              Loading documents...
+            </div>
+          ) : filteredDocuments.length === 0 ? (
+            <div className="p-4 text-center text-gray-500">
+              {searchTerm ? 'No documents found' : 'No documents yet'}
             </div>
           ) : (
-            <div className="h-full flex items-center justify-center text-gray-500">
-              <div className="text-center">
-                <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                <p>Select a document to edit</p>
-              </div>
+            <div className="p-2">
+              {filteredDocuments.map((doc: Document) => (
+                <button
+                  key={doc.id}
+                  onClick={() => setSelectedDoc(doc)}
+                  className={`w-full text-left p-3 rounded-lg mb-2 transition-colors ${
+                    selectedDoc?.id === doc.id
+                      ? 'bg-blue-100 border border-blue-200'
+                      : 'bg-white hover:bg-gray-50 border border-gray-200'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <FileText className="w-4 h-4 text-blue-600 mt-1 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-gray-900 truncate">
+                        {doc.title}
+                      </h3>
+                      <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+                        {doc.contentText || 'No content'}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-2">
+                        {new Date(doc.updatedAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              ))}
             </div>
           )}
         </div>
+      </div>
+
+      {/* Document Editor */}
+      <div className="flex-1 flex flex-col bg-white">
+        {selectedDoc ? (
+          <>
+            {/* Editor Header */}
+            <div className="p-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <Input
+                  value={localTitle}
+                  onChange={(e) => setLocalTitle(e.target.value)}
+                  className="text-xl font-semibold border-none shadow-none p-0 h-auto bg-transparent"
+                  placeholder="Document title..."
+                />
+                {saving && (
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <Save className="w-4 h-4 animate-spin" />
+                    Saving...
+                  </div>
+                )}
+              </div>
+              <p className="text-sm text-gray-500 mt-2">
+                Last updated: {new Date(selectedDoc.updatedAt).toLocaleDateString()}
+              </p>
+            </div>
+
+            {/* Editor Content */}
+            <div className="flex-1 p-4">
+              <Textarea
+                value={localContent}
+                onChange={(e) => setLocalContent(e.target.value)}
+                placeholder="Start writing your document..."
+                className="w-full h-full resize-none border-none shadow-none bg-transparent text-gray-900 leading-relaxed"
+              />
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No document selected
+              </h3>
+              <p className="text-gray-500">
+                Select a document from the list or create a new one
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

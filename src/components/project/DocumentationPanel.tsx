@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
@@ -14,183 +14,149 @@ import {
   X,
   Maximize2
 } from 'lucide-react';
-import { getDocuments, createDocument } from '@/lib/actions/documents';
-import { getCanvases, createCanvas } from '@/lib/actions/canvases';
+import { formatDistanceToNow } from 'date-fns';
+import useSWR, { mutate } from 'swr';
 
 interface Document {
   id: string;
   title: string;
-  content: string;
+  contentText: string;
   type: 'document';
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface Canvas {
   id: string;
   title: string;
-  type: 'canvas';
   elements: any[];
-  createdAt: Date;
-  updatedAt: Date;
-  thumbnail?: string;
+  type: 'canvas';
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface DocumentationPanelProps {
   projectId: string;
-  onSplitView: (itemId: string, itemType: 'document' | 'canvas') => void;
-  onFullScreen: (itemId: string, itemType: 'document' | 'canvas') => void;
-  onClosePanel: () => void;
+  projectName: string;
 }
 
-export function DocumentationPanel({
-  projectId,
-  onSplitView,
-  onFullScreen,
-  onClosePanel,
-}: DocumentationPanelProps) {
+const fetcher = async (url: string) => {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Failed to fetch');
+  return res.json();
+};
+
+export function DocumentationPanel({ projectId, projectName }: DocumentationPanelProps) {
   const router = useRouter();
   const { user } = useUser();
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [canvases, setCanvases] = useState<Canvas[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedItem, setSelectedItem] = useState<Document | Canvas | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  // Load documents and canvases from backend
-  useEffect(() => {
-    const loadData = async () => {
-      if (!user?.id) return;
-      
-      try {
-        setLoading(true);
-        const [docsData, canvasData] = await Promise.all([
-          getDocuments(projectId, user.id),
-          getCanvases(projectId, user.id)
-        ]);
-        
-        // Transform backend data to component format
-        const transformedDocs: Document[] = docsData.map(doc => ({
-          id: doc.id,
-          title: doc.title,
-          content: doc.contentText || '',
-          type: 'document' as const,
-          createdAt: new Date(doc.createdAt),
-          updatedAt: new Date(doc.updatedAt),
-        }));
-        
-        const transformedCanvases: Canvas[] = canvasData.map(canvas => ({
-          id: canvas.id,
-          title: canvas.title,
-          type: 'canvas' as const,
-          elements: canvas.elements || [],
-          createdAt: new Date(canvas.createdAt),
-          updatedAt: new Date(canvas.updatedAt),
-        }));
-        
-        setDocuments(transformedDocs);
-        setCanvases(transformedCanvases);
-      } catch (error) {
-        console.error('Failed to load project data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Fetch documents and canvases with SWR
+  const { data: documents = [], error: docsError } = useSWR(
+    user?.id ? `/api/projects/${projectId}/documents` : null,
+    fetcher
+  );
+
+  const { data: canvases = [], error: canvasError } = useSWR(
+    user?.id ? `/api/projects/${projectId}/canvases` : null,
+    fetcher
+  );
+
+  const createNewDocument = async () => {
+    if (!user?.id) return;
     
-    loadData();
-  }, [projectId, user?.id]);
-
-  // Filter items based on search
-  const filteredDocuments = documents.filter(doc =>
-    doc.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const filteredCanvases = canvases.filter(canvas =>
-    canvas.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleCreateDocument = async () => {
     try {
-      const newDoc = await createDocument(projectId, 'New Document');
-      const transformedDoc: Document = {
-        id: newDoc.id,
-        title: newDoc.title,
-        content: newDoc.contentText || '',
-        type: 'document',
-        createdAt: new Date(newDoc.createdAt),
-        updatedAt: new Date(newDoc.updatedAt),
-      };
-      setDocuments(prev => [transformedDoc, ...prev]);
-      // Navigate to new document in full screen
-      onFullScreen(newDoc.id, 'document');
+      const response = await fetch(`/api/projects/${projectId}/documents`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'New Document',
+          contentText: '',
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to create document');
+
+      const newDoc = await response.json();
+      
+      // Update the cache
+      mutate(`/api/projects/${projectId}/documents`);
+      
+      // Navigate to the new document
+      router.push(`/project/${projectId}/document/${newDoc.id}`);
     } catch (error) {
       console.error('Failed to create document:', error);
     }
   };
 
-  const handleCreateCanvas = async () => {
+  const createNewCanvas = async () => {
+    if (!user?.id) return;
+    
     try {
-      const newCanvas = await createCanvas(projectId, 'New Canvas');
-      const transformedCanvas: Canvas = {
-        id: newCanvas.id,
-        title: newCanvas.title,
-        type: 'canvas',
-        elements: newCanvas.elements || [],
-        createdAt: new Date(newCanvas.createdAt),
-        updatedAt: new Date(newCanvas.updatedAt),
-      };
-      setCanvases(prev => [transformedCanvas, ...prev]);
-      // Navigate to new canvas in full screen
-      onFullScreen(newCanvas.id, 'canvas');
+      const response = await fetch(`/api/projects/${projectId}/canvases`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'New Canvas',
+          elements: [],
+          appState: {},
+          files: {},
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to create canvas');
+
+      const newCanvas = await response.json();
+      
+      // Update the cache
+      mutate(`/api/projects/${projectId}/canvases`);
+      
+      // Navigate to the new canvas
+      router.push(`/project/${projectId}/canvas/${newCanvas.id}`);
     } catch (error) {
       console.error('Failed to create canvas:', error);
     }
   };
 
-  const handleSplitView = (item: Document | Canvas) => {
-    const itemType = item.type;
-    const route = `/project/${projectId}/split?left=${item.id}&leftType=${itemType}&right=${projectId}&rightType=canvas`;
-    router.push(route);
-  };
+  // Combine and filter items
+  const allItems = [
+    ...documents.map((doc: Document) => ({ ...doc, type: 'document' as const })),
+    ...canvases.map((canvas: Canvas) => ({ ...canvas, type: 'canvas' as const }))
+  ];
 
-  const handleFullScreen = (item: Document | Canvas) => {
-    if (item.type === 'document') {
-      router.push(`/project/${projectId}/document/${item.id}`);
-    } else {
-      router.push(`/project/${projectId}/canvas/${item.id}`);
-    }
-  };
+  const filteredItems = allItems.filter(item =>
+    item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (item.type === 'document' && item.contentText?.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
-  const handleItemClick = (item: Document | Canvas) => {
-    setSelectedItem(item);
-  };
+  const isLoading = !documents && !canvases && !docsError && !canvasError;
 
   return (
     <div className="h-full flex flex-col bg-white">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
-        <h2 className="font-semibold text-gray-900">Documents & Canvas</h2>
-        <div className="flex items-center gap-2">
-          <Button size="sm" onClick={handleCreateDocument} className="gap-2">
-            <Plus className="w-4 h-4" />
-            New Doc
-          </Button>
-          <Button size="sm" variant="outline" onClick={handleCreateCanvas} className="gap-2">
-            <CanvasIcon className="w-4 h-4" />
-            New Canvas
-          </Button>
-          <Button variant="ghost" size="sm" onClick={onClosePanel}>
-            <X className="w-4 h-4" />
-          </Button>
+      <div className="p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">{projectName}</h1>
+            <p className="text-gray-500 mt-1">Project documentation and canvases</p>
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={createNewDocument} className="gap-2">
+              <Plus className="w-4 h-4" />
+              New Document
+            </Button>
+            <Button onClick={createNewCanvas} variant="outline" className="gap-2">
+              <Plus className="w-4 h-4" />
+              New Canvas
+            </Button>
+          </div>
         </div>
-      </div>
 
-      {/* Search */}
-      <div className="p-4 border-b border-gray-200">
+        {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <Input
-            placeholder="Search documents and canvas..."
+            placeholder="Search documents and canvases..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -199,117 +165,130 @@ export function DocumentationPanel({
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex">
-        {/* Items List */}
-        <div className="w-1/2 border-r border-gray-200 overflow-y-auto">
-          {/* Documents Section */}
-          {filteredDocuments.length > 0 && (
-            <div className="p-3">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Documents</h3>
-              {filteredDocuments.map((doc) => (
-                <div
-                  key={doc.id}
-                  onClick={() => handleItemClick(doc)}
-                  className={`p-3 rounded-lg cursor-pointer mb-2 border ${
-                    selectedItem?.id === doc.id 
-                      ? 'bg-blue-50 border-blue-200' 
-                      : 'hover:bg-gray-50 border-gray-200'
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <FileText className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm truncate">{doc.title}</div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {new Date(doc.updatedAt).toLocaleDateString()}
+      <div className="flex-1 overflow-y-auto p-6">
+        {isLoading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-500">Loading content...</p>
+          </div>
+        ) : filteredItems.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FileText className="w-8 h-8 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              {searchTerm ? 'No results found' : 'No content yet'}
+            </h3>
+            <p className="text-gray-500 mb-6">
+              {searchTerm 
+                ? 'Try adjusting your search terms'
+                : 'Create your first document or canvas to get started'
+              }
+            </p>
+            {!searchTerm && (
+              <div className="flex gap-3 justify-center">
+                <Button onClick={createNewDocument} className="gap-2">
+                  <Plus className="w-4 h-4" />
+                  Create Document
+                </Button>
+                <Button onClick={createNewCanvas} variant="outline" className="gap-2">
+                  <Plus className="w-4 h-4" />
+                  Create Canvas
+                </Button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredItems.map((item) => (
+              <div
+                key={item.id}
+                className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow cursor-pointer group"
+                onClick={() => {
+                  if (item.type === 'document') {
+                    router.push(`/project/${projectId}/document/${item.id}`);
+                  } else {
+                    router.push(`/project/${projectId}/canvas/${item.id}`);
+                  }
+                }}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    {item.type === 'document' ? (
+                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <FileText className="w-5 h-5 text-blue-600" />
                       </div>
+                    ) : (
+                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <CanvasIcon className="w-5 h-5 text-purple-600" />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                        {item.title}
+                      </h3>
+                      <p className="text-sm text-gray-500 capitalize">
+                        {item.type}
+                      </p>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Canvas Section */}
-          {filteredCanvases.length > 0 && (
-            <div className="p-3">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Canvas</h3>
-              {filteredCanvases.map((canvas) => (
-                <div
-                  key={canvas.id}
-                  onClick={() => handleItemClick(canvas)}
-                  className={`p-3 rounded-lg cursor-pointer mb-2 border ${
-                    selectedItem?.id === canvas.id 
-                      ? 'bg-blue-50 border-blue-200' 
-                      : 'hover:bg-gray-50 border-gray-200'
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <CanvasIcon className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm truncate">{canvas.title}</div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {new Date(canvas.updatedAt).toLocaleDateString()}
-                      </div>
-                    </div>
+                  
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (item.type === 'document') {
+                          router.push(`/project/${projectId}/document/${item.id}`);
+                        } else {
+                          router.push(`/project/${projectId}/canvas/${item.id}`);
+                        }
+                      }}
+                    >
+                      <Maximize2 className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const leftId = item.id;
+                        const leftType = item.type;
+                        const rightId = projectId;
+                        const rightType = item.type === 'document' ? 'canvas' : 'document';
+                        router.push(`/project/${projectId}/split?left=${leftId}&leftType=${leftType}&right=${rightId}&rightType=${rightType}`);
+                      }}
+                    >
+                      <SplitSquareHorizontal className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
 
-        {/* Preview & Actions */}
-        <div className="flex-1 flex flex-col">
-          {selectedItem ? (
-            <>
-              {/* Preview */}
-              <div className="flex-1 p-4">
-                <h3 className="font-semibold text-lg mb-2">{selectedItem.title}</h3>
-                {selectedItem.type === 'document' ? (
-                  <div className="text-sm text-gray-600 leading-relaxed">
-                    {(selectedItem as Document).content.substring(0, 200)}...
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center h-32 bg-gray-100 rounded-lg">
-                    <CanvasIcon className="w-8 h-8 text-gray-400" />
-                    <span className="ml-2 text-gray-500">Canvas Preview</span>
-                  </div>
-                )}
-              </div>
+                <div className="mb-4">
+                  {item.type === 'document' ? (
+                    <p className="text-sm text-gray-600 line-clamp-3">
+                      {item.contentText || 'No content'}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-gray-600">
+                      {item.elements?.length || 0} elements
+                    </p>
+                  )}
+                </div>
 
-              {/* Actions */}
-              <div className="p-4 border-t border-gray-200 bg-gray-50">
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => handleSplitView(selectedItem)}
-                    className="flex-1 gap-2"
-                  >
-                    <SplitSquareHorizontal className="w-4 h-4" />
-                    Split View
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleFullScreen(selectedItem)}
-                    className="flex-1 gap-2"
-                  >
-                    <Maximize2 className="w-4 h-4" />
-                    Full Screen
-                  </Button>
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                  <span>
+                    Updated {formatDistanceToNow(new Date(item.updatedAt), { addSuffix: true })}
+                  </span>
+                  <span className="capitalize">
+                    {item.type}
+                  </span>
                 </div>
               </div>
-            </>
-          ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-500">
-              <div className="text-center">
-                <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                <p>Select an item to preview</p>
-              </div>
-            </div>
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

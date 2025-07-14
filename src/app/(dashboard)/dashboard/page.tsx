@@ -9,13 +9,31 @@ import {
   FolderOpen, 
   Clock, 
   Users,
-  Search,
-  MoreHorizontal
+  Search
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from "@/components/ui/alert-dialog";
 import Link from "next/link";
-import { getProjects, getProjectStats } from '@/lib/actions/projects';
+import { getProjects, getProjectStats, deleteProject } from '@/lib/actions/projects';
 import { formatDistanceToNow } from 'date-fns';
+import { ProjectDropdown } from '@/components/dashboard/ProjectDropdown';
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -33,6 +51,7 @@ export default async function DashboardPage() {
     getProjects(userId),
     getProjectStats(userId)
   ]);
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -150,7 +169,7 @@ export default async function DashboardPage() {
                         <div className="text-xs text-gray-500">
                           {project.viewCount} views
                         </div>
-                        <MoreHorizontal className="w-4 h-4 text-gray-400" />
+                        <ProjectDropdown project={project} />
                       </div>
                     </div>
                   </Link>
@@ -179,3 +198,4 @@ export default async function DashboardPage() {
     </div>
   );
 }
+
