@@ -27,7 +27,8 @@
 		{
 			"binding": "DB",
 			"database_name": "sketchflow-db",
-			"database_id": "b7ede466-f980-4c06-b42f-1222ec087d71"
+			"database_id": "b7ede466-f980-4c06-b42f-1222ec087d71",
+			"preview_database_id": "DB"
 		}
 	],
 	
@@ -38,7 +39,6 @@
 		}
 	],
 	
-	"migrations_dir": "./src/lib/db/migrations",
 	
 	/**
 	 * Smart Placement

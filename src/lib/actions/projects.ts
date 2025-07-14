@@ -17,6 +17,10 @@ export async function createProject(formData: FormData) {
   try {
     const db = getDb();
     
+    // Ensure user exists in database first
+    const { createOrUpdateUser } = await import('./auth');
+    await createOrUpdateUser();
+    
     // Extract form data
     const name = formData.get('name') as string;
     const description = formData.get('description') as string;
@@ -62,12 +66,20 @@ export async function createProject(formData: FormData) {
     redirect(`/project/${projectId}`);
   } catch (error) {
     console.error('Error creating project:', error);
+    // Don't throw error if it's a redirect
+    if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
+      throw error; // Re-throw redirect errors
+    }
     throw new Error('Failed to create project');
   }
 }
 
 export async function getProjects(userId: string) {
   try {
+    // Ensure user exists in database first
+    const { createOrUpdateUser } = await import('./auth');
+    await createOrUpdateUser();
+    
     const db = getDb();
     
     // Get projects where user is owner or collaborator
@@ -144,6 +156,10 @@ export async function getProject(projectId: string, userId: string) {
 
 export async function getProjectStats(userId: string) {
   try {
+    // Ensure user exists in database first
+    const { createOrUpdateUser } = await import('./auth');
+    await createOrUpdateUser();
+    
     const db = getDb();
     
     // Get total projects count

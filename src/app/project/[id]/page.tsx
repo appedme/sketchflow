@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
-import { redirect } from 'next/navigation';
+import { redirect, notFound } from 'next/navigation';
 import { ProjectWorkspace } from '@/components/project/ProjectWorkspace';
+import { getProject } from '@/lib/actions/projects';
 
 interface ProjectPageProps {
   params: Promise<{
@@ -17,20 +18,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   const { id } = await params;
 
-  // Mock project data - in real app, fetch from database
-  const project = {
-    id,
-    name: "System Architecture Diagram",
-    description: "Main system architecture for the new platform",
-    category: "Technical",
-    visibility: "Team",
-    lastModified: "2 minutes ago",
-    collaborators: [
-      { name: "John Doe", avatar: "JD", color: "#3b82f6" },
-      { name: "Jane Smith", avatar: "JS", color: "#ef4444" },
-      { name: "Mike Johnson", avatar: "MJ", color: "#10b981" },
-    ]
-  };
+  // Fetch real project data from database
+  const project = await getProject(id, userId);
+  
+  if (!project) {
+    notFound();
+  }
 
   return (
     <ProjectWorkspace

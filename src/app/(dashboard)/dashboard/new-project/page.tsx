@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { createProject } from "./actions";
+import { createProject } from "@/lib/actions/projects";
 import { NewProjectForm } from "@/components/dashboard/NewProjectForm";
 
 export default async function NewProjectPage() {

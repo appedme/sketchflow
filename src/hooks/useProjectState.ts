@@ -25,19 +25,38 @@ export function useProjectState(projectId: string, excalidrawAPI: ExcalidrawImpe
   const [zenModeEnabled, setZenModeEnabled] = useState(false);
   const [gridModeEnabled, setGridModeEnabled] = useState(true);
 
-  // Load from storage on mount
+  // Load from database on mount
   useEffect(() => {
-    const savedData = localStorage.getItem(`excalidraw-${projectId}`);
-    if (savedData) {
+    const loadCanvasData = async () => {
       try {
-        const parsed = JSON.parse(savedData);
-        setElements(parsed.elements || []);
-        setAppState(prev => ({ ...prev, ...parsed.appState }));
-        setTheme(parsed.appState?.theme || "light");
+        // Try to load from server first
+        const response = await fetch(`/api/canvas/${projectId}`);
+        if (response.ok) {
+          const canvasData = await response.json();
+          setElements(canvasData.elements || []);
+          setAppState(prev => ({ ...prev, ...canvasData.appState }));
+          setTheme(canvasData.appState?.theme || "light");
+          return;
+        }
       } catch (error) {
-        console.error("Failed to load saved canvas:", error);
+        console.error("Failed to load canvas from server:", error);
       }
-    }
+      
+      // Fallback to localStorage
+      const savedData = localStorage.getItem(`excalidraw-${projectId}`);
+      if (savedData) {
+        try {
+          const parsed = JSON.parse(savedData);
+          setElements(parsed.elements || []);
+          setAppState(prev => ({ ...prev, ...parsed.appState }));
+          setTheme(parsed.appState?.theme || "light");
+        } catch (error) {
+          console.error("Failed to load saved canvas:", error);
+        }
+      }
+    };
+    
+    loadCanvasData();
   }, [projectId]);
 
   const toggleTheme = useCallback(() => {

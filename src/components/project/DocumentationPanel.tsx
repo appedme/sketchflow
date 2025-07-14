@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useUser } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -13,6 +14,8 @@ import {
   X,
   Maximize2
 } from 'lucide-react';
+import { getDocuments, createDocument } from '@/lib/actions/documents';
+import { getCanvases, createCanvas } from '@/lib/actions/canvases';
 
 interface Document {
   id: string;
@@ -47,54 +50,55 @@ export function DocumentationPanel({
   onClosePanel,
 }: DocumentationPanelProps) {
   const router = useRouter();
-  const [documents, setDocuments] = useState<Document[]>([
-    {
-      id: '1',
-      title: 'Project Overview',
-      content: 'This is the main project document with detailed information about the project scope, objectives, and requirements.',
-      type: 'document',
-      createdAt: new Date('2024-01-15'),
-      updatedAt: new Date('2024-01-20'),
-    },
-    {
-      id: '2',
-      title: 'Technical Requirements',
-      content: 'Detailed technical specifications and requirements for the project implementation.',
-      type: 'document',
-      createdAt: new Date('2024-01-16'),
-      updatedAt: new Date('2024-01-18'),
-    },
-    {
-      id: '3',
-      title: 'Meeting Notes',
-      content: 'Notes from project meetings and discussions with stakeholders.',
-      type: 'document',
-      createdAt: new Date('2024-01-17'),
-      updatedAt: new Date('2024-01-19'),
-    },
-  ]);
-
-  const [canvases, setCanvases] = useState<Canvas[]>([
-    {
-      id: 'canvas-1',
-      title: 'System Architecture',
-      type: 'canvas',
-      elements: [],
-      createdAt: new Date('2024-01-15'),
-      updatedAt: new Date('2024-01-20'),
-    },
-    {
-      id: 'canvas-2',
-      title: 'User Flow Diagram',
-      type: 'canvas',
-      elements: [],
-      createdAt: new Date('2024-01-16'),
-      updatedAt: new Date('2024-01-18'),
-    },
-  ]);
-
+  const { user } = useUser();
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [canvases, setCanvases] = useState<Canvas[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedItem, setSelectedItem] = useState<Document | Canvas | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Load documents and canvases from backend
+  useEffect(() => {
+    const loadData = async () => {
+      if (!user?.id) return;
+      
+      try {
+        setLoading(true);
+        const [docsData, canvasData] = await Promise.all([
+          getDocuments(projectId, user.id),
+          getCanvases(projectId, user.id)
+        ]);
+        
+        // Transform backend data to component format
+        const transformedDocs: Document[] = docsData.map(doc => ({
+          id: doc.id,
+          title: doc.title,
+          content: doc.contentText || '',
+          type: 'document' as const,
+          createdAt: new Date(doc.createdAt),
+          updatedAt: new Date(doc.updatedAt),
+        }));
+        
+        const transformedCanvases: Canvas[] = canvasData.map(canvas => ({
+          id: canvas.id,
+          title: canvas.title,
+          type: 'canvas' as const,
+          elements: canvas.elements || [],
+          createdAt: new Date(canvas.createdAt),
+          updatedAt: new Date(canvas.updatedAt),
+        }));
+        
+        setDocuments(transformedDocs);
+        setCanvases(transformedCanvases);
+      } catch (error) {
+        console.error('Failed to load project data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadData();
+  }, [projectId, user?.id]);
 
   // Filter items based on search
   const filteredDocuments = documents.filter(doc =>
@@ -105,18 +109,23 @@ export function DocumentationPanel({
     canvas.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleCreateDocument = () => {
-    const newDoc: Document = {
-      id: `doc-${Date.now()}`,
-      title: 'New Document',
-      content: 'Start writing your document...',
-      type: 'document',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    setDocuments(prev => [newDoc, ...prev]);
-    // Navigate to new document in full screen
-    router.push(`/project/${projectId}/document/${newDoc.id}`);
+  const handleCreateDocument = async () => {
+    try {
+      const newDoc = await createDocument(projectId, 'New Document');
+      const transformedDoc: Document = {
+        id: newDoc.id,
+        title: newDoc.title,
+        content: newDoc.contentText || '',
+        type: 'document',
+        createdAt: new Date(newDoc.createdAt),
+        updatedAt: new Date(newDoc.updatedAt),
+      };
+      setDocuments(prev => [transformedDoc, ...prev]);
+      // Navigate to new document in full screen
+      router.push(`/project/${projectId}/document/${newDoc.id}`);
+    } catch (error) {
+      console.error('Failed to create document:', error);
+    }
   };
 
   const handleSplitView = (item: Document | Canvas) => {

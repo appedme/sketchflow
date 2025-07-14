@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { updateCanvas } from '@/lib/actions/canvases';
 
 export function useAutoSave(
   projectId: string,
+  canvasId: string,
   elements: unknown[],
   appState: Record<string, unknown>
 ) {
@@ -16,17 +18,11 @@ export function useAutoSave(
     
     setIsSaving(true);
     try {
-      // Save to localStorage (in a real app, this would be an API call)
-      const data = {
+      // Save to database via server action
+      await updateCanvas(canvasId, {
         elements,
-        appState,
-        timestamp: Date.now()
-      };
-      
-      localStorage.setItem(`excalidraw-${projectId}`, JSON.stringify(data));
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+        appState
+      });
       
       const now = new Date();
       const timeString = now.toLocaleTimeString([], { 
@@ -35,13 +31,20 @@ export function useAutoSave(
       });
       setLastSaved(timeString);
       
-      console.log("Project saved successfully");
+      console.log("Canvas saved successfully");
     } catch (error) {
-      console.error("Failed to save project:", error);
+      console.error("Failed to save canvas:", error);
+      // Fallback to localStorage on error
+      const data = {
+        elements,
+        appState,
+        timestamp: Date.now()
+      };
+      localStorage.setItem(`excalidraw-${projectId}`, JSON.stringify(data));
     } finally {
       setIsSaving(false);
     }
-  }, [projectId, elements, appState, isSaving]);
+  }, [canvasId, elements, appState, isSaving]);
 
   // Auto-save when elements or appState change
   useEffect(() => {

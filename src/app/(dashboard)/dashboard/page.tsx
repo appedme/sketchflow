@@ -1,4 +1,5 @@
-import { currentUser } from '@clerk/nextjs/server';
+import { currentUser, auth } from '@clerk/nextjs/server';
+import { redirect } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,37 +14,25 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-
-// Mock data for recent projects
-const recentProjects = [
-  {
-    id: "1",
-    name: "System Architecture Diagram",
-    description: "Main system architecture for the new platform",
-    category: "Technical",
-    lastModified: "2 hours ago",
-    collaborators: ["JD", "JS"],
-  },
-  {
-    id: "2", 
-    name: "User Journey Map",
-    description: "Customer experience mapping for mobile app",
-    category: "UX Design",
-    lastModified: "1 day ago",
-    collaborators: ["MJ"],
-  },
-  {
-    id: "3",
-    name: "Database Schema",
-    description: "Complete database structure and relationships",
-    category: "Technical", 
-    lastModified: "3 days ago",
-    collaborators: ["SW", "TB", "LD"],
-  }
-];
+import { getProjects, getProjectStats } from '@/lib/actions/projects';
+import { formatDistanceToNow } from 'date-fns';
 
 export default async function DashboardPage() {
+  const { userId } = await auth();
   const user = await currentUser();
+  
+  if (!userId) {
+    redirect('/sign-in');
+  }
+
+  // Ensure user exists in database and fetch user's projects and stats
+  const { createOrUpdateUser } = await import('@/lib/actions/auth');
+  await createOrUpdateUser();
+  
+  const [projects, stats] = await Promise.all([
+    getProjects(userId),
+    getProjectStats(userId)
+  ]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -131,9 +120,9 @@ export default async function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent>
-            {recentProjects.length > 0 ? (
+            {projects.length > 0 ? (
               <div className="space-y-4">
-                {recentProjects.map((project) => (
+                {projects.map((project) => (
                   <Link key={project.id} href={`/project/${project.id}`}>
                     <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
                       <div className="flex items-center gap-4">
@@ -142,28 +131,24 @@ export default async function DashboardPage() {
                         </div>
                         <div>
                           <h3 className="font-medium text-gray-900">{project.name}</h3>
-                          <p className="text-sm text-gray-500">{project.description}</p>
+                          <p className="text-sm text-gray-500">{project.description || 'No description'}</p>
                           <div className="flex items-center gap-4 mt-1">
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge variant="secondary" className="text-xs capitalize">
                               {project.category}
                             </Badge>
                             <div className="flex items-center gap-1 text-xs text-gray-500">
                               <Clock className="w-3 h-3" />
-                              {project.lastModified}
+                              {formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}
                             </div>
+                            <Badge variant="outline" className="text-xs capitalize">
+                              {project.visibility}
+                            </Badge>
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex -space-x-1">
-                          {project.collaborators.map((collaborator, index) => (
-                            <div
-                              key={index}
-                              className="w-6 h-6 bg-gray-300 rounded-full border border-white flex items-center justify-center text-xs font-medium text-gray-600"
-                            >
-                              {collaborator}
-                            </div>
-                          ))}
+                        <div className="text-xs text-gray-500">
+                          {project.viewCount} views
                         </div>
                         <MoreHorizontal className="w-4 h-4 text-gray-400" />
                       </div>
