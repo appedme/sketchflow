@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,25 +28,35 @@ import {
   ExternalLink,
   Mail,
   Twitter,
-  Linkedin
+  Linkedin,
+  Loader2
 } from "lucide-react";
 
 interface ShareDialogProps {
   projectId: string;
   projectName: string;
+  itemType?: 'project' | 'document' | 'canvas';
+  itemId?: string;
 }
 
-export function ShareDialog({ projectId, projectName }: ShareDialogProps) {
+export function ShareDialog({ 
+  projectId, 
+  projectName, 
+  itemType = 'project', 
+  itemId 
+}: ShareDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
   const [isPublic, setIsPublic] = useState(false);
   const [embedSize, setEmbedSize] = useState("medium");
   const [showToolbar, setShowToolbar] = useState(true);
   const [allowEdit, setAllowEdit] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [shareData, setShareData] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
+  const targetItemId = itemId || projectId;
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://sketchflow.space";
-  const projectUrl = `${baseUrl}/project/${projectId}`;
-  const embedUrl = `${baseUrl}/embed/project/${projectId}`;
   
   const embedDimensions = {
     small: { width: 600, height: 400 },
@@ -56,14 +66,65 @@ export function ShareDialog({ projectId, projectName }: ShareDialogProps) {
 
   const currentDimensions = embedDimensions[embedSize as keyof typeof embedDimensions];
 
+  // Create or get share
+  const createShare = async () => {
+    if (shareData) return shareData;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch('/api/share', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          itemId: targetItemId,
+          itemType,
+          settings: {
+            shareType: isPublic ? 'public' : 'private',
+            embedSettings: {
+              toolbar: showToolbar,
+              edit: allowEdit,
+              size: embedSize,
+            },
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create share');
+      }
+
+      const result = await response.json();
+      setShareData(result);
+      return result;
+    } catch (err) {
+      setError('Failed to create share link');
+      console.error('Error creating share:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getShareUrl = () => {
+    if (!shareData) return '';
+    return shareData.shareUrl;
+  };
+
+  const getEmbedUrl = () => {
+    if (!shareData) return '';
+    return shareData.embedUrl;
+  };
+
   const generateEmbedCode = () => {
-    const params = new URLSearchParams({
-      toolbar: showToolbar.toString(),
-      edit: allowEdit.toString(),
-    });
+    const embedUrl = getEmbedUrl();
+    if (!embedUrl) return '';
     
     return `<iframe
-  src="${embedUrl}?${params.toString()}"
+  src="${embedUrl}"
   width="${currentDimensions.width}"
   height="${currentDimensions.height}"
   frameborder="0"
@@ -71,6 +132,13 @@ export function ShareDialog({ projectId, projectName }: ShareDialogProps) {
   title="${projectName}">
 </iframe>`;
   };
+
+  // Auto-create share when dialog opens
+  useEffect(() => {
+    if (isOpen && !shareData && !loading) {
+      createShare();
+    }
+  }, [isOpen]);
 
   const copyToClipboard = async (text: string, type: string) => {
     try {
@@ -83,13 +151,15 @@ export function ShareDialog({ projectId, projectName }: ShareDialogProps) {
   };
 
   const shareToSocial = (platform: string) => {
-    const text = `Check out this project: ${projectName}`;
-    const url = projectUrl;
+    const shareUrl = getShareUrl();
+    if (!shareUrl) return;
+    
+    const text = `Check out this ${itemType}: ${projectName}`;
     
     const shareUrls = {
-      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
-      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
-      email: `mailto:?subject=${encodeURIComponent(projectName)}&body=${encodeURIComponent(text + "\n\n" + url)}`,
+      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`,
+      email: `mailto:?subject=${encodeURIComponent(`Check out: ${projectName}`)}&body=${encodeURIComponent(`${text}\n\n${shareUrl}`)}`,
     };
 
     if (shareUrls[platform as keyof typeof shareUrls]) {
@@ -156,24 +226,33 @@ export function ShareDialog({ projectId, projectName }: ShareDialogProps) {
 
               <div className="space-y-3">
                 <Label htmlFor="share-url">Share URL</Label>
+                {error && (
+                  <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
+                    {error}
+                  </div>
+                )}
                 <div className="flex gap-2">
                   <Input
                     id="share-url"
-                    value={projectUrl}
+                    value={loading ? "Generating share link..." : getShareUrl()}
                     readOnly
                     className="flex-1"
+                    disabled={loading}
                   />
                   <Button
                     variant="outline"
-                    onClick={() => copyToClipboard(projectUrl, "url")}
+                    onClick={() => copyToClipboard(getShareUrl(), "url")}
                     className="gap-2"
+                    disabled={loading || !shareData}
                   >
-                    {copied === "url" ? (
+                    {loading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : copied === "url" ? (
                       <Check className="w-4 h-4" />
                     ) : (
                       <Copy className="w-4 h-4" />
                     )}
-                    {copied === "url" ? "Copied!" : "Copy"}
+                    {loading ? "Loading..." : copied === "url" ? "Copied!" : "Copy"}
                   </Button>
                 </div>
               </div>
@@ -276,20 +355,24 @@ export function ShareDialog({ projectId, projectName }: ShareDialogProps) {
                     size="sm"
                     onClick={() => copyToClipboard(generateEmbedCode(), "embed")}
                     className="gap-2"
+                    disabled={loading || !shareData}
                   >
-                    {copied === "embed" ? (
+                    {loading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : copied === "embed" ? (
                       <Check className="w-4 h-4" />
                     ) : (
                       <Copy className="w-4 h-4" />
                     )}
-                    {copied === "embed" ? "Copied!" : "Copy Code"}
+                    {loading ? "Loading..." : copied === "embed" ? "Copied!" : "Copy Code"}
                   </Button>
                 </div>
                 <Textarea
                   id="embed-code"
-                  value={generateEmbedCode()}
+                  value={loading ? "Generating embed code..." : generateEmbedCode()}
                   readOnly
                   className="font-mono text-sm min-h-[120px]"
+                  disabled={loading}
                 />
               </div>
 

@@ -175,7 +175,7 @@ export function ProjectWorkspace({
         
         {/* Documentation Panel */}
         {showDocumentPanel && (
-          <div className="absolute left-0 top-0 w-2/3 h-full bg-white border-r border-gray-200 shadow-lg z-20 flex flex-col overflow-hidden">
+          <div className="absolute left-0 top-0 w-1/3 h-full bg-white border-r border-gray-200 shadow-lg z-20 flex flex-col overflow-hidden">
             <DocumentationPanel
               projectId={projectId}
               onSplitView={(itemId, itemType) => {

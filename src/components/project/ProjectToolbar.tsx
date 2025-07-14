@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { ShareDialog } from "./ShareDialog";
 import { 
   Save, 
   ArrowLeft
@@ -9,6 +10,7 @@ import {
 import Link from "next/link";
 
 interface ProjectToolbarProps {
+  projectId: string;
   projectName: string;
   onExport: (type: "png" | "svg" | "json") => void;
   onSave: () => void;
@@ -16,6 +18,7 @@ interface ProjectToolbarProps {
 }
 
 export function ProjectToolbar({
+  projectId,
   projectName,
   onExport,
   onSave,
@@ -47,6 +50,7 @@ export function ProjectToolbar({
 
         {/* Right Section - Essential Actions */}
         <div className="flex items-center gap-2">
+          <ShareDialog projectId={projectId} projectName={projectName} />
           <Button variant="outline" size="sm" onClick={() => onExport("png")}>
             Export
           </Button>
