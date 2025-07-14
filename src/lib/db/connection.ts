@@ -19,7 +19,9 @@ export function getDb() {
   if (process.env.NODE_ENV === 'development') {
     try {
       // Use the most recent database file
-      const sqlite = new Database('.wrangler/state/v3/d1/miniflare-D1DatabaseObject/f6e48957e47f012c5c5a65bf21adff6c119aa6eac319e7567f29f68cc1e4a8c2.sqlite');
+      const dbFiles = require('fs').readdirSync('.wrangler/state/v3/d1/miniflare-D1DatabaseObject/').filter((f: string) => f.endsWith('.sqlite'));
+      const dbPath = `.wrangler/state/v3/d1/miniflare-D1DatabaseObject/${dbFiles[0]}`;
+      const sqlite = new Database(dbPath);
       return drizzleBetter(sqlite, { schema });
     } catch (error) {
       console.warn('Local D1 database not found, trying alternative path');

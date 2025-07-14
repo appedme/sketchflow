@@ -5,3 +5,6 @@
 
 
 pwa
+
+https://yoopta.dev/examples/withBaseFullSetup
+
