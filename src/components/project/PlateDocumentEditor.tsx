@@ -114,7 +114,7 @@ export function PlateDocumentEditor({
       setLocalTitle(data.title);
 
       // Update editor content
-      if (data.content && Array.isArray(data.content)) {
+      if (data.content && Array.isArray(data.content) && editor) {
         editor.children = data.content;
       }
 
@@ -180,6 +180,8 @@ export function PlateDocumentEditor({
   useEffect(() => {
     if (!document || isReadOnly) return;
 
+    if (!editor) return;
+
     const currentContent = editor.children;
     const hasContentChanged = JSON.stringify(currentContent) !== JSON.stringify(document.content);
 
@@ -187,7 +189,7 @@ export function PlateDocumentEditor({
       setHasUnsavedChanges(true);
       saveDocument(undefined, currentContent);
     }
-  }, [debouncedContent, document, editor.children, isReadOnly, saveDocument]);
+  }, [debouncedContent, document, editor, isReadOnly, saveDocument]);
 
   // Auto-save on title changes
   useEffect(() => {
@@ -206,7 +208,7 @@ export function PlateDocumentEditor({
 
   // Handle manual save
   const handleManualSave = () => {
-    if (document) {
+    if (document && editor) {
       saveDocument(localTitle, editor.children);
     }
   };

@@ -1,51 +1,76 @@
-import { currentUser, auth } from '@clerk/nextjs/server';
-import { redirect } from 'next/navigation';
+"use client";
+
+import { useState, useEffect } from 'react';
+import { useUser } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Plus,
   FileText,
   FolderOpen,
   Clock,
   Users,
-  Search,
   Star,
-  StarOff,
-  Filter,
-  SortAsc,
-  Tag,
-  Grid3X3,
-  List,
   TrendingUp,
-  Calendar,
-  Eye
+  Eye,
+  Loader2
 } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { getProjects, getProjectStats } from '@/lib/actions/projects';
-import { formatDistanceToNow } from 'date-fns';
 import { ProjectCard } from '@/components/dashboard/ProjectCard';
 import { ProjectFilters } from '@/components/dashboard/ProjectFilters';
+import useSWR from 'swr';
 
-export default async function DashboardPage() {
-  const { userId } = await auth();
-  const user = await currentUser();
+const fetcher = async (url: string) => {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Failed to fetch');
+  return res.json();
+};
 
-  if (!userId) {
-    redirect('/sign-in');
+export default function DashboardPage() {
+  const { user, isLoaded } = useUser();
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState('updated');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [showFavorites, setShowFavorites] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (isLoaded && !user) {
+      router.push('/sign-in');
+    }
+  }, [isLoaded, user, router]);
+
+  // Fetch projects and stats
+  const { data: projects = [], isLoading: projectsLoading } = useSWR(
+    user ? '/api/projects' : null,
+    fetcher
+  );
+
+  const { data: stats = { totalProjects: 0, thisWeek: 0, collaborators: 0, totalViews: 0 } } = useSWR(
+    user ? '/api/projects/stats' : null,
+    fetcher
+  );
+
+  if (!isLoaded || !user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <img src="/logo.svg" alt="SketchFlow" className="w-16 h-16 mx-auto animate-pulse" />
+          <div className="space-y-2">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+            <p className="text-muted-foreground">Loading your dashboard...</p>
+          </div>
+        </div>
+      </div>
+    );
   }
-
-  // Ensure user exists in database and fetch user's projects and stats
-  const { createOrUpdateUser } = await import('@/lib/actions/auth');
-  await createOrUpdateUser();
-
-  const [projects, stats] = await Promise.all([
-    getProjects(userId),
-    getProjectStats(userId)
-  ]);
 
   // Extract all unique tags from projects
   const allTags = Array.from(
@@ -220,28 +245,28 @@ export default async function DashboardPage() {
 
                 <TabsContent value="all" className="space-y-6">
                   <ProjectFilters
-                    searchQuery=""
-                    onSearchChange={() => { }}
-                    selectedCategory="all"
-                    onCategoryChange={() => { }}
-                    selectedTags={[]}
-                    onTagsChange={() => { }}
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    selectedCategory={selectedCategory}
+                    onCategoryChange={setSelectedCategory}
+                    selectedTags={selectedTags}
+                    onTagsChange={setSelectedTags}
                     availableTags={allTags}
-                    sortBy="updated"
-                    onSortChange={() => { }}
-                    sortOrder="desc"
-                    onSortOrderChange={() => { }}
-                    showFavorites={false}
-                    onShowFavoritesChange={() => { }}
-                    viewMode="list"
-                    onViewModeChange={() => { }}
+                    sortBy={sortBy}
+                    onSortChange={setSortBy}
+                    sortOrder={sortOrder}
+                    onSortOrderChange={setSortOrder}
+                    showFavorites={showFavorites}
+                    onShowFavoritesChange={setShowFavorites}
+                    viewMode={viewMode}
+                    onViewModeChange={setViewMode}
                   />
-                  <div className="space-y-4">
+                  <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-4'}>
                     {projects.map((project) => (
                       <ProjectCard
                         key={project.id}
                         project={project}
-                        viewMode="list"
+                        viewMode={viewMode}
                       />
                     ))}
                   </div>
