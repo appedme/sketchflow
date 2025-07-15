@@ -21,7 +21,7 @@ export default async function SharePage({ params }: SharePageProps) {
   try {
     // Get share data (no auth required for public shares)
     const shareData = await getShare(shareToken);
-    
+
     if (!shareData) {
       notFound();
     }
@@ -33,7 +33,7 @@ export default async function SharePage({ params }: SharePageProps) {
 
     // Get the shared content (no auth required for public shares)
     const publicData = await getPublicProject(shareToken);
-    
+
     if (!publicData) {
       notFound();
     }
@@ -46,14 +46,11 @@ export default async function SharePage({ params }: SharePageProps) {
     // Render based on share type
     if (shareData.projectId) {
       return (
-        <div className="h-screen">
-          <div className="bg-gray-100 border-b px-4 py-2 text-sm text-gray-600">
-            <span className="font-medium">Shared Project:</span> {getDisplayName(publicData)}
-          </div>
-          <PublicProjectWorkspace 
-            projectId={shareData.projectId}
-            projectName={getDisplayName(publicData)}
-            shareData={shareData}
+        <div className="min-h-screen bg-background">
+          <PublicProjectWorkspace
+            project={publicData}
+            shareToken={shareToken}
+            shareSettings={shareData}
           />
         </div>
       );
@@ -98,11 +95,11 @@ export default async function SharePage({ params }: SharePageProps) {
 
 export async function generateMetadata({ params }: SharePageProps) {
   const { shareToken } = await params;
-  
+
   try {
     const shareData = await getShare(shareToken);
     const publicData = await getPublicProject(shareToken);
-    
+
     if (!shareData || !publicData) {
       return {
         title: 'Shared Content - SketchFlow',
