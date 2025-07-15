@@ -20,17 +20,17 @@ export async function createShare(
   }
 ) {
   const { userId } = await auth();
-  
+
   if (!userId) {
     throw new Error('User not authenticated');
   }
 
   try {
     const db = getDb();
-    
+
     // Check permissions based on item type
     let projectId: string | null = null;
-    
+
     if (itemType === 'project') {
       projectId = itemId;
     } else if (itemType === 'document') {
@@ -39,7 +39,7 @@ export async function createShare(
         .from(documents)
         .where(eq(documents.id, itemId))
         .limit(1);
-      
+
       if (document.length === 0) {
         throw new Error('Document not found');
       }
@@ -50,7 +50,7 @@ export async function createShare(
         .from(canvases)
         .where(eq(canvases.id, itemId))
         .limit(1);
-      
+
       if (canvas.length === 0) {
         throw new Error('Canvas not found');
       }
@@ -95,12 +95,23 @@ export async function createShare(
 
     await db.insert(shares).values(newShare);
 
+    // Update project visibility to public if sharing publicly
+    if (settings.shareType === 'public' && itemType === 'project') {
+      await db
+        .update(projects)
+        .set({
+          visibility: 'public',
+          updatedAt: new Date().toISOString()
+        })
+        .where(eq(projects.id, itemId));
+    }
+
     return {
       success: true,
       shareId,
       shareToken,
       shareUrl: `${process.env.NODE_ENV === 'production' ? 'https://sketchflow.space' : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')}/share/${shareToken}`,
-      embedUrl: settings.shareType === 'embed' 
+      embedUrl: settings.shareType === 'embed'
         ? `${process.env.NODE_ENV === 'production' ? 'https://sketchflow.space' : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')}/embed/${itemType}/${itemId}?token=${shareToken}`
         : null,
     };
@@ -113,7 +124,7 @@ export async function createShare(
 export async function getShare(shareToken: string) {
   try {
     const db = getDb();
-    
+
     const share = await db
       .select()
       .from(shares)
@@ -141,7 +152,7 @@ export async function getShare(shareToken: string) {
 export async function getPublicProject(shareToken: string) {
   try {
     const db = getDb();
-    
+
     const share = await getShare(shareToken);
     if (!share) {
       return null;
@@ -154,7 +165,7 @@ export async function getPublicProject(shareToken: string) {
         .from(projects)
         .where(eq(projects.id, share.projectId))
         .limit(1);
-      
+
       return project[0] || null;
     } else if (share.documentId) {
       const document = await db
@@ -162,7 +173,7 @@ export async function getPublicProject(shareToken: string) {
         .from(documents)
         .where(eq(documents.id, share.documentId))
         .limit(1);
-      
+
       return document[0] || null;
     } else if (share.canvasId) {
       const canvas = await db
@@ -170,7 +181,7 @@ export async function getPublicProject(shareToken: string) {
         .from(canvases)
         .where(eq(canvases.id, share.canvasId))
         .limit(1);
-      
+
       return canvas[0] || null;
     }
 
@@ -196,7 +207,7 @@ export async function updateShareSettings(
 ) {
   try {
     const db = getDb();
-    
+
     // Get share and check permissions
     const share = await db
       .select()
@@ -235,15 +246,15 @@ export async function updateShareSettings(
     }
 
     const updates: any = {};
-    
+
     if (settings.shareType) {
       updates.shareType = settings.shareType;
     }
-    
+
     if (settings.embedSettings) {
       updates.embedSettings = settings.embedSettings;
     }
-    
+
     if (settings.expiresAt !== undefined) {
       updates.expiresAt = settings.expiresAt;
     }
@@ -263,7 +274,7 @@ export async function updateShareSettings(
 export async function deleteShare(shareId: string, userId: string) {
   try {
     const db = getDb();
-    
+
     // Get share and check permissions
     const share = await db
       .select()

@@ -17,9 +17,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
-  Share, 
-  Copy, 
+import {
+  Share,
+  Copy,
   Check,
   Globe,
   Lock,
@@ -39,11 +39,11 @@ interface ShareDialogProps {
   itemId?: string;
 }
 
-export function ShareDialog({ 
-  projectId, 
-  projectName, 
-  itemType = 'project', 
-  itemId 
+export function ShareDialog({
+  projectId,
+  projectName,
+  itemType = 'project',
+  itemId
 }: ShareDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
@@ -57,7 +57,7 @@ export function ShareDialog({
 
   const targetItemId = itemId || projectId;
   const baseUrl = process.env.NODE_ENV === 'production' ? "https://sketchflow.space" : (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000");
-  
+
   const embedDimensions = {
     small: { width: 600, height: 400 },
     medium: { width: 800, height: 600 },
@@ -69,11 +69,29 @@ export function ShareDialog({
   // Create or get share
   const createShare = async () => {
     if (shareData) return shareData;
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
+      // First, update project visibility if needed
+      if (isPublic && itemType === 'project') {
+        const visibilityResponse = await fetch(`/api/projects/${projectId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            visibility: 'public',
+          }),
+        });
+
+        if (!visibilityResponse.ok) {
+          throw new Error('Failed to update project visibility');
+        }
+      }
+
+      // Then create the share
       const response = await fetch('/api/share', {
         method: 'POST',
         headers: {
@@ -122,7 +140,7 @@ export function ShareDialog({
   const generateEmbedCode = () => {
     const embedUrl = getEmbedUrl();
     if (!embedUrl) return '';
-    
+
     return `<iframe
   src="${embedUrl}"
   width="${currentDimensions.width}"
@@ -153,9 +171,9 @@ export function ShareDialog({
   const shareToSocial = (platform: string) => {
     const shareUrl = getShareUrl();
     if (!shareUrl) return;
-    
+
     const text = `Check out this ${itemType}: ${projectName}`;
-    
+
     const shareUrls = {
       twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`,
       linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`,
@@ -175,7 +193,7 @@ export function ShareDialog({
           Share
         </Button>
       </DialogTrigger>
-      
+
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

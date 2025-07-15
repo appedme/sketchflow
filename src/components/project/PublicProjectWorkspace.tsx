@@ -7,9 +7,19 @@ import dynamic from 'next/dynamic';
 
 const ExcalidrawCanvas = dynamic(
   () => import('./ExcalidrawCanvas').then(mod => mod.ExcalidrawCanvas),
-  { 
+  {
     ssr: false,
-    loading: () => <div className="flex items-center justify-center h-full">Loading canvas...</div>
+    loading: () => (
+      <div className="flex items-center justify-center h-full bg-background">
+        <div className="text-center space-y-4">
+          <img src="/logo.svg" alt="SketchFlow" className="w-16 h-16 mx-auto animate-pulse" />
+          <div className="space-y-2">
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="text-muted-foreground">Loading canvas...</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 );
 
@@ -36,9 +46,9 @@ export function PublicProjectWorkspace({
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => window.open('https://sketchflow.space', '_blank')}
             className="gap-2"
           >
