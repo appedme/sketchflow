@@ -5,6 +5,7 @@ export default defineConfig({
   out: './src/lib/db/migrations',
   dialect: 'sqlite',
   dbCredentials: {
-    url: './.wrangler/state/v3/d1/miniflare-D1DatabaseObject/f6e48957e47f012c5c5a65bf21adff6c119aa6eac319e7567f29f68cc1e4a8c2.sqlite',
+    url: process.env.TURSO_DATABASE_URL!,
+    authToken: process.env.TURSO_AUTH_TOKEN!,
   },
 });
