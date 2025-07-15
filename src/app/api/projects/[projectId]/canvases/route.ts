@@ -35,7 +35,8 @@ export async function POST(
     }
 
     const { projectId } = await params;
-    const { title, elements, appState, files } = await request.json();
+    const body: any = await request.json();
+    const { title, elements, appState, files } = body;
 
     const canvas = await createCanvas(projectId, title, elements, appState, files, userId);
 

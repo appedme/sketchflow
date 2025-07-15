@@ -35,9 +35,10 @@ export async function POST(
     }
 
     const { projectId } = await params;
-    const { title, content, contentText } = await request.json();
+    const body: any = await request.json();
+    const { title, content, contentText } = body;
 
-    const document = await createDocument(projectId, title, content, contentText, userId);
+    const document = await createDocument(projectId, title, content);
 
     return NextResponse.json(document, { status: 201 });
   } catch (error) {

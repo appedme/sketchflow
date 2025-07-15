@@ -4,7 +4,7 @@ import { getFileContent } from '@/lib/actions/files';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { fileId: string } }
+  { params }: { params: Promise<{ fileId: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -13,7 +13,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const fileId = params.fileId;
+    const { fileId } = await params;
     const fileData = await getFileContent(fileId, userId);
 
     if (!fileData) {

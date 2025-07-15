@@ -13,7 +13,8 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { elements, appState, files } = await request.json();
+    const body: any = await request.json();
+    const { elements, appState, files } = body;
     const { projectId } = await params;
 
     // Get existing canvases for this project

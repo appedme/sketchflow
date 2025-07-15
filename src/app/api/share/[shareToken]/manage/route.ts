@@ -14,13 +14,14 @@ export async function PATCH(
     }
 
     const { shareToken } = await params;
-    const { settings } = await request.json();
+    const body: any = await request.json();
+    const { settings } = body;
 
     if (!shareToken) {
       return NextResponse.json({ error: 'Share token required' }, { status: 400 });
     }
 
-    const result = await updateShareSettings(shareToken, settings);
+    const result = await updateShareSettings(shareToken, settings, userId);
 
     return NextResponse.json(result);
   } catch (error) {

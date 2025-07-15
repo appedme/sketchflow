@@ -10,7 +10,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { itemId, itemType, settings } = await request.json();
+    const body: any = await request.json();
+    const { itemId, itemType, settings } = body;
 
     if (!itemId || !itemType) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });

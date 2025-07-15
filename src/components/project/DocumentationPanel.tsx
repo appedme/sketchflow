@@ -82,7 +82,7 @@ export function DocumentationPanel({ projectId, projectName }: DocumentationPane
 
       if (!response.ok) throw new Error('Failed to create document');
 
-      const newDoc = await response.json();
+      const newDoc = await response.json() as { id: string };
       
       // Update the cache
       mutate(`/api/projects/${projectId}/documents`);
@@ -111,7 +111,7 @@ export function DocumentationPanel({ projectId, projectName }: DocumentationPane
 
       if (!response.ok) throw new Error('Failed to create canvas');
 
-      const newCanvas = await response.json();
+      const newCanvas = await response.json() as { id: string };
       
       // Update the cache
       mutate(`/api/projects/${projectId}/canvases`);

@@ -157,7 +157,7 @@ export default async function DashboardPage() {
                             </Badge>
                             <div className="flex items-center gap-1 text-xs text-gray-500">
                               <Clock className="w-3 h-3" />
-                              {formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}
+                              {formatDistanceToNow(new Date(project.updatedAt || project.createdAt || new Date()), { addSuffix: true })}
                             </div>
                             <Badge variant="outline" className="text-xs capitalize">
                               {project.visibility}

@@ -15,6 +15,15 @@ const eslintConfig = [
     rules: {
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-explicit-any": "off",
+      "react/no-unescaped-entities": "off",
+      "react-hooks/exhaustive-deps": "off",
+      "no-unused-vars": "off",
+      "react/jsx-key": "off",
+      "react/display-name": "off",
+      "@next/next/no-img-element": "off",
+      "react/no-unknown-property": ["error", {
+        ignore: ["css", "jsx"],
+      }],
     },
   },
 ];

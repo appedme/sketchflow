@@ -129,7 +129,8 @@ const CHUNKING_REGEXPS = {
 };
 
 export async function POST(req: NextRequest) {
-  const { apiKey: key, messages, system } = await req.json();
+  const body = await req.json() as { apiKey?: string; messages: any[]; system?: string };
+  const { apiKey: key, messages, system } = body;
 
   const apiKey = key || process.env.OPENAI_API_KEY;
 

@@ -29,6 +29,7 @@ import {
 import Link from "next/link";
 import { deleteProject } from '@/lib/actions/projects';
 import { useRouter } from 'next/navigation';
+import { useUser } from '@clerk/nextjs';
 
 interface ProjectDropdownProps {
   project: {
@@ -40,11 +41,14 @@ interface ProjectDropdownProps {
 export function ProjectDropdown({ project }: ProjectDropdownProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
+  const { user } = useUser();
 
   const handleDelete = async () => {
+    if (!user) return;
+    
     try {
       setIsDeleting(true);
-      await deleteProject(project.id);
+      await deleteProject(project.id, user.id);
       router.refresh(); // Refresh the page to show updated project list
     } catch (error) {
       console.error('Failed to delete project:', error);
@@ -86,7 +90,7 @@ export function ProjectDropdown({ project }: ProjectDropdownProps) {
         <AlertDialogHeader>
           <AlertDialogTitle>Delete Project</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to delete "{project.name}"? This action cannot be undone.
+            Are you sure you want to delete &quot;{project.name}&quot;? This action cannot be undone.
             All documents, canvases, and collaborators will be permanently removed.
           </AlertDialogDescription>
         </AlertDialogHeader>

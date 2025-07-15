@@ -39,7 +39,8 @@ export async function PATCH(
     }
 
     const { documentId } = await params;
-    const { title, contentText, content } = await request.json();
+    const body: any = await request.json();
+    const { title, contentText, content } = body;
 
     const updatedDocument = await updateDocument(documentId, {
       title,

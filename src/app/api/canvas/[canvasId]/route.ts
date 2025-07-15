@@ -43,7 +43,13 @@ export async function PATCH(
     }
 
     const { canvasId } = await params;
-    const { title, elements, appState, files } = await request.json();
+    const body = await request.json() as {
+      title?: string;
+      elements?: any[];
+      appState?: any;
+      files?: any;
+    };
+    const { title, elements, appState, files } = body;
 
     const updatedCanvas = await updateCanvasMetadata(canvasId, {
       title,
