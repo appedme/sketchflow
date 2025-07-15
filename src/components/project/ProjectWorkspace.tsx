@@ -1,10 +1,11 @@
 "use client";
 
 import dynamic from 'next/dynamic';
-import { Suspense, useState } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { ProjectWorkspaceLoading } from './ProjectWorkspaceLoading';
 import { DocumentPanel } from './DocumentPanel';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { PanelLeftOpen, PanelLeftClose, FileText, Share, Save, ArrowLeft, SplitSquareHorizontal } from 'lucide-react';
 import { DocumentationPanel } from './DocumentationPanel';
 import { ShareDialog } from './ShareDialog';
@@ -14,7 +15,7 @@ import { FullScreenDocumentEditor } from './FullScreenDocumentEditor';
 // Dynamically import Excalidraw to avoid SSR issues
 const ExcalidrawCanvas = dynamic(
   () => import('./ExcalidrawCanvas').then(mod => mod.ExcalidrawCanvas),
-  { 
+  {
     ssr: false,
     loading: () => <ProjectWorkspaceLoading />
   }
@@ -26,10 +27,10 @@ interface ProjectWorkspaceProps {
   isReadOnly?: boolean;
 }
 
-export function ProjectWorkspace({ 
-  projectId, 
-  projectName, 
-  isReadOnly = false 
+export function ProjectWorkspace({
+  projectId,
+  projectName,
+  isReadOnly = false
 }: ProjectWorkspaceProps) {
   const [showDocumentPanel, setShowDocumentPanel] = useState(false);
   const [splitViewMode, setSplitViewMode] = useState(false);
@@ -42,6 +43,18 @@ export function ProjectWorkspace({
     type: 'document' | 'canvas';
   } | null>(null);
   const [saving, setSaving] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024); // lg breakpoint
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const handleSave = async () => {
     setSaving(true);
@@ -49,7 +62,7 @@ export function ProjectWorkspace({
       // Trigger save for the current canvas
       const event = new CustomEvent('excalidraw-save');
       window.dispatchEvent(event);
-      
+
       // Show feedback
       setTimeout(() => setSaving(false), 1000);
     } catch (error) {
@@ -68,10 +81,10 @@ export function ProjectWorkspace({
         leftItemType={splitViewItem.type}
         rightItemId={projectId}
         rightItemType="canvas"
-        // onClose={() => {
-        //   setSplitViewMode(false);
-        //   setSplitViewItem(null);
-        // }}
+      // onClose={() => {
+      //   setSplitViewMode(false);
+      //   setSplitViewItem(null);
+      // }}
       />
     );
   }
@@ -137,53 +150,63 @@ export function ProjectWorkspace({
   return (
     <div className="h-screen flex flex-col bg-gray-50">
       {/* Top Toolbar */}
-      <div className="h-12 bg-white border-b border-gray-200 flex items-center justify-between px-4">
+      <div className="h-14 bg-background/95 backdrop-blur-sm border-b flex items-center justify-between px-4 shadow-sm">
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowDocumentPanel(!showDocumentPanel)}
-            className="gap-2"
-          >
-            <PanelLeftOpen className="w-4 h-4" />
-            Docs
-          </Button>
-          <div className="h-6 w-px bg-gray-300" />
-          <h1 className="font-semibold text-lg text-gray-900">{projectName}</h1>
+          {/* Mobile Documentation Panel Trigger */}
+          {isMobile ? (
+            <DocumentationPanel
+              projectId={projectId}
+              projectName={projectName}
+              isMobile={true}
+            />
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowDocumentPanel(!showDocumentPanel)}
+              className="gap-2 hover:bg-accent"
+            >
+              <PanelLeftOpen className="w-4 h-4" />
+              <span className="hidden sm:inline">Docs</span>
+            </Button>
+          )}
+          <Separator orientation="vertical" className="h-6" />
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+              <FileText className="w-4 h-4 text-primary" />
+            </div>
+            <h1 className="font-semibold text-lg text-foreground truncate">{projectName}</h1>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <ShareDialog projectId={projectId} projectName={projectName} />
-          <Button size="sm" className="gap-2" onClick={handleSave} disabled={saving}>
+          <Button
+            size="sm"
+            className="gap-2 shadow-sm"
+            onClick={handleSave}
+            disabled={saving}
+          >
             <Save className="w-4 h-4" />
-            {saving ? 'Saving...' : 'Save'}
+            <span className="hidden sm:inline">{saving ? 'Saving...' : 'Save'}</span>
           </Button>
         </div>
       </div>
 
-      {/* Main Content Area - Full Screen Excalidraw */}
-      <div className="flex-1 relative">
+      {/* Main Content Area */}
+      <div className="flex-1 relative overflow-hidden">
         <ExcalidrawCanvas
           projectId={projectId}
           projectName={projectName}
           isReadOnly={isReadOnly}
         />
-        
-        {/* Documentation Panel */}
-        {showDocumentPanel && (
-          <div className="absolute left-0 top-0 w-1/3 h-full bg-white border-r border-gray-200 shadow-lg z-20 flex flex-col overflow-hidden">
+
+        {/* Desktop Documentation Panel */}
+        {!isMobile && showDocumentPanel && (
+          <div className="absolute left-0 top-0 w-96 h-full bg-background border-r shadow-xl z-20 animate-slide-in-left">
             <DocumentationPanel
               projectId={projectId}
               projectName={projectName}
-              // onSplitView={(itemId, itemType) => {
-              //   setSplitViewItem({ id: itemId, type: itemType });
-              //   setSplitViewMode(true);
-              //   setShowDocumentPanel(false);
-              // }}
-              // onFullScreen={(itemId, itemType) => {
-              //   setFullScreenItem({ id: itemId, type: itemType });
-              //   setShowDocumentPanel(false);
-              // }}
-              // onClosePanel={() => setShowDocumentPanel(false)}
+              className="border-0 shadow-none"
             />
           </div>
         )}

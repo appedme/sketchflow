@@ -15,7 +15,7 @@ import dynamic from 'next/dynamic';
 
 const ExcalidrawCanvas = dynamic(
   () => import('./ExcalidrawCanvas').then((mod) => ({ default: mod.ExcalidrawCanvas })),
-  { 
+  {
     ssr: false,
     loading: () => <div className="h-full w-full flex items-center justify-center">Loading canvas...</div>
   }
@@ -41,10 +41,10 @@ export function SplitViewWorkspace({
   const router = useRouter();
   const [leftExpanded, setLeftExpanded] = useState(false);
   const [rightExpanded, setRightExpanded] = useState(false);
-  
+
   // Storage key for persisting panel sizes
   const storageKey = `split-view-${projectId}-${leftItemId}-${rightItemId}`;
-  
+
   // Load saved panel sizes from localStorage
   const [leftPanelSize, setLeftPanelSize] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -58,7 +58,7 @@ export function SplitViewWorkspace({
   const handlePanelResize = (sizes: number[]) => {
     const [leftSize, rightSize] = sizes;
     setLeftPanelSize(leftSize);
-    
+
     if (typeof window !== 'undefined') {
       localStorage.setItem(storageKey, JSON.stringify({
         leftSize,
@@ -86,7 +86,7 @@ export function SplitViewWorkspace({
         <div className="flex items-center gap-4">
           <h1 className="font-semibold text-lg text-gray-900">{projectName} - Split View</h1>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
@@ -123,7 +123,10 @@ export function SplitViewWorkspace({
           <div className="h-full bg-white">
             {leftExpanded ? (
               leftItemType === 'document' ? (
-                <SplitViewDocumentEditor documentId={leftItemId || projectId} />
+                <SplitViewDocumentEditor
+                  documentId={leftItemId || projectId}
+                  projectId={projectId}
+                />
               ) : (
                 <ExcalidrawCanvas
                   projectId={leftItemId || projectId}
@@ -137,7 +140,10 @@ export function SplitViewWorkspace({
                   projectName={`${projectName} - Right Canvas`}
                 />
               ) : (
-                <SplitViewDocumentEditor documentId={rightItemId || projectId} />
+                <SplitViewDocumentEditor
+                  documentId={rightItemId || projectId}
+                  projectId={projectId}
+                />
               )
             )}
           </div>
@@ -149,14 +155,17 @@ export function SplitViewWorkspace({
             onLayout={handlePanelResize}
           >
             {/* Left Panel */}
-            <ResizablePanel 
+            <ResizablePanel
               defaultSize={leftPanelSize}
               minSize={20}
               maxSize={80}
               className="bg-white overflow-hidden"
             >
               {leftItemType === 'document' ? (
-                <SplitViewDocumentEditor documentId={leftItemId || projectId} />
+                <SplitViewDocumentEditor
+                  documentId={leftItemId || projectId}
+                  projectId={projectId}
+                />
               ) : (
                 <ExcalidrawCanvas
                   projectId={leftItemId || projectId}
@@ -169,7 +178,7 @@ export function SplitViewWorkspace({
             <ResizableHandle withHandle />
 
             {/* Right Panel */}
-            <ResizablePanel 
+            <ResizablePanel
               defaultSize={100 - leftPanelSize}
               minSize={20}
               maxSize={80}
@@ -181,7 +190,10 @@ export function SplitViewWorkspace({
                   projectName={`${projectName} - Right Canvas`}
                 />
               ) : (
-                <SplitViewDocumentEditor documentId={rightItemId || projectId} />
+                <SplitViewDocumentEditor
+                  documentId={rightItemId || projectId}
+                  projectId={projectId}
+                />
               )}
             </ResizablePanel>
           </ResizablePanelGroup>

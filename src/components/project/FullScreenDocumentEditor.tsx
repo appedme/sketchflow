@@ -1,12 +1,12 @@
 "use client";
 
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Save, PanelLeftOpen, SplitSquareHorizontal, FileText } from 'lucide-react';
-import { DocumentProvider, useDocument } from '@/contexts/DocumentContext';
+import { Separator } from '@/components/ui/separator';
+import { ArrowLeft, PanelLeftOpen, SplitSquareHorizontal, FileText } from 'lucide-react';
+import { PlateDocumentEditor } from './PlateDocumentEditor';
 import { DocumentationPanel } from './DocumentationPanel';
 
 interface FullScreenDocumentEditorProps {
@@ -15,142 +15,109 @@ interface FullScreenDocumentEditorProps {
   projectName: string;
 }
 
-function DocumentEditorContent({
+export function FullScreenDocumentEditor({
   projectId,
+  documentId,
   projectName,
-}: {
-  projectId: string;
-  projectName: string;
-}) {
+}: FullScreenDocumentEditorProps) {
   const router = useRouter();
   const [showDocumentPanel, setShowDocumentPanel] = useState(false);
-  const [manualSaving, setManualSaving] = useState(false);
-  const {
-    document,
-    isLoading,
-    title,
-    content,
-    saving,
-    setTitle,
-    setContent,
-    saveDocument
-  } = useDocument();
+  const [isMobile, setIsMobile] = useState(false);
 
-  const handleSave = async () => {
-    setManualSaving(true);
-    try {
-      await saveDocument();
-      setTimeout(() => setManualSaving(false), 1000);
-    } catch (error) {
-      console.error('Save failed:', error);
-      setManualSaving(false);
-    }
-  };
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024); // lg breakpoint
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-background">
       {/* Header */}
-      <div className="h-12 bg-white border-b flex items-center justify-between px-4">
-        <div className="flex items-center gap-2">
+      <div className="h-14 bg-background/95 backdrop-blur-sm border-b flex items-center justify-between px-4 shadow-sm">
+        <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setShowDocumentPanel(!showDocumentPanel)}
+            onClick={() => router.push(`/project/${projectId}`)}
             className="gap-2"
           >
-            <PanelLeftOpen className="w-4 h-4" />
-            Docs
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Back</span>
           </Button>
-          <FileText className="w-4 h-4 text-blue-600 ml-2" />
-          <span className="font-semibold text-lg text-gray-900">Document Editor</span>
+
+          <Separator orientation="vertical" className="h-6" />
+
+          {/* Mobile Documentation Panel Trigger */}
+          {isMobile ? (
+            <DocumentationPanel
+              projectId={projectId}
+              projectName={projectName}
+              isMobile={true}
+            />
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowDocumentPanel(!showDocumentPanel)}
+              className="gap-2 hover:bg-accent"
+            >
+              <PanelLeftOpen className="w-4 h-4" />
+              <span className="hidden sm:inline">Docs</span>
+            </Button>
+          )}
+
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+              <FileText className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <h1 className="font-semibold text-foreground">Document Editor</h1>
+              <p className="text-xs text-muted-foreground hidden sm:block">{projectName}</p>
+            </div>
+          </div>
         </div>
+
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => router.push(`/project/${projectId}/split?left=${document?.id}&leftType=document&right=${projectId}&rightType=canvas`)}
+            onClick={() => router.push(`/project/${projectId}/split?left=${documentId}&leftType=document&right=${projectId}&rightType=canvas`)}
             className="gap-2"
           >
             <SplitSquareHorizontal className="w-4 h-4" />
-            Split View
-          </Button>
-          <Button 
-            size="sm" 
-            className="gap-2" 
-            onClick={handleSave} 
-            disabled={manualSaving || saving}
-          >
-            <Save className="w-4 h-4" />
-            {manualSaving || saving ? 'Saving...' : 'Save'}
+            <span className="hidden sm:inline">Split View</span>
           </Button>
         </div>
       </div>
 
       {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Documentation Panel */}
-        {showDocumentPanel && (
-          <div className="w-1/3 bg-white border-r border-gray-200 shadow-lg z-20 flex flex-col overflow-hidden">
+        {/* Desktop Documentation Panel */}
+        {!isMobile && showDocumentPanel && (
+          <div className="w-96 bg-background border-r shadow-xl z-20 animate-slide-in-left">
             <DocumentationPanel
               projectId={projectId}
               projectName={projectName}
+              className="border-0 shadow-none"
             />
           </div>
         )}
-        
-        {/* Document Content */}
-        <div className="flex-1 flex flex-col overflow-hidden bg-white mx-auto max-w-4xl w-full">
-        {isLoading ? (
-          <div className="flex-1 flex items-center justify-center">
-            <span className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></span>
-            <span className="text-gray-500 ml-2">Loading...</span>
-          </div>
-        ) : document ? (
-          <>
-            {/* Document Title */}
-            <div className="p-6 border-b">
-              <Input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="text-2xl font-bold border-none shadow-none p-0 h-auto bg-transparent focus:ring-0"
-                placeholder="Document title..."
-              />
-              <span className="text-xs text-gray-400 mt-1 block">
-                Last updated: {new Date(document.updatedAt).toLocaleDateString()}
-                {saving && <span className="ml-2">Saving...</span>}
-              </span>
-            </div>
 
-            {/* Editor */}
-            <div className="flex-1 overflow-hidden p-6">
-              <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="w-full h-full resize-none border-none outline-none bg-transparent text-gray-900 leading-relaxed focus:ring-0"
-                placeholder="Start writing..."
-              />
-            </div>
-          </>
-        ) : (
-          <div className="flex-1 flex items-center justify-center">
-            <FileText className="w-12 h-12 text-gray-300 mb-4" />
-            <span className="text-gray-500 ml-2">Document not found</span>
-          </div>
-        )}
+        {/* Document Editor */}
+        <div className="flex-1 overflow-hidden">
+          <PlateDocumentEditor
+            documentId={documentId}
+            projectId={projectId}
+            projectName={projectName}
+            className="h-full"
+          />
         </div>
       </div>
     </div>
-  );
-}
-
-export function FullScreenDocumentEditor({
-  projectId,
-  documentId,
-  projectName,
-}: FullScreenDocumentEditorProps) {
-  return (
-    <DocumentProvider documentId={documentId}>
-      <DocumentEditorContent projectId={projectId} projectName={projectName} />
-    </DocumentProvider>
   );
 }

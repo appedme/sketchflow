@@ -8,14 +8,14 @@ import { eq, and, desc } from 'drizzle-orm';
 
 export async function createDocument(projectId: string, title: string, content?: any) {
   const { userId } = await auth();
-  
+
   if (!userId) {
     throw new Error('User not authenticated');
   }
 
   try {
     const db = getDb();
-    
+
     // Check if user has edit permissions on the project
     const collaboration = await db
       .select()
@@ -35,13 +35,29 @@ export async function createDocument(projectId: string, title: string, content?:
     const documentId = nanoid();
     const defaultContent = content || [
       {
+        type: 'h1',
+        children: [{ text: 'Welcome to your document!' }],
+      },
+      {
+        type: 'p',
+        children: [
+          { text: 'Start writing your content here. You can use ' },
+          { text: 'formatting', bold: true },
+          { text: ', create ' },
+          { text: 'lists', italic: true },
+          { text: ', add links, and much more.' },
+        ],
+      },
+      {
         type: 'p',
         children: [{ text: '' }],
-      }
+      },
     ];
 
-    // Extract text content for search
+    // Extract text content for search and calculate metrics
     const contentText = extractTextFromContent(defaultContent);
+    const wordCount = calculateWordCount(contentText);
+    const readingTime = calculateReadingTime(wordCount);
 
     const newDocument: NewDocument = {
       id: documentId,
@@ -49,15 +65,21 @@ export async function createDocument(projectId: string, title: string, content?:
       title,
       content: defaultContent,
       contentText,
+      wordCount,
+      readingTime,
       version: 1,
+      isFavorite: false,
+      tags: [],
+      status: 'draft',
+      lastEditedBy: userId,
       createdBy: userId,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
-    await db.insert(documents).values(newDocument);
+    const [insertedDoc] = await db.insert(documents).values(newDocument).returning();
 
-    return { success: true, documentId };
+    return insertedDoc;
   } catch (error) {
     console.error('Error creating document:', error);
     throw new Error('Failed to create document');
@@ -67,7 +89,7 @@ export async function createDocument(projectId: string, title: string, content?:
 export async function getDocuments(projectId: string, userId: string) {
   try {
     const db = getDb();
-    
+
     // Check if user has access to the project
     const collaboration = await db
       .select()
@@ -122,7 +144,7 @@ export async function getDocuments(projectId: string, userId: string) {
 export async function getDocument(documentId: string, userId: string) {
   try {
     const db = getDb();
-    
+
     // Get document with project info
     const document = await db
       .select({
@@ -169,14 +191,14 @@ export async function getDocument(documentId: string, userId: string) {
 export async function updateDocument(documentId: string, updateData: { title?: string; contentText?: string; content?: any }, userId?: string) {
   const { userId: authUserId } = await auth();
   const currentUserId = userId || authUserId;
-  
+
   if (!currentUserId) {
     throw new Error('User not authenticated');
   }
 
   try {
     const db = getDb();
-    
+
     // Get document and check permissions
     const document = await db
       .select()
@@ -241,7 +263,7 @@ export async function updateDocument(documentId: string, updateData: { title?: s
 export async function deleteDocument(documentId: string, userId: string) {
   try {
     const db = getDb();
-    
+
     // Get document and check permissions
     const document = await db
       .select()
@@ -283,7 +305,7 @@ export async function deleteDocument(documentId: string, userId: string) {
 // Helper function to extract text from Plate.js content for search
 function extractTextFromContent(content: any[]): string {
   if (!Array.isArray(content)) return '';
-  
+
   return content
     .map((node) => {
       if (node.children && Array.isArray(node.children)) {
@@ -295,4 +317,15 @@ function extractTextFromContent(content: any[]): string {
     })
     .join(' ')
     .trim();
+}
+
+// Helper function to calculate word count
+function calculateWordCount(text: string): number {
+  if (!text || typeof text !== 'string') return 0;
+  return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+}
+
+// Helper function to calculate reading time (average 200 words per minute)
+function calculateReadingTime(wordCount: number): number {
+  return Math.ceil(wordCount / 200);
 }

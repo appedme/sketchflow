@@ -1,127 +1,417 @@
 "use client";
 
 import * as React from 'react';
-import { useState, useEffect } from 'react';
-import { PlateEditor } from '@/components/editor/plate-editor';
+import { useState, useEffect, useCallback } from 'react';
+import { Plate, usePlateEditor, PlateContent } from 'platejs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Save, Edit3, Eye, ChevronDown } from 'lucide-react';
+import { EditorKit } from '@/components/editor/editor-kit';
+import { Editor, EditorContainer } from '@/components/ui/editor';
+import {
+  Save,
+  Edit3,
+  Eye,
+  ChevronDown,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  User,
+  FileText
+} from 'lucide-react';
+import { useDebounce } from '@/hooks/use-debounce';
+import { formatDistanceToNow } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface PlateDocumentEditorProps {
-  title: string;
-  content: string;
-  isEditing: boolean;
-  onTitleChange: (title: string) => void;
-  onContentChange: (content: string) => void;
-  onSave: () => void;
-  onEdit: () => void;
-  onCancel: () => void;
+  documentId: string;
+  projectId: string;
+  projectName?: string;
+  isReadOnly?: boolean;
+  className?: string;
 }
 
-// Using simple PlateEditor component
+interface DocumentData {
+  id: string;
+  title: string;
+  content: any[];
+  contentText: string;
+  version: number;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const defaultContent = [
+  {
+    type: 'h1',
+    children: [{ text: 'Welcome to your document!' }],
+  },
+  {
+    type: 'p',
+    children: [
+      { text: 'Start writing your content here. You can use ' },
+      { text: 'formatting', bold: true },
+      { text: ', create ' },
+      { text: 'lists', italic: true },
+      { text: ', add links, and much more.' },
+    ],
+  },
+  {
+    type: 'p',
+    children: [{ text: '' }],
+  },
+];
 
 export function PlateDocumentEditor({
-  title,
-  content,
-  isEditing,
-  onTitleChange,
-  onContentChange,
-  onSave,
-  onEdit,
-  onCancel,
+  documentId,
+  projectId,
+  projectName,
+  isReadOnly = false,
+  className,
 }: PlateDocumentEditorProps) {
-  const [editingTitle, setEditingTitle] = useState(title);
+  const [document, setDocument] = useState<DocumentData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [isEditing, setIsEditing] = useState(!isReadOnly);
+  const [localTitle, setLocalTitle] = useState('');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  const handleSave = () => {
-    onTitleChange(editingTitle);
-    onSave();
+  // Initialize editor with document content
+  const editor = usePlateEditor({
+    plugins: EditorKit,
+    value: document?.content || defaultContent,
+  });
+
+  // Debounce editor content changes
+  const debouncedContent = useDebounce(editor.children, 2000);
+  const debouncedTitle = useDebounce(localTitle, 1000);
+
+  // Load document data
+  const loadDocument = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const response = await fetch(`/api/documents/${documentId}`);
+      if (!response.ok) {
+        throw new Error('Failed to load document');
+      }
+
+      const data: DocumentData = await response.json();
+      setDocument(data);
+      setLocalTitle(data.title);
+
+      // Update editor content
+      if (data.content && Array.isArray(data.content)) {
+        editor.children = data.content;
+      }
+
+    } catch (err) {
+      console.error('Error loading document:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load document');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [documentId, editor]);
+
+  // Save document changes
+  const saveDocument = useCallback(async (title?: string, content?: any[]) => {
+    if (!document || isSaving) return;
+
+    try {
+      setIsSaving(true);
+      setError(null);
+
+      const updateData: any = {};
+
+      if (title !== undefined && title !== document.title) {
+        updateData.title = title;
+      }
+
+      if (content !== undefined) {
+        updateData.content = content;
+        // Extract text content for search
+        updateData.contentText = extractTextFromContent(content);
+      }
+
+      if (Object.keys(updateData).length === 0) {
+        setIsSaving(false);
+        return;
+      }
+
+      const response = await fetch(`/api/documents/${documentId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save document');
+      }
+
+      const updatedDoc: DocumentData = await response.json();
+      setDocument(updatedDoc);
+      setLastSaved(new Date());
+      setHasUnsavedChanges(false);
+
+    } catch (err) {
+      console.error('Error saving document:', err);
+      setError(err instanceof Error ? err.message : 'Failed to save document');
+    } finally {
+      setIsSaving(false);
+    }
+  }, [document, documentId, isSaving]);
+
+  // Auto-save on content changes
+  useEffect(() => {
+    if (!document || isReadOnly) return;
+
+    const currentContent = editor.children;
+    const hasContentChanged = JSON.stringify(currentContent) !== JSON.stringify(document.content);
+
+    if (hasContentChanged) {
+      setHasUnsavedChanges(true);
+      saveDocument(undefined, currentContent);
+    }
+  }, [debouncedContent, document, editor.children, isReadOnly, saveDocument]);
+
+  // Auto-save on title changes
+  useEffect(() => {
+    if (!document || isReadOnly || !localTitle.trim()) return;
+
+    if (localTitle !== document.title) {
+      setHasUnsavedChanges(true);
+      saveDocument(localTitle);
+    }
+  }, [debouncedTitle, document, localTitle, isReadOnly, saveDocument]);
+
+  // Load document on mount
+  useEffect(() => {
+    loadDocument();
+  }, [loadDocument]);
+
+  // Handle manual save
+  const handleManualSave = () => {
+    if (document) {
+      saveDocument(localTitle, editor.children);
+    }
   };
 
-  const handleCancel = () => {
-    setEditingTitle(title);
-    onCancel();
+  // Extract text from Plate.js content
+  const extractTextFromContent = (content: any[]): string => {
+    if (!Array.isArray(content)) return '';
+
+    return content
+      .map((node) => {
+        if (node.children && Array.isArray(node.children)) {
+          return node.children
+            .map((child: any) => child.text || '')
+            .join('');
+        }
+        return '';
+      })
+      .join(' ')
+      .trim();
   };
 
-  if (!isEditing) {
-    // Read-only view
+  if (isLoading) {
     return (
-      <div className="h-full flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
-          <div className="flex-1 min-w-0">
-            <h1 className="font-semibold text-lg text-gray-900 truncate">{title}</h1>
-            <p className="text-sm text-gray-500">View Mode</p>
+      <div className={cn("h-full flex items-center justify-center bg-background", className)}>
+        <div className="text-center space-y-4">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+          <div>
+            <h3 className="font-medium text-foreground">Loading document...</h3>
+            <p className="text-sm text-muted-foreground">Please wait while we fetch your content</p>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Eye className="w-4 h-4" />
-                  View Mode
-                  <ChevronDown className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={onEdit}>
-                  <Edit3 className="w-4 h-4 mr-2" />
-                  Switch to Edit Mode
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-
-        {/* Read-only content */}
-        <div className="flex-1 p-4 overflow-y-auto">
-          <PlateEditor />
         </div>
       </div>
     );
   }
 
-  // Editing view
-  return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-blue-50">
-        <div className="flex-1 min-w-0 mr-4">
-          <Input
-            value={editingTitle}
-            onChange={(e) => setEditingTitle(e.target.value)}
-            className="font-semibold text-lg text-gray-900 bg-transparent border-none outline-none w-full placeholder-gray-500"
-            placeholder="Document title..."
-          />
-          <p className="text-sm text-blue-600">Edit Mode</p>
+  if (error) {
+    return (
+      <div className={cn("h-full flex items-center justify-center bg-background p-8", className)}>
+        <Alert variant="destructive" className="max-w-md">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="mt-2">
+            <div className="space-y-2">
+              <p className="font-medium">Failed to load document</p>
+              <p className="text-sm">{error}</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadDocument}
+                className="mt-3"
+              >
+                Try Again
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  if (!document) {
+    return (
+      <div className={cn("h-full flex items-center justify-center bg-background", className)}>
+        <div className="text-center space-y-4">
+          <FileText className="w-12 h-12 mx-auto text-muted-foreground" />
+          <div>
+            <h3 className="font-medium text-foreground">Document not found</h3>
+            <p className="text-sm text-muted-foreground">The requested document could not be found</p>
+          </div>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleCancel}
-            className="gap-2"
-          >
-            Cancel
-          </Button>
-          <Button
-            size="sm"
-            onClick={handleSave}
-            className="gap-2"
-          >
-            <Save className="w-4 h-4" />
-            Save
-          </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn("h-full flex flex-col bg-background", className)}>
+      {/* Header */}
+      <div className="flex-shrink-0 border-b bg-card">
+        <div className="p-4 space-y-4">
+          {/* Title and Controls */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              {isEditing && !isReadOnly ? (
+                <Input
+                  value={localTitle}
+                  onChange={(e) => setLocalTitle(e.target.value)}
+                  className="text-xl font-semibold border-none shadow-none p-0 h-auto bg-transparent focus-visible:ring-0"
+                  placeholder="Document title..."
+                />
+              ) : (
+                <h1 className="text-xl font-semibold text-foreground truncate">
+                  {document.title}
+                </h1>
+              )}
+
+              {/* Document Info */}
+              <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <User className="w-3 h-3" />
+                  <span>Version {document.version}</span>
+                </div>
+                <Separator orientation="vertical" className="h-3" />
+                <div className="flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  <span>
+                    {lastSaved
+                      ? `Saved ${formatDistanceToNow(lastSaved, { addSuffix: true })}`
+                      : `Updated ${formatDistanceToNow(new Date(document.updatedAt), { addSuffix: true })}`
+                    }
+                  </span>
+                </div>
+                {projectName && (
+                  <>
+                    <Separator orientation="vertical" className="h-3" />
+                    <span>{projectName}</span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2">
+              {/* Save Status */}
+              {isSaving ? (
+                <Badge variant="secondary" className="gap-1">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Saving...
+                </Badge>
+              ) : hasUnsavedChanges ? (
+                <Badge variant="outline" className="gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  Unsaved
+                </Badge>
+              ) : lastSaved ? (
+                <Badge variant="secondary" className="gap-1">
+                  <CheckCircle2 className="w-3 h-3" />
+                  Saved
+                </Badge>
+              ) : null}
+
+              {/* Mode Toggle */}
+              {!isReadOnly && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-2">
+                      {isEditing ? (
+                        <>
+                          <Edit3 className="w-4 h-4" />
+                          Edit Mode
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="w-4 h-4" />
+                          View Mode
+                        </>
+                      )}
+                      <ChevronDown className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onClick={() => setIsEditing(true)}
+                      disabled={isEditing}
+                    >
+                      <Edit3 className="w-4 h-4 mr-2" />
+                      Edit Mode
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => setIsEditing(false)}
+                      disabled={!isEditing}
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      View Mode
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+
+              {/* Manual Save */}
+              {isEditing && !isReadOnly && (
+                <Button
+                  size="sm"
+                  onClick={handleManualSave}
+                  disabled={isSaving || !hasUnsavedChanges}
+                  className="gap-2"
+                >
+                  <Save className="w-4 h-4" />
+                  Save
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Editor */}
-      <div className="flex-1 overflow-hidden p-4">
-        <PlateEditor />
+      {/* Editor Content */}
+      <div className="flex-1 overflow-hidden">
+        <Plate editor={editor}>
+          <EditorContainer className="h-full">
+            <Editor
+              variant="demo"
+              readOnly={!isEditing || isReadOnly}
+              className="h-full"
+            />
+          </EditorContainer>
+        </Plate>
       </div>
     </div>
   );

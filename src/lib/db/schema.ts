@@ -49,9 +49,15 @@ export const documents = sqliteTable('documents', {
   id: text('id').primaryKey(),
   projectId: text('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
   title: text('title').notNull(),
-  content: text('content', { mode: 'json' }), // Plate.js editor content (BasicNodesKit format)
-  contentText: text('content_text'), // Searchable text content
+  content: text('content', { mode: 'json' }), // Plate.js editor content (Plate format)
+  contentText: text('content_text'), // Searchable text content extracted from Plate content
+  wordCount: integer('word_count').default(0), // Word count for analytics
+  readingTime: integer('reading_time').default(0), // Estimated reading time in minutes
   version: integer('version').default(1),
+  isFavorite: integer('is_favorite', { mode: 'boolean' }).default(false),
+  tags: text('tags', { mode: 'json' }), // Array of tags for organization
+  status: text('status').default('draft'), // draft, published, archived
+  lastEditedBy: text('last_edited_by').references(() => users.id),
   createdBy: text('created_by').notNull().references(() => users.id),
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
