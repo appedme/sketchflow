@@ -12,7 +12,7 @@ export function PricingPreviewSection() {
       period: "forever",
       description: "Perfect for getting started",
       features: [
-        "Up to 3 projects",
+        "Up to 300 projects",
         "Basic diagramming tools",
         "Community support",
         "Export to PNG/PDF"
@@ -28,6 +28,7 @@ export function PricingPreviewSection() {
       description: "For professional creators",
       features: [
         "Unlimited projects",
+        "AI Features",
         "Advanced diagramming tools",
         "Priority support",
         "All export formats",
@@ -49,7 +50,8 @@ export function PricingPreviewSection() {
         "Admin dashboard",
         "SSO integration",
         "Custom branding",
-        "Dedicated support"
+        "Dedicated support",
+        
       ],
       cta: "Contact Sales",
       href: "/contact",

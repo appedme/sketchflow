@@ -12,7 +12,7 @@ const pricingPlans = [
     description: "Perfect for individuals and small projects",
     popular: false,
     features: [
-      { name: "Up to 33 projects", included: true },
+      { name: "Up to 300 projects", included: true },
       { name: "Basic diagram tools", included: true },
       { name: "Export to PNG/PDF", included: true },
       { name: "Community support", included: true },
@@ -32,6 +32,7 @@ const pricingPlans = [
     popular: true,
     features: [
       { name: "Unlimited projects", included: true },
+      { name: "AI Features", included: true },
       { name: "Advanced diagram tools", included: true },
       { name: "Export to multiple formats", included: true },
       { name: "Real-time collaboration", included: true },
@@ -58,6 +59,8 @@ const pricingPlans = [
       { name: "SSO integration", included: true },
       { name: "Priority phone support", included: true },
       { name: "Custom integrations", included: true },
+      { name: "On-premise deployment", included: false },
+      { name: "On-demand features", included: false },
     ],
     cta: "Start Team Trial",
     ctaVariant: "outline" as const,
