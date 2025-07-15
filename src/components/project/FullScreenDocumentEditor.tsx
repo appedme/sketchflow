@@ -1,11 +1,13 @@
 "use client";
 
 import * as React from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Save, ArrowLeft, SplitSquareHorizontal, FileText } from 'lucide-react';
+import { Save, PanelLeftOpen, SplitSquareHorizontal, FileText } from 'lucide-react';
 import { DocumentProvider, useDocument } from '@/contexts/DocumentContext';
+import { DocumentationPanel } from './DocumentationPanel';
 
 interface FullScreenDocumentEditorProps {
   projectId: string;
@@ -21,6 +23,7 @@ function DocumentEditorContent({
   projectName: string;
 }) {
   const router = useRouter();
+  const [showDocumentPanel, setShowDocumentPanel] = useState(false);
   const {
     document,
     isLoading,
@@ -40,11 +43,11 @@ function DocumentEditorContent({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push(`/project/${projectId}`)}
+            onClick={() => setShowDocumentPanel(!showDocumentPanel)}
             className="gap-2"
           >
-            <ArrowLeft className="w-4 h-4" />
-            Back
+            <PanelLeftOpen className="w-4 h-4" />
+            Docs
           </Button>
           <FileText className="w-4 h-4 text-blue-600 ml-2" />
           <span className="font-semibold text-lg text-gray-900">Document Editor</span>
@@ -68,8 +71,20 @@ function DocumentEditorContent({
         </div>
       </div>
 
-      {/* Document Content */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-white mx-auto max-w-4xl w-full">
+      {/* Main Content Area */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Documentation Panel */}
+        {showDocumentPanel && (
+          <div className="w-1/3 bg-white border-r border-gray-200 shadow-lg z-20 flex flex-col overflow-hidden">
+            <DocumentationPanel
+              projectId={projectId}
+              projectName={projectName}
+            />
+          </div>
+        )}
+        
+        {/* Document Content */}
+        <div className="flex-1 flex flex-col overflow-hidden bg-white mx-auto max-w-4xl w-full">
         {isLoading ? (
           <div className="flex-1 flex items-center justify-center">
             <span className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></span>
@@ -107,6 +122,7 @@ function DocumentEditorContent({
             <span className="text-gray-500 ml-2">Document not found</span>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

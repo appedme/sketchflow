@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, SplitSquareHorizontal } from 'lucide-react';
+import { PanelLeftOpen, SplitSquareHorizontal } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { DocumentationPanel } from './DocumentationPanel';
 
 // Dynamically import Excalidraw to avoid SSR issues
 const ExcalidrawCanvas = dynamic(
@@ -26,6 +28,7 @@ export function FullScreenCanvasEditor({
   projectName,
 }: FullScreenCanvasEditorProps) {
   const router = useRouter();
+  const [showDocumentPanel, setShowDocumentPanel] = useState(false);
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
@@ -35,11 +38,11 @@ export function FullScreenCanvasEditor({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push(`/project/${projectId}`)}
+            onClick={() => setShowDocumentPanel(!showDocumentPanel)}
             className="gap-2"
           >
-            <ArrowLeft className="w-4 h-4" />
-            Back
+            <PanelLeftOpen className="w-4 h-4" />
+            Docs
           </Button>
           <div className="h-6 w-px bg-gray-300" />
           <h1 className="font-semibold text-lg text-gray-900">Canvas - Full Screen</h1>
@@ -57,14 +60,27 @@ export function FullScreenCanvasEditor({
         </div>
       </div>
 
-      {/* Full Screen Canvas Content */}
-      <div className="flex-1">
-        <ExcalidrawCanvas
-          projectId={projectId}
-          canvasId={canvasId}
-          projectName={projectName}
-          isReadOnly={false}
-        />
+      {/* Main Content Area */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Documentation Panel */}
+        {showDocumentPanel && (
+          <div className="w-1/3 bg-white border-r border-gray-200 shadow-lg z-20 flex flex-col overflow-hidden">
+            <DocumentationPanel
+              projectId={projectId}
+              projectName={projectName}
+            />
+          </div>
+        )}
+        
+        {/* Full Screen Canvas Content */}
+        <div className="flex-1">
+          <ExcalidrawCanvas
+            projectId={projectId}
+            canvasId={canvasId}
+            projectName={projectName}
+            isReadOnly={false}
+          />
+        </div>
       </div>
     </div>
   );
