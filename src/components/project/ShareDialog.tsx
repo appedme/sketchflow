@@ -56,7 +56,7 @@ export function ShareDialog({
   const [error, setError] = useState<string | null>(null);
 
   const targetItemId = itemId || projectId;
-  const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://sketchflow.space";
+  const baseUrl = process.env.NODE_ENV === 'production' ? "https://sketchflow.space" : (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000");
   
   const embedDimensions = {
     small: { width: 600, height: 400 },

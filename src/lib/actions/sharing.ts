@@ -99,9 +99,9 @@ export async function createShare(
       success: true,
       shareId,
       shareToken,
-      shareUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/share/${shareToken}`,
+      shareUrl: `${process.env.NODE_ENV === 'production' ? 'https://sketchflow.space' : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')}/share/${shareToken}`,
       embedUrl: settings.shareType === 'embed' 
-        ? `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/embed/${itemType}/${itemId}?token=${shareToken}`
+        ? `${process.env.NODE_ENV === 'production' ? 'https://sketchflow.space' : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')}/embed/${itemType}/${itemId}?token=${shareToken}`
         : null,
     };
   } catch (error) {

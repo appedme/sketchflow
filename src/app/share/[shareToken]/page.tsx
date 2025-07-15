@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation';
 import { getShare, getPublicProject } from '@/lib/actions/sharing';
-import { ProjectWorkspace } from '@/components/project/ProjectWorkspace';
-import { FullScreenDocumentEditor } from '@/components/project/FullScreenDocumentEditor';
-import { FullScreenCanvasEditor } from '@/components/project/FullScreenCanvasEditor';
+import { PublicProjectWorkspace } from '@/components/project/PublicProjectWorkspace';
+import { PublicDocumentViewer } from '@/components/project/PublicDocumentViewer';
+import { PublicCanvasViewer } from '@/components/project/PublicCanvasViewer';
 
 // Helper function to get the display name
 const getDisplayName = (data: any) => {
@@ -19,7 +19,7 @@ export default async function SharePage({ params }: SharePageProps) {
   const { shareToken } = await params;
 
   try {
-    // Get share data
+    // Get share data (no auth required for public shares)
     const shareData = await getShare(shareToken);
     
     if (!shareData) {
@@ -31,7 +31,7 @@ export default async function SharePage({ params }: SharePageProps) {
       notFound();
     }
 
-    // Get the shared content
+    // Get the shared content (no auth required for public shares)
     const publicData = await getPublicProject(shareToken);
     
     if (!publicData) {
@@ -50,10 +50,10 @@ export default async function SharePage({ params }: SharePageProps) {
           <div className="bg-gray-100 border-b px-4 py-2 text-sm text-gray-600">
             <span className="font-medium">Shared Project:</span> {getDisplayName(publicData)}
           </div>
-          <ProjectWorkspace 
+          <PublicProjectWorkspace 
             projectId={shareData.projectId}
             projectName={getDisplayName(publicData)}
-            isReadOnly={shareData.shareType !== 'public'}
+            shareData={shareData}
           />
         </div>
       );
@@ -65,9 +65,9 @@ export default async function SharePage({ params }: SharePageProps) {
           <div className="bg-gray-100 border-b px-4 py-2 text-sm text-gray-600">
             <span className="font-medium">Shared Document:</span> {getDisplayName(publicData)}
           </div>
-          <FullScreenDocumentEditor
-            projectId={(publicData as any).projectId}
+          <PublicDocumentViewer
             documentId={shareData.documentId}
+            projectId={(publicData as any).projectId}
             projectName={getDisplayName(publicData)}
           />
         </div>
@@ -80,9 +80,9 @@ export default async function SharePage({ params }: SharePageProps) {
           <div className="bg-gray-100 border-b px-4 py-2 text-sm text-gray-600">
             <span className="font-medium">Shared Canvas:</span> {getDisplayName(publicData)}
           </div>
-          <FullScreenCanvasEditor
-            projectId={(publicData as any).projectId}
+          <PublicCanvasViewer
             canvasId={shareData.canvasId}
+            projectId={(publicData as any).projectId}
             projectName={getDisplayName(publicData)}
           />
         </div>
