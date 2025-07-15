@@ -24,6 +24,7 @@ function DocumentEditorContent({
 }) {
   const router = useRouter();
   const [showDocumentPanel, setShowDocumentPanel] = useState(false);
+  const [manualSaving, setManualSaving] = useState(false);
   const {
     document,
     isLoading,
@@ -34,6 +35,17 @@ function DocumentEditorContent({
     setContent,
     saveDocument
   } = useDocument();
+
+  const handleSave = async () => {
+    setManualSaving(true);
+    try {
+      await saveDocument();
+      setTimeout(() => setManualSaving(false), 1000);
+    } catch (error) {
+      console.error('Save failed:', error);
+      setManualSaving(false);
+    }
+  };
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
@@ -62,12 +74,15 @@ function DocumentEditorContent({
             <SplitSquareHorizontal className="w-4 h-4" />
             Split View
           </Button>
-          {saving && (
-            <span className="flex items-center gap-1 text-sm text-gray-500">
-              <Save className="w-4 h-4 animate-spin" />
-              Saving...
-            </span>
-          )}
+          <Button 
+            size="sm" 
+            className="gap-2" 
+            onClick={handleSave} 
+            disabled={manualSaving || saving}
+          >
+            <Save className="w-4 h-4" />
+            {manualSaving || saving ? 'Saving...' : 'Save'}
+          </Button>
         </div>
       </div>
 

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { PanelLeftOpen, SplitSquareHorizontal } from 'lucide-react';
+import { PanelLeftOpen, SplitSquareHorizontal, Save } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { DocumentationPanel } from './DocumentationPanel';
 
@@ -29,6 +29,22 @@ export function FullScreenCanvasEditor({
 }: FullScreenCanvasEditorProps) {
   const router = useRouter();
   const [showDocumentPanel, setShowDocumentPanel] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      // Trigger save for the current canvas
+      const event = new CustomEvent('excalidraw-save');
+      window.dispatchEvent(event);
+      
+      // Show feedback
+      setTimeout(() => setSaving(false), 1000);
+    } catch (error) {
+      console.error('Save failed:', error);
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
@@ -56,6 +72,15 @@ export function FullScreenCanvasEditor({
           >
             <SplitSquareHorizontal className="w-4 h-4" />
             Split View
+          </Button>
+          <Button 
+            size="sm" 
+            className="gap-2" 
+            onClick={handleSave} 
+            disabled={saving}
+          >
+            <Save className="w-4 h-4" />
+            {saving ? 'Saving...' : 'Save'}
           </Button>
         </div>
       </div>
