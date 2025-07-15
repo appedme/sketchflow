@@ -188,7 +188,18 @@ export async function getDocument(documentId: string, userId: string) {
   }
 }
 
-export async function updateDocument(documentId: string, updateData: { title?: string; contentText?: string; content?: any }, userId?: string) {
+export async function updateDocument(
+  documentId: string,
+  updateData: {
+    title?: string;
+    contentText?: string;
+    content?: any;
+    isFavorite?: boolean;
+    tags?: string[];
+    status?: string;
+  },
+  userId?: string
+) {
   const { userId: authUserId } = await auth();
   const currentUserId = userId || authUserId;
 
@@ -230,6 +241,7 @@ export async function updateDocument(documentId: string, updateData: { title?: s
 
     const updates: any = {
       version: docData.version + 1,
+      lastEditedBy: currentUserId,
       updatedAt: new Date().toISOString(),
     };
 
@@ -237,14 +249,25 @@ export async function updateDocument(documentId: string, updateData: { title?: s
       updates.title = updateData.title;
     }
 
-    if (updateData.contentText !== undefined) {
-      updates.contentText = updateData.contentText;
-    }
-
     if (updateData.content !== undefined) {
       updates.content = updateData.content;
-      // Extract text content for search if content is provided
-      updates.contentText = extractTextFromContent(updateData.content);
+      // Extract text content for search and calculate metrics
+      const contentText = extractTextFromContent(updateData.content);
+      updates.contentText = contentText;
+      updates.wordCount = calculateWordCount(contentText);
+      updates.readingTime = calculateReadingTime(updates.wordCount);
+    }
+
+    if (updateData.isFavorite !== undefined) {
+      updates.isFavorite = updateData.isFavorite;
+    }
+
+    if (updateData.tags !== undefined) {
+      updates.tags = updateData.tags;
+    }
+
+    if (updateData.status !== undefined) {
+      updates.status = updateData.status;
     }
 
     const [updatedDoc] = await db
@@ -328,4 +351,60 @@ function calculateWordCount(text: string): number {
 // Helper function to calculate reading time (average 200 words per minute)
 function calculateReadingTime(wordCount: number): number {
   return Math.ceil(wordCount / 200);
+}
+
+export async function toggleDocumentFavorite(documentId: string, userId?: string) {
+  const { userId: authUserId } = await auth();
+  const currentUserId = userId || authUserId;
+
+  if (!currentUserId) {
+    throw new Error('User not authenticated');
+  }
+
+  try {
+    const db = getDb();
+
+    // Get document and check permissions
+    const document = await db
+      .select()
+      .from(documents)
+      .where(eq(documents.id, documentId))
+      .limit(1);
+
+    if (document.length === 0) {
+      throw new Error('Document not found');
+    }
+
+    const docData = document[0];
+
+    // Check if user has access to the project
+    const collaboration = await db
+      .select()
+      .from(projectCollaborators)
+      .where(
+        and(
+          eq(projectCollaborators.projectId, docData.projectId),
+          eq(projectCollaborators.userId, currentUserId)
+        )
+      )
+      .limit(1);
+
+    if (collaboration.length === 0) {
+      throw new Error('Insufficient permissions');
+    }
+
+    const [updatedDoc] = await db
+      .update(documents)
+      .set({
+        isFavorite: !docData.isFavorite,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(documents.id, documentId))
+      .returning();
+
+    return updatedDoc;
+  } catch (error) {
+    console.error('Error toggling document favorite:', error);
+    throw new Error('Failed to update document favorite');
+  }
 }

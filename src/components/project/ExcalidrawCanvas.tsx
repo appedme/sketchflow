@@ -1,9 +1,9 @@
 'use client';
 import { useCallback, useRef, useEffect } from "react";
-import { 
-  Excalidraw, 
-  MainMenu, 
-  WelcomeScreen, 
+import {
+  Excalidraw,
+  MainMenu,
+  WelcomeScreen,
   Sidebar,
   convertToExcalidrawElements,
   serializeAsJSON,
@@ -12,11 +12,11 @@ import {
   exportToSvg,
   exportToBlob
 } from "@excalidraw/excalidraw";
-import type { 
-  ExcalidrawImperativeAPI, 
-  AppState, 
+import type {
+  ExcalidrawImperativeAPI,
+  AppState,
   BinaryFiles,
-  LibraryItems 
+  LibraryItems
 } from "@excalidraw/excalidraw/types";
 import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import "@excalidraw/excalidraw/index.css";
@@ -31,8 +31,8 @@ interface ExcalidrawCanvasProps {
   isReadOnly?: boolean;
 }
 
-function ExcalidrawCanvasContent({ 
-  projectId, 
+function ExcalidrawCanvasContent({
+  projectId,
   projectName,
   canvasId,
   isReadOnly = false
@@ -40,7 +40,7 @@ function ExcalidrawCanvasContent({
   const excalidrawAPIRef = useRef<ExcalidrawImperativeAPI | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const sceneFileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const {
     elements,
     appState,
@@ -63,19 +63,19 @@ function ExcalidrawCanvasContent({
     if (JSON.stringify(newElements) !== JSON.stringify(elements)) {
       updateElements(newElements);
     }
-    
+
     // Update app state (excluding volatile properties like collaborators)
     const { collaborators, ...stableAppState } = newAppState;
     const currentAppStateWithoutCollaborators = { ...appState };
     delete currentAppStateWithoutCollaborators.collaborators;
-    
+
     if (JSON.stringify(stableAppState) !== JSON.stringify(currentAppStateWithoutCollaborators)) {
       updateAppState({
         ...stableAppState,
         collaborators: new Map(), // Always ensure collaborators is a Map
       });
     }
-    
+
     // Update files if changed
     if (JSON.stringify(newFiles) !== JSON.stringify(files)) {
       updateFiles(newFiles);
@@ -85,7 +85,7 @@ function ExcalidrawCanvasContent({
   // Export functions
   const exportToPNG = useCallback(async () => {
     if (!excalidrawAPIRef.current) return;
-    
+
     try {
       const canvas = await exportToCanvas({
         elements,
@@ -93,7 +93,7 @@ function ExcalidrawCanvasContent({
         files,
         getDimensions: () => ({ width: 1920, height: 1080 })
       });
-      
+
       const link = document.createElement('a');
       link.download = `${projectName}-canvas.png`;
       link.href = canvas.toDataURL();
@@ -105,23 +105,23 @@ function ExcalidrawCanvasContent({
 
   const exportToSVGFile = useCallback(async () => {
     if (!excalidrawAPIRef.current) return;
-    
+
     try {
       const svg = await exportToSvg({
         elements,
         appState,
         files,
       });
-      
+
       const svgData = new XMLSerializer().serializeToString(svg);
       const blob = new Blob([svgData], { type: 'image/svg+xml' });
       const url = URL.createObjectURL(blob);
-      
+
       const link = document.createElement('a');
       link.download = `${projectName}-canvas.svg`;
       link.href = url;
       link.click();
-      
+
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Export to SVG failed:', error);
@@ -133,12 +133,12 @@ function ExcalidrawCanvasContent({
       const data = serializeAsJSON(elements, appState, files, 'local');
       const blob = new Blob([data], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
-      
+
       const link = document.createElement('a');
       link.download = `${projectName}-canvas.excalidraw`;
       link.href = url;
       link.click();
-      
+
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Export to JSON failed:', error);
@@ -161,7 +161,7 @@ function ExcalidrawCanvasContent({
 
       if (result.success && result.url) {
         console.log('Image uploaded successfully:', result.url);
-        
+
         // Add to Excalidraw files
         const newFiles = {
           ...files,
@@ -173,7 +173,7 @@ function ExcalidrawCanvasContent({
           }
         };
         updateFiles(newFiles);
-        
+
         return {
           url: result.url,
           id: id,
@@ -181,7 +181,7 @@ function ExcalidrawCanvasContent({
         };
       } else {
         console.warn('Image upload failed, using local data URL:', result.error);
-        
+
         // Add to Excalidraw files with local data URL
         const newFiles = {
           ...files,
@@ -193,7 +193,7 @@ function ExcalidrawCanvasContent({
           }
         };
         updateFiles(newFiles);
-        
+
         return {
           url: dataURL,
           id: id,
@@ -202,16 +202,16 @@ function ExcalidrawCanvasContent({
       }
     } catch (error) {
       console.error('Error in image upload:', error);
-      
+
       // Fallback to local data URL
       const dataURL = await new Promise<string>((resolve) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result as string);
         reader.readAsDataURL(file);
       });
-      
+
       const id = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
+
       // Add to Excalidraw files
       const newFiles = {
         ...files,
@@ -255,7 +255,7 @@ function ExcalidrawCanvasContent({
     } catch (error) {
       console.error('Import failed:', error);
     }
-    
+
     // Reset file input
     event.target.value = '';
   }, [elements, appState, updateElements, updateAppState, updateFiles]);
@@ -277,8 +277,9 @@ function ExcalidrawCanvasContent({
     return (
       <div className="w-full h-full flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-500">Loading canvas...</p>
+          <img src="/logo.svg" alt="Logo" className="h-8 w-8 mx-auto mb-4" />
+          <div className="animate-pulse">Loading...</div>
+
         </div>
       </div>
     );
@@ -292,7 +293,7 @@ function ExcalidrawCanvasContent({
           <span className="text-sm text-gray-600">Saving...</span>
         </div>
       )}
-      
+
       <Excalidraw
         excalidrawAPI={(api) => {
           excalidrawAPIRef.current = api;
@@ -321,11 +322,11 @@ function ExcalidrawCanvasContent({
                   try {
                     const result = await handleImageUpload(file);
                     console.log('Image pasted and uploaded:', result.url);
-                    
+
                     // Convert to ArrayBuffer for Excalidraw
                     const response = await fetch(result.url);
                     const arrayBuffer = await response.arrayBuffer();
-                    
+
                     // Add to files object
                     const newFiles = {
                       ...files,
@@ -336,7 +337,7 @@ function ExcalidrawCanvasContent({
                         created: Date.now(),
                       }
                     };
-                    
+
                     updateFiles(newFiles);
                     return false; // Prevent default paste
                   } catch (error) {

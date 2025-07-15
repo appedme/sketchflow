@@ -9,14 +9,14 @@ import { eq, and, desc } from 'drizzle-orm';
 export async function createCanvas(projectId: string, title: string, elements?: any, appState?: any, files?: any, userId?: string) {
   const { userId: authUserId } = await auth();
   const currentUserId = userId || authUserId;
-  
+
   if (!currentUserId) {
     throw new Error('User not authenticated');
   }
 
   try {
     const db = getDb();
-    
+
     // Check if user has edit permissions on the project
     const collaboration = await db
       .select()
@@ -64,7 +64,12 @@ export async function createCanvas(projectId: string, title: string, elements?: 
       elements: defaultElements,
       appState: defaultAppState,
       files: files || {},
+      elementCount: Array.isArray(defaultElements) ? defaultElements.length : 0,
       version: 1,
+      isFavorite: false,
+      tags: [],
+      status: 'draft',
+      lastEditedBy: currentUserId,
       createdBy: currentUserId,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -82,7 +87,7 @@ export async function createCanvas(projectId: string, title: string, elements?: 
 export async function getCanvases(projectId: string, userId: string) {
   try {
     const db = getDb();
-    
+
     // Check if user has access to the project
     const collaboration = await db
       .select()
@@ -120,7 +125,12 @@ export async function getCanvases(projectId: string, userId: string) {
         elements: canvases.elements,
         appState: canvases.appState,
         files: canvases.files,
+        elementCount: canvases.elementCount,
         version: canvases.version,
+        isFavorite: canvases.isFavorite,
+        tags: canvases.tags,
+        status: canvases.status,
+        lastEditedBy: canvases.lastEditedBy,
         createdBy: canvases.createdBy,
         createdAt: canvases.createdAt,
         updatedAt: canvases.updatedAt,
@@ -139,7 +149,7 @@ export async function getCanvases(projectId: string, userId: string) {
 export async function getCanvas(canvasId: string, userId: string) {
   try {
     const db = getDb();
-    
+
     // Get canvas with project info
     const canvas = await db
       .select({
@@ -186,14 +196,14 @@ export async function getCanvas(canvasId: string, userId: string) {
 export async function updateCanvas(canvasId: string, elements: any, appState: any, files?: any, userId?: string) {
   const { userId: authUserId } = await auth();
   const currentUserId = userId || authUserId;
-  
+
   if (!currentUserId) {
     throw new Error('User not authenticated');
   }
 
   try {
     const db = getDb();
-    
+
     // Get canvas and check permissions
     const canvas = await db
       .select()
@@ -226,7 +236,9 @@ export async function updateCanvas(canvasId: string, elements: any, appState: an
     const updates: any = {
       elements,
       appState,
+      elementCount: Array.isArray(elements) ? elements.length : 0,
       version: canvasData.version + 1,
+      lastEditedBy: currentUserId,
       updatedAt: new Date().toISOString(),
     };
 
@@ -249,14 +261,14 @@ export async function updateCanvas(canvasId: string, elements: any, appState: an
 export async function updateCanvasMetadata(canvasId: string, updates: { title?: string; elements?: any; appState?: any; files?: any }, userId?: string) {
   const { userId: authUserId } = await auth();
   const currentUserId = userId || authUserId;
-  
+
   if (!currentUserId) {
     throw new Error('User not authenticated');
   }
 
   try {
     const db = getDb();
-    
+
     // Get canvas and check permissions
     const canvas = await db
       .select()
@@ -320,7 +332,7 @@ export async function updateCanvasMetadata(canvasId: string, updates: { title?: 
 export async function deleteCanvas(canvasId: string, userId: string) {
   try {
     const db = getDb();
-    
+
     // Get canvas and check permissions
     const canvas = await db
       .select()
@@ -356,5 +368,60 @@ export async function deleteCanvas(canvasId: string, userId: string) {
   } catch (error) {
     console.error('Error deleting canvas:', error);
     throw new Error('Failed to delete canvas');
+  }
+} export
+  async function toggleCanvasFavorite(canvasId: string, userId?: string) {
+  const { userId: authUserId } = await auth();
+  const currentUserId = userId || authUserId;
+
+  if (!currentUserId) {
+    throw new Error('User not authenticated');
+  }
+
+  try {
+    const db = getDb();
+
+    // Get canvas and check permissions
+    const canvas = await db
+      .select()
+      .from(canvases)
+      .where(eq(canvases.id, canvasId))
+      .limit(1);
+
+    if (canvas.length === 0) {
+      throw new Error('Canvas not found');
+    }
+
+    const canvasData = canvas[0];
+
+    // Check if user has access to the project
+    const collaboration = await db
+      .select()
+      .from(projectCollaborators)
+      .where(
+        and(
+          eq(projectCollaborators.projectId, canvasData.projectId),
+          eq(projectCollaborators.userId, currentUserId)
+        )
+      )
+      .limit(1);
+
+    if (collaboration.length === 0) {
+      throw new Error('Insufficient permissions');
+    }
+
+    const [updatedCanvas] = await db
+      .update(canvases)
+      .set({
+        isFavorite: !canvasData.isFavorite,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(canvases.id, canvasId))
+      .returning();
+
+    return updatedCanvas;
+  } catch (error) {
+    console.error('Error toggling canvas favorite:', error);
+    throw new Error('Failed to update canvas favorite');
   }
 }

@@ -3,37 +3,32 @@ import { redirect } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Plus,
   FileText,
   FolderOpen,
   Clock,
   Users,
-  Search
+  Search,
+  Star,
+  StarOff,
+  Filter,
+  SortAsc,
+  Tag,
+  Grid3X3,
+  List,
+  TrendingUp,
+  Calendar,
+  Eye
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger
-} from "@/components/ui/alert-dialog";
 import Link from "next/link";
-import { getProjects, getProjectStats, deleteProject } from '@/lib/actions/projects';
+import { getProjects, getProjectStats } from '@/lib/actions/projects';
 import { formatDistanceToNow } from 'date-fns';
-import { ProjectDropdown } from '@/components/dashboard/ProjectDropdown';
+import { ProjectCard } from '@/components/dashboard/ProjectCard';
+import { ProjectFilters } from '@/components/dashboard/ProjectFilters';
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -52,141 +47,248 @@ export default async function DashboardPage() {
     getProjectStats(userId)
   ]);
 
+  // Extract all unique tags from projects
+  const allTags = Array.from(
+    new Set(
+      projects
+        .filter(p => p.tags && Array.isArray(p.tags))
+        .flatMap(p => p.tags as string[])
+    )
+  );
+
+  const favoriteProjects = projects.filter(p => p.isFavorite);
+  const recentProjects = projects.slice(0, 6);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 py-8">
-
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-2">
-            Welcome back, {user?.firstName || 'there'}
-          </h1>
-          <p className="text-gray-600">
-            Manage your projects and collaborate with your team
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground mb-2">
+                Welcome back, {user?.firstName || 'there'}
+              </h1>
+              <p className="text-muted-foreground">
+                Manage your projects and collaborate with your team
+              </p>
+            </div>
+            <Link href="/dashboard/new-project">
+              <Button size="lg" className="gap-2">
+                <Plus className="w-5 h-5" />
+                New Project
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                  <FolderOpen className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{projects.length}</p>
+                  <p className="text-sm text-muted-foreground">Total Projects</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                  <Star className="w-6 h-6 text-yellow-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{favoriteProjects.length}</p>
+                  <p className="text-sm text-muted-foreground">Favorites</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <Eye className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{stats.totalViews}</p>
+                  <p className="text-sm text-muted-foreground">Total Views</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{stats.thisWeek}</p>
+                  <p className="text-sm text-muted-foreground">This Week</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Link href="/dashboard/new-project">
-            <Card className="cursor-pointer hover:shadow-sm transition-shadow border-gray-200">
+            <Card className="cursor-pointer hover:shadow-md transition-all duration-200 group">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <Plus className="w-5 h-5 text-gray-600" />
+                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                    <Plus className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900">New Project</h3>
-                    <p className="text-sm text-gray-500">Start from scratch or use a template</p>
+                    <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">New Project</h3>
+                    <p className="text-sm text-muted-foreground">Start from scratch or use a template</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </Link>
 
-          <Card className="cursor-pointer hover:shadow-sm transition-shadow border-gray-200">
+          <Card className="cursor-pointer hover:shadow-md transition-all duration-200 group">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-gray-600" />
+                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                  <FileText className="w-6 h-6 text-purple-600" />
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900">Templates</h3>
-                  <p className="text-sm text-gray-500">Browse pre-made templates</p>
+                  <h3 className="font-semibold text-foreground group-hover:text-purple-600 transition-colors">Templates</h3>
+                  <p className="text-sm text-muted-foreground">Browse pre-made templates</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-sm transition-shadow border-gray-200">
+          <Card className="cursor-pointer hover:shadow-md transition-all duration-200 group">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <Users className="w-5 h-5 text-gray-600" />
+                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                  <Users className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900">Team</h3>
-                  <p className="text-sm text-gray-500">Collaborate with others</p>
+                  <h3 className="font-semibold text-foreground group-hover:text-blue-600 transition-colors">Team</h3>
+                  <p className="text-sm text-muted-foreground">Collaborate with others</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Recent Projects */}
-        <Card className="border-gray-200">
+        {/* Projects Section */}
+        <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-lg font-medium text-gray-900">Recent Projects</CardTitle>
-                <CardDescription className="text-gray-500">
-                  Your recently accessed projects
+                <CardTitle className="text-xl font-semibold text-foreground">Your Projects</CardTitle>
+                <CardDescription className="text-muted-foreground">
+                  Manage and organize your projects
                 </CardDescription>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <Input placeholder="Search projects..." className="pl-10 w-64 border-gray-200" />
-                </div>
-                <Link href="/dashboard/new-project">
-                  <Button className=" ">
-                    <Plus className="w-4 h-4 mr-2" />
-                    New Project
-                  </Button>
-                </Link>
               </div>
             </div>
           </CardHeader>
           <CardContent>
             {projects.length > 0 ? (
-              <div className="space-y-4">
-                {projects.map((project) => (
-                  <Link key={project.id} href={`/project/${project.id}`}>
-                    <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                          <FileText className="w-6 h-6 text-gray-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium text-gray-900">{project.name}</h3>
-                          <p className="text-sm text-gray-500">{project.description || 'No description'}</p>
-                          <div className="flex items-center gap-4 mt-1">
-                            <Badge variant="secondary" className="text-xs capitalize">
-                              {project.category}
-                            </Badge>
-                            <div className="flex items-center gap-1 text-xs text-gray-500">
-                              <Clock className="w-3 h-3" />
-                              {formatDistanceToNow(new Date(project.updatedAt || project.createdAt || new Date()), { addSuffix: true })}
-                            </div>
-                            <Badge variant="outline" className="text-xs capitalize">
-                              {project.visibility}
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="text-xs text-gray-500">
-                          {project.viewCount} views
-                        </div>
-                        <ProjectDropdown project={project} />
-                      </div>
+              <Tabs defaultValue="all" className="w-full">
+                <TabsList className="grid w-full grid-cols-3 mb-6">
+                  <TabsTrigger value="all" className="gap-2">
+                    <FolderOpen className="w-4 h-4" />
+                    All Projects ({projects.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="favorites" className="gap-2">
+                    <Star className="w-4 h-4" />
+                    Favorites ({favoriteProjects.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="recent" className="gap-2">
+                    <Clock className="w-4 h-4" />
+                    Recent ({recentProjects.length})
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="all" className="space-y-6">
+                  <ProjectFilters
+                    searchQuery=""
+                    onSearchChange={() => { }}
+                    selectedCategory="all"
+                    onCategoryChange={() => { }}
+                    selectedTags={[]}
+                    onTagsChange={() => { }}
+                    availableTags={allTags}
+                    sortBy="updated"
+                    onSortChange={() => { }}
+                    sortOrder="desc"
+                    onSortOrderChange={() => { }}
+                    showFavorites={false}
+                    onShowFavoritesChange={() => { }}
+                    viewMode="list"
+                    onViewModeChange={() => { }}
+                  />
+                  <div className="space-y-4">
+                    {projects.map((project) => (
+                      <ProjectCard
+                        key={project.id}
+                        project={project}
+                        viewMode="list"
+                      />
+                    ))}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="favorites" className="space-y-4">
+                  {favoriteProjects.length > 0 ? (
+                    favoriteProjects.map((project) => (
+                      <ProjectCard
+                        key={project.id}
+                        project={project}
+                        viewMode="list"
+                      />
+                    ))
+                  ) : (
+                    <div className="text-center py-12">
+                      <Star className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                      <h3 className="text-lg font-medium text-foreground mb-2">No favorite projects</h3>
+                      <p className="text-muted-foreground">
+                        Star your important projects to see them here
+                      </p>
                     </div>
-                  </Link>
-                ))}
-              </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="recent" className="space-y-4">
+                  {recentProjects.map((project) => (
+                    <ProjectCard
+                      key={project.id}
+                      project={project}
+                      viewMode="list"
+                    />
+                  ))}
+                </TabsContent>
+              </Tabs>
             ) : (
               <div className="text-center py-12">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FolderOpen className="w-8 h-8 text-gray-400" />
+                <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
+                  <FolderOpen className="w-10 h-10 text-muted-foreground" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No projects yet</h3>
-                <p className="text-gray-500 mb-6">
-                  Create your first project to get started
+                <h3 className="text-xl font-semibold text-foreground mb-2">No projects yet</h3>
+                <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+                  Create your first project to get started with SketchFlow. Choose from templates or start from scratch.
                 </p>
                 <Link href="/dashboard/new-project">
-                  <Button className="">
-                    <Plus className="w-4 h-4 mr-2" />
+                  <Button size="lg" className="gap-2">
+                    <Plus className="w-5 h-5" />
                     Create Your First Project
                   </Button>
                 </Link>

@@ -40,6 +40,10 @@ export const projects = sqliteTable('projects', {
   thumbnailUrl: text('thumbnail_url'),
   settings: text('settings', { mode: 'json' }), // Project-specific settings
   viewCount: integer('view_count').default(0),
+  isFavorite: integer('is_favorite', { mode: 'boolean' }).default(false),
+  tags: text('tags', { mode: 'json' }), // Array of tags for organization
+  status: text('status').default('active'), // active, archived, completed
+  lastActivityAt: text('last_activity_at'),
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
 });
@@ -71,7 +75,12 @@ export const canvases = sqliteTable('canvases', {
   elements: text('elements', { mode: 'json' }), // Excalidraw elements
   appState: text('app_state', { mode: 'json' }), // Excalidraw app state
   files: text('files', { mode: 'json' }), // Excalidraw files
+  elementCount: integer('element_count').default(0), // Number of elements for analytics
   version: integer('version').default(1),
+  isFavorite: integer('is_favorite', { mode: 'boolean' }).default(false),
+  tags: text('tags', { mode: 'json' }), // Array of tags for organization
+  status: text('status').default('draft'), // draft, published, archived
+  lastEditedBy: text('last_edited_by').references(() => users.id),
   createdBy: text('created_by').notNull().references(() => users.id),
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),

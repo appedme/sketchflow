@@ -95,7 +95,7 @@ export function PlateDocumentEditor({
   });
 
   // Debounce editor content changes
-  const debouncedContent = useDebounce(editor.children, 2000);
+  const debouncedContent = useDebounce(editor?.children || [], 2000);
   const debouncedTitle = useDebounce(localTitle, 1000);
 
   // Load document data

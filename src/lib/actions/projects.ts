@@ -9,18 +9,18 @@ import { eq, and, desc, count, gte, sql } from 'drizzle-orm';
 
 export async function createProject(formData: FormData) {
   const { userId } = await auth();
-  
+
   if (!userId) {
     redirect('/sign-in');
   }
 
   try {
     const db = getDb();
-    
+
     // Ensure user exists in database first
     const { createOrUpdateUser } = await import('./auth');
     await createOrUpdateUser();
-    
+
     // Extract form data
     const name = formData.get('name') as string;
     const description = formData.get('description') as string;
@@ -34,7 +34,7 @@ export async function createProject(formData: FormData) {
     }
 
     const projectId = nanoid();
-    
+
     const newProject: NewProject = {
       id: projectId,
       name,
@@ -44,6 +44,10 @@ export async function createProject(formData: FormData) {
       templateId: templateId !== 'blank' ? templateId : null,
       ownerId: userId,
       viewCount: 0,
+      isFavorite: false,
+      tags: [],
+      status: 'active',
+      lastActivityAt: new Date().toISOString(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -79,9 +83,9 @@ export async function getProjects(userId: string) {
     // Ensure user exists in database first
     const { createOrUpdateUser } = await import('./auth');
     await createOrUpdateUser();
-    
+
     const db = getDb();
-    
+
     // Get projects where user is owner or collaborator
     const userProjects = await db
       .select({
@@ -92,6 +96,10 @@ export async function getProjects(userId: string) {
         visibility: projects.visibility,
         ownerId: projects.ownerId,
         viewCount: projects.viewCount,
+        isFavorite: projects.isFavorite,
+        tags: projects.tags,
+        status: projects.status,
+        lastActivityAt: projects.lastActivityAt,
         createdAt: projects.createdAt,
         updatedAt: projects.updatedAt,
       })
@@ -115,7 +123,7 @@ export async function getProjects(userId: string) {
 export async function getProject(projectId: string, userId: string) {
   try {
     const db = getDb();
-    
+
     // Get project with user's collaboration status
     const project = await db
       .select({
@@ -123,7 +131,7 @@ export async function getProject(projectId: string, userId: string) {
         userRole: projectCollaborators.role,
       })
       .from(projects)
-      .leftJoin(projectCollaborators, 
+      .leftJoin(projectCollaborators,
         and(
           eq(projects.id, projectCollaborators.projectId),
           eq(projectCollaborators.userId, userId)
@@ -139,7 +147,7 @@ export async function getProject(projectId: string, userId: string) {
     // Check if user has access (owner, collaborator, or public project)
     const userRole = project[0].userRole;
     const projectData = project[0].project;
-    
+
     if (!userRole && projectData.visibility !== 'public') {
       return null; // No access
     }
@@ -159,9 +167,9 @@ export async function getProjectStats(userId: string) {
     // Ensure user exists in database first
     const { createOrUpdateUser } = await import('./auth');
     await createOrUpdateUser();
-    
+
     const db = getDb();
-    
+
     // Get total projects count
     const totalProjectsResult = await db
       .select({ count: count() })
@@ -172,7 +180,7 @@ export async function getProjectStats(userId: string) {
     // Get projects created this week
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    
+
     const thisWeekProjectsResult = await db
       .select({ count: count() })
       .from(projects)
@@ -220,7 +228,7 @@ export async function getProjectStats(userId: string) {
 export async function updateProject(projectId: string, updates: Partial<NewProject>, userId: string) {
   try {
     const db = getDb();
-    
+
     // Check if user has edit permissions
     const collaboration = await db
       .select()
@@ -255,7 +263,7 @@ export async function updateProject(projectId: string, updates: Partial<NewProje
 export async function deleteProject(projectId: string, userId: string) {
   try {
     const db = getDb();
-    
+
     // Check if user is owner
     const project = await db
       .select()
@@ -285,7 +293,7 @@ export async function deleteProject(projectId: string, userId: string) {
 export async function incrementProjectViews(projectId: string) {
   try {
     const db = getDb();
-    
+
     // Increment view count
     await db
       .update(projects)
@@ -299,5 +307,104 @@ export async function incrementProjectViews(projectId: string) {
   } catch (error) {
     console.error('Error incrementing project views:', error);
     return { success: false };
+  }
+}
+
+export async function toggleProjectFavorite(projectId: string, userId?: string) {
+  const { userId: authUserId } = await auth();
+  const currentUserId = userId || authUserId;
+
+  if (!currentUserId) {
+    throw new Error('User not authenticated');
+  }
+
+  try {
+    const db = getDb();
+
+    // Get project and check permissions
+    const project = await db
+      .select()
+      .from(projects)
+      .where(eq(projects.id, projectId))
+      .limit(1);
+
+    if (project.length === 0) {
+      throw new Error('Project not found');
+    }
+
+    const projectData = project[0];
+
+    // Check if user has access to the project
+    const collaboration = await db
+      .select()
+      .from(projectCollaborators)
+      .where(
+        and(
+          eq(projectCollaborators.projectId, projectId),
+          eq(projectCollaborators.userId, currentUserId)
+        )
+      )
+      .limit(1);
+
+    if (collaboration.length === 0) {
+      throw new Error('Insufficient permissions');
+    }
+
+    const [updatedProject] = await db
+      .update(projects)
+      .set({
+        isFavorite: !projectData.isFavorite,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(projects.id, projectId))
+      .returning();
+
+    return updatedProject;
+  } catch (error) {
+    console.error('Error toggling project favorite:', error);
+    throw new Error('Failed to update project favorite');
+  }
+}
+
+export async function updateProjectTags(projectId: string, tags: string[], userId?: string) {
+  const { userId: authUserId } = await auth();
+  const currentUserId = userId || authUserId;
+
+  if (!currentUserId) {
+    throw new Error('User not authenticated');
+  }
+
+  try {
+    const db = getDb();
+
+    // Check if user has edit permissions
+    const collaboration = await db
+      .select()
+      .from(projectCollaborators)
+      .where(
+        and(
+          eq(projectCollaborators.projectId, projectId),
+          eq(projectCollaborators.userId, currentUserId)
+        )
+      )
+      .limit(1);
+
+    if (collaboration.length === 0 || !['owner', 'editor'].includes(collaboration[0].role)) {
+      throw new Error('Insufficient permissions');
+    }
+
+    const [updatedProject] = await db
+      .update(projects)
+      .set({
+        tags,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(projects.id, projectId))
+      .returning();
+
+    return updatedProject;
+  } catch (error) {
+    console.error('Error updating project tags:', error);
+    throw new Error('Failed to update project tags');
   }
 }

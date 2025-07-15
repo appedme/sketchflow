@@ -8,6 +8,27 @@
       "when": 1752393837381,
       "tag": "0000_bouncy_franklin_storm",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1752580398368,
+      "tag": "0001_careless_wallop",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1752580828413,
+      "tag": "0002_abandoned_puff_adder",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1752580928997,
+      "tag": "0003_pink_ender_wiggin",
+      "breakpoints": true
     }
   ]
 }
