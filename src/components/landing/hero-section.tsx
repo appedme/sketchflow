@@ -8,50 +8,49 @@ export function HeroSection() {
 
   return (
     <section className="flex flex-col items-center justify-center min-h-screen px-4 py-20 text-center">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-4xl mx-auto space-y-10">
         {/* Announcement Badge */}
         <div className="flex justify-center">
-          <Badge variant="secondary" className="px-4 py-2 text-sm">
+          <Badge variant="secondary" className="px-4 py-2 text-sm font-medium">
             {hero.announcement}
           </Badge>
         </div>
 
-        {/* Brand and Beta */}
-        <div className="space-y-2">
+        {/* Brand and Hero Content */}
+        <div className="space-y-6">
           <div className="flex items-center justify-center gap-3">
-            <h1 className="text-4xl md:text-6xl font-heading font-bold tracking-tight hero-text">
+            <h1 className="text-5xl md:text-7xl font-heading font-bold tracking-tight hero-text">
               SketchFlow
             </h1>
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="text-xs font-semibold">
               {hero.badge}
             </Badge>
           </div>
-        </div>
-
-        {/* Hero Title */}
-        <div className="space-y-4">
-          <h2 className="text-3xl md:text-5xl font-heading font-bold tracking-tight hero-text">
-            {hero.title}
-          </h2>
-          <h3 className="text-2xl md:text-4xl font-heading font-semibold tracking-tight text-muted-foreground">
-            {hero.subtitle}
-          </h3>
+          
+          <div className="space-y-3">
+            <h2 className="text-3xl md:text-5xl font-heading font-bold tracking-tight hero-text">
+              {hero.title}
+            </h2>
+            <h3 className="text-xl md:text-2xl font-medium text-muted-foreground">
+              {hero.subtitle}
+            </h3>
+          </div>
         </div>
 
         {/* Description */}
-        <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
           {hero.description}
         </p>
 
         {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-8">
-          <Link href={hero.cta.primary_link} className="w-full sm:w-auto">
-            <Button className="w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
+          <Link href={hero.cta.primary_link}>
+            <Button size="lg" className="px-8 py-3 text-base font-semibold">
               {hero.cta.primary}
             </Button>
           </Link>
-          <Link href={hero.cta.secondary_link} className="w-full sm:w-auto">
-            <Button variant="outline" className="w-full sm:w-auto">
+          <Link href={hero.cta.secondary_link}>
+            <Button variant="outline" size="lg" className="px-8 py-3 text-base font-semibold">
               {hero.cta.secondary}
             </Button>
           </Link>

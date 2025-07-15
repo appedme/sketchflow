@@ -2,15 +2,15 @@
 export const LANDING_CONTENT = {
   hero: {
     badge: "BETA",
-    title: "Powerful diagramming & documentation",
-    subtitle: "Without Limits",
-    description: "SketchFlow combines powerful diagramming, documentation, and project management in one seamless platform. Create, organize, and manage your visual projects with ease anywhere, anytime.",
-    announcement: "New: Project Embedding & Export Features",
+    title: "Sketch. Document. Collaborate.",
+    subtitle: "All in one place",
+    description: "Transform your ideas into visual stories with powerful diagramming and seamless documentation.",
+    announcement: "New: Project Embedding & Export Features Coming Soon!",
     cta: {
-      primary: "Go to Dashboard",
+      primary: "Start Creating",
       primary_link: "/dashboard",
-      secondary_link: "/learn-more",
-      secondary: "Learn More"
+      secondary_link: "/#use-cases",
+      secondary: "Explore Use Cases"
     }
   },
   features: [
