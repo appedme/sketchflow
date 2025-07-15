@@ -83,7 +83,7 @@ export function Navigation() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand */}
-          <Link href="/" className="flex items-center gap-3 group">
+          <Link href="/" className="flex items-center gap-3 group" >
             <img src="/logo.svg" alt="Logo" className="w-8 h-8 group-hover:scale-105 transition-transform" />
             <div className="flex items-center gap-2">
               <span className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
@@ -100,7 +100,7 @@ export function Navigation() {
             <NavigationMenu>
               <NavigationMenuList>
                 <NavigationMenuItem>
-                  <Link href="/" legacyBehavior passHref>
+                  <Link href="/" >
                     <NavigationMenuLink className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50">
                       Home
                     </NavigationMenuLink>
@@ -173,7 +173,7 @@ export function Navigation() {
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <Link href="/pricing" legacyBehavior passHref>
+                  <Link href="/pricing" >
                     <NavigationMenuLink className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50">
                       Pricing
                     </NavigationMenuLink>
@@ -187,7 +187,7 @@ export function Navigation() {
           <div className="flex items-center gap-3">
             {isSignedIn ? (
               <div className="flex items-center gap-3">
-                <Link href="/dashboard" className="hidden sm:block">
+                <Link href="/dashboard" className="hidden sm:block" >
                   <Button variant="outline" size="sm" className="gap-2">
                     <LayoutDashboard className="w-4 h-4" />
                     Dashboard
@@ -198,12 +198,12 @@ export function Navigation() {
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                <Link href="/sign-in" className="hidden sm:block">
+                <Link href="/sign-in" className="hidden sm:block" >
                   <Button variant="ghost" size="sm">
                     Sign In
                   </Button>
                 </Link>
-                <Link href="/join">
+                <Link href="/join" >
                   <Button size="sm" className="gap-2">
                     Get Started
                     <ArrowRight className="w-4 h-4" />
@@ -285,12 +285,12 @@ export function Navigation() {
 
                     {!isSignedIn && (
                       <div className="flex flex-col gap-3 pt-4 border-t">
-                        <Link href="/sign-in" onClick={() => setIsMobileMenuOpen(false)}>
+                        <Link href="/sign-in" onClick={() => setIsMobileMenuOpen(false)} >
                           <Button variant="outline" className="w-full">
                             Sign In
                           </Button>
                         </Link>
-                        <Link href="/join" onClick={() => setIsMobileMenuOpen(false)}>
+                        <Link href="/join" onClick={() => setIsMobileMenuOpen(false)} >
                           <Button className="w-full gap-2">
                             Get Started
                             <ArrowRight className="w-4 h-4" />

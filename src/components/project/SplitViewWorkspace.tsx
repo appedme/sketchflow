@@ -115,12 +115,11 @@ export function SplitViewWorkspace({
           </Button>
         </div>
       </div>
-
       {/* Split Content */}
       <div className="flex-1 overflow-hidden">
         {leftExpanded || rightExpanded ? (
           // Full screen mode - show only one panel
-          <div className="h-full bg-white">
+          (<div className="h-full bg-white">
             {leftExpanded ? (
               leftItemType === 'document' ? (
                 <SplitViewDocumentEditor
@@ -146,10 +145,10 @@ export function SplitViewWorkspace({
                 />
               )
             )}
-          </div>
+          </div>)
         ) : (
           // Split view mode - resizable panels
-          <ResizablePanelGroup
+          (<ResizablePanelGroup
             direction="horizontal"
             className="h-full"
             onLayout={handlePanelResize}
@@ -173,10 +172,8 @@ export function SplitViewWorkspace({
                 />
               )}
             </ResizablePanel>
-
             {/* Resizable Handle */}
             <ResizableHandle withHandle />
-
             {/* Right Panel */}
             <ResizablePanel
               defaultSize={100 - leftPanelSize}
@@ -196,7 +193,7 @@ export function SplitViewWorkspace({
                 />
               )}
             </ResizablePanel>
-          </ResizablePanelGroup>
+          </ResizablePanelGroup>)
         )}
       </div>
     </div>

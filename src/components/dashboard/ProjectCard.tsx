@@ -116,7 +116,7 @@ export function ProjectCard({
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuItem asChild>
-                                        <Link href={`/project/${project.id}`}>
+                                        <Link href={`/project/${project.id}`} >
                                             <ExternalLink className="w-4 h-4 mr-2" />
                                             Open
                                         </Link>
@@ -146,7 +146,7 @@ export function ProjectCard({
                         </div>
                     </div>
 
-                    <Link href={`/project/${project.id}`} className="block">
+                    <Link href={`/project/${project.id}`} className="block" >
                         <div className="space-y-3">
                             <div>
                                 <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
@@ -198,7 +198,7 @@ export function ProjectCard({
     return (
         <Card className="group hover:shadow-sm transition-all duration-200 border-border bg-card">
             <CardContent className="p-4">
-                <Link href={`/project/${project.id}`} className="block">
+                <Link href={`/project/${project.id}`} className="block" >
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 flex-1 min-w-0">
                             <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -268,7 +268,7 @@ export function ProjectCard({
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuItem asChild>
-                                        <Link href={`/project/${project.id}`}>
+                                        <Link href={`/project/${project.id}`} >
                                             <ExternalLink className="w-4 h-4 mr-2" />
                                             Open
                                         </Link>

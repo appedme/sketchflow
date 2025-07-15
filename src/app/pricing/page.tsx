@@ -126,8 +126,8 @@ export default function PricingPage() {
           {/* Pricing Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
             {pricingPlans.map((plan) => (
-              <Card 
-                key={plan.name} 
+              <Card
+                key={plan.name}
                 className={`relative ${plan.popular ? 'border-primary shadow-lg scale-105' : ''}`}
               >
                 {plan.popular && (
@@ -138,7 +138,7 @@ export default function PricingPage() {
                     </Badge>
                   </div>
                 )}
-                
+
                 <CardHeader className="text-center pb-8">
                   <CardTitle className="text-2xl">{plan.name}</CardTitle>
                   <div className="mt-4">
@@ -149,7 +149,7 @@ export default function PricingPage() {
                     {plan.description}
                   </CardDescription>
                 </CardHeader>
-                
+
                 <CardContent className="space-y-6">
                   <ul className="space-y-3">
                     {plan.features.map((feature, featureIndex) => (
@@ -165,10 +165,10 @@ export default function PricingPage() {
                       </li>
                     ))}
                   </ul>
-                  
-                  <Link href="/join" className="block">
-                    <Button 
-                      variant={plan.ctaVariant} 
+
+                  <Link href="/join" className="block" >
+                    <Button
+                      variant={plan.ctaVariant}
                       className="w-full"
                       size="lg"
                     >
@@ -185,11 +185,11 @@ export default function PricingPage() {
             <div className="text-center">
               <h2 className="text-3xl font-heading font-bold mb-4">Need something more?</h2>
               <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
-                For large organizations with specific requirements, we offer custom enterprise solutions 
+                For large organizations with specific requirements, we offer custom enterprise solutions
                 with dedicated support, advanced security, and tailored integrations.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/contact">
+                <Link href="/contact" >
                   <Button size="lg" variant="outline">
                     Contact Sales
                   </Button>
@@ -228,7 +228,7 @@ export default function PricingPage() {
             <p className="text-muted-foreground mb-6">
               Join thousands of teams already using SketchFlow to bring their ideas to life.
             </p>
-            <Link href="/join">
+            <Link href="/join" >
               <Button size="lg">
                 Start Free Trial
               </Button>

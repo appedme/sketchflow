@@ -51,7 +51,7 @@ export function PricingPreviewSection() {
         "SSO integration",
         "Custom branding",
         "Dedicated support",
-        
+
       ],
       cta: "Contact Sales",
       href: "/contact",
@@ -79,7 +79,7 @@ export function PricingPreviewSection() {
                   Most Popular
                 </Badge>
               )}
-              
+
               <CardHeader className="text-center">
                 <CardTitle className="text-2xl">{plan.name}</CardTitle>
                 <div className="mt-4">
@@ -90,7 +90,7 @@ export function PricingPreviewSection() {
                   {plan.description}
                 </CardDescription>
               </CardHeader>
-              
+
               <CardContent>
                 <ul className="space-y-3 mb-6">
                   {plan.features.map((feature, featureIndex) => (
@@ -100,10 +100,10 @@ export function PricingPreviewSection() {
                     </li>
                   ))}
                 </ul>
-                
-                <Link href={plan.href} className="w-full">
-                  <Button 
-                    className="w-full" 
+
+                <Link href={plan.href} className="w-full" >
+                  <Button
+                    className="w-full"
                     variant={plan.popular ? "default" : "outline"}
                   >
                     {plan.cta}
@@ -113,9 +113,9 @@ export function PricingPreviewSection() {
             </Card>
           ))}
         </div>
-        
+
         <div className="text-center mt-12">
-          <Link href="/pricing">
+          <Link href="/pricing" >
             <Button variant="outline" size="lg">
               View Full Pricing Details
             </Button>

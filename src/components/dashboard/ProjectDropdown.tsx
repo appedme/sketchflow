@@ -2,14 +2,14 @@
 
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { 
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -20,7 +20,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { 
+import {
   MoreHorizontal,
   Trash2,
   Edit,
@@ -45,7 +45,7 @@ export function ProjectDropdown({ project }: ProjectDropdownProps) {
 
   const handleDelete = async () => {
     if (!user) return;
-    
+
     try {
       setIsDeleting(true);
       await deleteProject(project.id, user.id);
@@ -67,7 +67,10 @@ export function ProjectDropdown({ project }: ProjectDropdownProps) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem asChild>
-            <Link href={`/project/${project.id}`} className="flex items-center gap-2">
+            <Link
+              href={`/project/${project.id}`}
+              className="flex items-center gap-2"
+            >
               <Edit className="w-4 h-4" />
               Open Project
             </Link>
@@ -85,7 +88,6 @@ export function ProjectDropdown({ project }: ProjectDropdownProps) {
           </AlertDialogTrigger>
         </DropdownMenuContent>
       </DropdownMenu>
-
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete Project</AlertDialogTitle>

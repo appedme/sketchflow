@@ -3,8 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ShareDialog } from "./ShareDialog";
-import { 
-  Save, 
+import {
+  Save,
   ArrowLeft
 } from "lucide-react";
 import Link from "next/link";
@@ -29,7 +29,7 @@ export function ProjectToolbar({
       <div className="flex items-center justify-between px-4 py-3">
         {/* Left Section */}
         <div className="flex items-center gap-4">
-          <Link href="/dashboard">
+          <Link href="/dashboard" >
             <Button variant="ghost" size="sm" className="gap-2">
               <ArrowLeft className="w-4 h-4" />
               Dashboard

@@ -125,7 +125,6 @@ export function LibraryPanel({ onAddLibraryItems, className }: LibraryPanelProps
                     Libraries
                 </Button>
             </DialogTrigger>
-
             <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
@@ -136,7 +135,7 @@ export function LibraryPanel({ onAddLibraryItems, className }: LibraryPanelProps
 
                 {selectedLibrary ? (
                     // Library Items View
-                    <div className="flex flex-col h-full">
+                    (<div className="flex flex-col h-full">
                         <div className="flex items-center justify-between mb-4">
                             <Button
                                 variant="ghost"
@@ -160,7 +159,6 @@ export function LibraryPanel({ onAddLibraryItems, className }: LibraryPanelProps
                                 </Button>
                             </div>
                         </div>
-
                         <div className="mb-4">
                             <p className="text-sm text-muted-foreground">
                                 {selectedLibrary.description}
@@ -171,7 +169,6 @@ export function LibraryPanel({ onAddLibraryItems, className }: LibraryPanelProps
                                 <span>Updated {selectedLibrary.updated}</span>
                             </div>
                         </div>
-
                         <ScrollArea className="flex-1">
                             {isLoadingItems ? (
                                 <div className="flex items-center justify-center py-12">
@@ -207,10 +204,10 @@ export function LibraryPanel({ onAddLibraryItems, className }: LibraryPanelProps
                                 </div>
                             )}
                         </ScrollArea>
-                    </div>
+                    </div>)
                 ) : (
                     // Libraries List View
-                    <div className="flex flex-col h-full">
+                    (<div className="flex flex-col h-full">
                         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                             <TabsList className="grid w-full grid-cols-3">
                                 <TabsTrigger value="popular" className="gap-2">
@@ -239,7 +236,6 @@ export function LibraryPanel({ onAddLibraryItems, className }: LibraryPanelProps
                                 </div>
                             </TabsContent>
                         </Tabs>
-
                         <ScrollArea className="flex-1 mt-4">
                             {isLoading ? (
                                 <div className="flex items-center justify-center py-12">
@@ -272,7 +268,7 @@ export function LibraryPanel({ onAddLibraryItems, className }: LibraryPanelProps
                                 </div>
                             )}
                         </ScrollArea>
-                    </div>
+                    </div>)
                 )}
             </DialogContent>
         </Dialog>

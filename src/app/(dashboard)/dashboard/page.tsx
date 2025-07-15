@@ -90,7 +90,7 @@ export default function DashboardPage() {
                 Manage your projects and collaborate with your team
               </p>
             </div>
-            <Link href="/dashboard/new-project">
+            <Link href="/dashboard/new-project" >
               <Button size="lg" className="gap-2">
                 <Plus className="w-5 h-5" />
                 New Project
@@ -160,7 +160,7 @@ export default function DashboardPage() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Link href="/dashboard/new-project">
+          <Link href="/dashboard/new-project" >
             <Card className="cursor-pointer hover:shadow-md transition-all duration-200 group">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
@@ -303,7 +303,7 @@ export default function DashboardPage() {
                 <p className="text-muted-foreground mb-8 max-w-md mx-auto">
                   Create your first project to get started with SketchFlow. Choose from templates or start from scratch.
                 </p>
-                <Link href="/dashboard/new-project">
+                <Link href="/dashboard/new-project" >
                   <Button size="lg" className="gap-2">
                     <Plus className="w-5 h-5" />
                     Create Your First Project

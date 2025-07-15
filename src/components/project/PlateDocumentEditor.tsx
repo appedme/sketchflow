@@ -99,7 +99,7 @@ export function PlateDocumentEditor({
   });
 
   // Debounce editor content changes
-  const debouncedContent = useDebounce(editor?.children || [], 2000);
+  const debouncedContent = useDebounce((editor as any)?.children || [], 2000);
   const debouncedTitle = useDebounce(localTitle, 1000);
 
   // Load document data
@@ -119,7 +119,7 @@ export function PlateDocumentEditor({
 
       // Update editor content
       if (data.content && Array.isArray(data.content) && editor) {
-        editor.children = data.content;
+        (editor as any).children = data.content;
       }
 
     } catch (err) {
@@ -186,7 +186,7 @@ export function PlateDocumentEditor({
 
     if (!editor) return;
 
-    const currentContent = editor.children;
+    const currentContent = (editor as any).children;
     const hasContentChanged = JSON.stringify(currentContent) !== JSON.stringify(document.content);
 
     if (hasContentChanged) {
@@ -213,7 +213,7 @@ export function PlateDocumentEditor({
   // Handle manual save
   const handleManualSave = () => {
     if (document && editor) {
-      saveDocument(localTitle, editor.children);
+      saveDocument(localTitle, (editor as any).children);
     }
   };
 
@@ -250,10 +250,10 @@ export function PlateDocumentEditor({
         };
 
         // Insert the image at the current cursor position
-        editor.insertNodes([imageNode]);
+        (editor as any).insertNodes([imageNode]);
 
         // Add a paragraph after the image
-        editor.insertNodes([{
+        (editor as any).insertNodes([{
           type: 'p',
           children: [{ text: '' }],
         }]);

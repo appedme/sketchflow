@@ -12,21 +12,21 @@ export function CTASection() {
         <p className="text-xl md:text-2xl opacity-90 mb-8 max-w-2xl mx-auto">
           Join thousands of creators who are already building amazing visual projects with SketchFlow.
         </p>
-        
+
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Link href="/dashboard">
+          <Link href="/dashboard" >
             <Button size="lg" variant="secondary" className="px-8 py-4 text-lg font-semibold">
               Start Creating for Free
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
           </Link>
-          <Link href="/contact">
+          <Link href="/contact" >
             <Button size="lg" variant="outline" className="px-8 py-4 text-lg font-semibold border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
               Talk to Sales
             </Button>
           </Link>
         </div>
-        
+
         <p className="text-sm opacity-75 mt-6">
           No credit card required • Free forever plan available
         </p>

@@ -29,7 +29,7 @@ export function HeroSection() {
               {hero.badge}
             </Badge>
           </div>
-          
+
           <div className="space-y-3">
             <h2 className="text-3xl md:text-5xl font-heading font-bold tracking-tight hero-text">
               {hero.title}
@@ -47,12 +47,12 @@ export function HeroSection() {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
-          <Link href={hero.cta.primary_link}>
+          <Link href={hero.cta.primary_link} >
             <Button size="lg" className="px-8 py-3 text-base font-semibold">
               {hero.cta.primary}
             </Button>
           </Link>
-          <Link href={hero.cta.secondary_link}>
+          <Link href={hero.cta.secondary_link} >
             <Button variant="outline" size="lg" className="px-8 py-3 text-base font-semibold">
               {hero.cta.secondary}
             </Button>

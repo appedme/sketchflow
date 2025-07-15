@@ -168,13 +168,13 @@ function ExcalidrawCanvasContent({
         const newFiles = {
           ...files,
           [id]: {
-            mimeType: file.type,
+            mimeType: file.type as any,
             id: id,
             dataURL: result.url,
             created: Date.now(),
           }
         };
-        updateFiles(newFiles);
+        updateFiles(newFiles as any);
 
         return {
           url: result.url,
@@ -188,13 +188,13 @@ function ExcalidrawCanvasContent({
         const newFiles = {
           ...files,
           [id]: {
-            mimeType: file.type,
+            mimeType: file.type as any,
             id: id,
             dataURL: dataURL,
             created: Date.now(),
           }
         };
-        updateFiles(newFiles);
+        updateFiles(newFiles as any);
 
         return {
           url: dataURL,
@@ -218,13 +218,13 @@ function ExcalidrawCanvasContent({
       const newFiles = {
         ...files,
         [id]: {
-          mimeType: file.type,
+          mimeType: file.type as any,
           id: id,
           dataURL: dataURL,
           created: Date.now(),
         }
       };
-      updateFiles(newFiles);
+      updateFiles(newFiles as any);
 
       return {
         url: dataURL,
@@ -358,14 +358,14 @@ function ExcalidrawCanvasContent({
                     const newFiles = {
                       ...files,
                       [result.id]: {
-                        mimeType: file.type,
+                        mimeType: file.type as any,
                         id: result.id,
                         dataURL: result.url,
                         created: Date.now(),
                       }
                     };
 
-                    updateFiles(newFiles);
+                    updateFiles(newFiles as any);
                     return false; // Prevent default paste
                   } catch (error) {
                     console.error('Error handling pasted image:', error);
