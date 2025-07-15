@@ -8,6 +8,13 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  serverExternalPackages: ['@libsql/client', '@libsql/hrana-client', '@libsql/isomorphic-ws'],
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals.push('@libsql/client', '@libsql/hrana-client', '@libsql/isomorphic-ws');
+    }
+    return config;
+  },
 };
 
 export default nextConfig;

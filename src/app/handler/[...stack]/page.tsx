@@ -1,6 +1,4 @@
-import { StackHandler } from "@stackframe/stack";
-import { stackServerApp } from "../../../stack";
-
-export default function Handler(props: unknown) {
-  return <StackHandler fullPage app={stackServerApp} routeProps={props} />;
+// Temporarily disabled Stack Auth handler due to missing project ID
+export default function Handler() {
+  return <div>Handler temporarily disabled</div>;
 }
