@@ -29,8 +29,8 @@ export function TemplateSelector({ templates, categories, onTemplateSelect }: Te
     onTemplateSelect(templateId);
   };
 
-  const filteredTemplates = selectedCategory === "All" 
-    ? templates 
+  const filteredTemplates = selectedCategory === "All"
+    ? templates
     : templates.filter(template => template.category === selectedCategory);
 
   const popularTemplates = templates.filter(template => template.popular);
@@ -40,7 +40,7 @@ export function TemplateSelector({ templates, categories, onTemplateSelect }: Te
       <div className="mb-6">
         <h2 className="text-lg font-medium text-gray-900 mb-2">Choose a Template</h2>
         <p className="text-gray-600 mb-4">Select a template to get started quickly</p>
-        
+
         {/* Category Filter */}
         <div className="flex gap-2 flex-wrap">
           {categories.map((category) => (
@@ -48,8 +48,8 @@ export function TemplateSelector({ templates, categories, onTemplateSelect }: Te
               key={category}
               variant={selectedCategory === category ? "default" : "outline"}
               size="sm"
-              className={selectedCategory === category 
-                ? "bg-gray-900 hover:bg-gray-800" 
+              className={selectedCategory === category
+                ? ""
                 : "border-gray-200 text-gray-600 hover:bg-gray-50"
               }
               onClick={() => setSelectedCategory(category)}
@@ -66,11 +66,10 @@ export function TemplateSelector({ templates, categories, onTemplateSelect }: Te
           <h3 className="text-md font-medium text-gray-900 mb-4">Popular Templates</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {popularTemplates.map((template) => (
-              <Card 
-                key={template.id} 
-                className={`cursor-pointer hover:shadow-sm transition-shadow border-gray-200 ${
-                  selectedTemplate === template.id ? 'ring-2 ring-gray-900' : ''
-                }`}
+              <Card
+                key={template.id}
+                className={`cursor-pointer hover:shadow-sm transition-shadow border-gray-200 ${selectedTemplate === template.id ? 'ring-2 ring-gray-900' : ''
+                  }`}
                 onClick={() => handleTemplateClick(template.id)}
               >
                 <CardContent className="p-6">
@@ -102,11 +101,10 @@ export function TemplateSelector({ templates, categories, onTemplateSelect }: Te
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filteredTemplates.map((template) => (
-            <Card 
-              key={template.id} 
-              className={`cursor-pointer hover:shadow-sm transition-shadow border-gray-200 ${
-                selectedTemplate === template.id ? 'ring-2 ring-gray-900' : ''
-              }`}
+            <Card
+              key={template.id}
+              className={`cursor-pointer hover:shadow-sm transition-shadow border-gray-200 ${selectedTemplate === template.id ? 'ring-2 ring-gray-900' : ''
+                }`}
               onClick={() => handleTemplateClick(template.id)}
             >
               <CardContent className="p-6">

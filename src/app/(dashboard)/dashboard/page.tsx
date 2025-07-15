@@ -3,23 +3,23 @@ import { redirect } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Plus, 
-  FileText, 
-  FolderOpen, 
-  Clock, 
+import {
+  Plus,
+  FileText,
+  FolderOpen,
+  Clock,
   Users,
   Search
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { 
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -38,7 +38,7 @@ import { ProjectDropdown } from '@/components/dashboard/ProjectDropdown';
 export default async function DashboardPage() {
   const { userId } = await auth();
   const user = await currentUser();
-  
+
   if (!userId) {
     redirect('/sign-in');
   }
@@ -46,7 +46,7 @@ export default async function DashboardPage() {
   // Ensure user exists in database and fetch user's projects and stats
   const { createOrUpdateUser } = await import('@/lib/actions/auth');
   await createOrUpdateUser();
-  
+
   const [projects, stats] = await Promise.all([
     getProjects(userId),
     getProjectStats(userId)
@@ -56,7 +56,7 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
-        
+
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-semibold text-gray-900 mb-2">
@@ -130,7 +130,7 @@ export default async function DashboardPage() {
                   <Input placeholder="Search projects..." className="pl-10 w-64 border-gray-200" />
                 </div>
                 <Link href="/dashboard/new-project">
-                  <Button className="bg-gray-900 hover:bg-gray-800">
+                  <Button className=" ">
                     <Plus className="w-4 h-4 mr-2" />
                     New Project
                   </Button>
@@ -185,7 +185,7 @@ export default async function DashboardPage() {
                   Create your first project to get started
                 </p>
                 <Link href="/dashboard/new-project">
-                  <Button className="bg-gray-900 hover:bg-gray-800">
+                  <Button className="">
                     <Plus className="w-4 h-4 mr-2" />
                     Create Your First Project
                   </Button>

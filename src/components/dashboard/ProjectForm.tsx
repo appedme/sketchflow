@@ -43,7 +43,7 @@ export function ProjectForm({ onSubmit }: ProjectFormProps) {
                 className="mt-1 border-gray-200"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="description" className="text-sm font-medium text-gray-700">Description</Label>
               <Textarea
@@ -54,7 +54,7 @@ export function ProjectForm({ onSubmit }: ProjectFormProps) {
                 className="mt-1 border-gray-200"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="category" className="text-sm font-medium text-gray-700">Category</Label>
               <Select name="category">
@@ -70,7 +70,7 @@ export function ProjectForm({ onSubmit }: ProjectFormProps) {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div>
               <Label htmlFor="visibility" className="text-sm font-medium text-gray-700">Visibility</Label>
               <Select name="visibility" defaultValue="private">
@@ -88,8 +88,8 @@ export function ProjectForm({ onSubmit }: ProjectFormProps) {
             <div className="text-sm text-gray-600">
               Selected template: <span className="font-medium">{selectedTemplate}</span>
             </div>
-            
-            <Button type="submit" className="w-full bg-gray-900 hover:bg-gray-800 mt-6">
+
+            <Button type="submit" className="w-full  mt-6">
               Create Project
             </Button>
           </div>

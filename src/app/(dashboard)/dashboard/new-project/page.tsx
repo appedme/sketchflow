@@ -31,7 +31,7 @@ export default async function NewProjectPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Create New Project</h1>
+            <h1 className="text-2xl font-semibold ">Create New Project</h1>
             <p className="text-gray-600">
               Choose a template to get started or create from scratch
             </p>

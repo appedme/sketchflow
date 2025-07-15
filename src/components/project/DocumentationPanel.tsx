@@ -310,25 +310,25 @@ export function DocumentationPanel({ projectId, projectName }: DocumentationPane
                         </h3>
                       )}
                       <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <span className="capitalize">{item.type}</span>
-                        <span>•</span>
+                        {/* <span className="capitalize">{item.type}</span> */}
+                        {/* <span>•</span> */}
                         <span>
                           {formatDistanceToNow(new Date(item.updatedAt), { addSuffix: true })}
                         </span>
-                        {item.type === 'document' && (
+                        {/* {item.type === 'document' && (
                           <>
                             <span>•</span>
                             <span className="truncate max-w-xs">
                               {item.contentText || 'No content'}
                             </span>
                           </>
-                        )}
-                        {item.type === 'canvas' && (
+                        )} */}
+                        {/* {item.type === 'canvas' && (
                           <>
                             <span>•</span>
                             <span>{item.elements?.length || 0} elements</span>
                           </>
-                        )}
+                        )} */}
                       </div>
                     </div>
                   </div>
