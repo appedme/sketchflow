@@ -157,11 +157,11 @@ function ExcalidrawCanvasContent({
 
     try {
       const result = await loadSceneOrLibraryFromBlob(file, null, elements);
-      if (result.type === 'scene') {
-        updateElements(result.data.elements);
-        updateAppState({ ...appState, ...result.data.appState });
-        if (result.data.files) {
-          updateFiles(result.data.files);
+      if ((result as any).type === 'scene') {
+        updateElements((result as any).data.elements);
+        updateAppState({ ...appState, ...(result as any).data.appState });
+        if ((result as any).data.files) {
+          updateFiles((result as any).data.files);
         }
       }
     } catch (error) {
@@ -206,7 +206,7 @@ function ExcalidrawCanvasContent({
       )}
       
       <Excalidraw
-        ref={(api) => {
+        excalidrawAPI={(api) => {
           excalidrawAPIRef.current = api;
         }}
         initialData={{
@@ -233,7 +233,7 @@ function ExcalidrawCanvasContent({
             export: {
               saveFileToDisk: false,
             },
-            theme: false,
+            // theme: false,
           },
         }}
       >

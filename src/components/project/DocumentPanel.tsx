@@ -107,13 +107,13 @@ export function DocumentPanel({ projectId }: DocumentPanelProps) {
       mutate(`/api/projects/${projectId}/documents`);
       
       // Select the new document
-      setSelectedDoc(newDoc);
+      setSelectedDoc(newDoc as Document);
     } catch (error) {
       console.error('Failed to create document:', error);
     }
   };
 
-  const filteredDocuments = documents.filter((doc: Document) =>
+  const filteredDocuments = ((documents as Document[]) || []).filter((doc: Document) =>
     doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (doc.contentText && doc.contentText.toLowerCase().includes(searchTerm.toLowerCase()))
   );

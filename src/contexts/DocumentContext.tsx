@@ -64,8 +64,8 @@ export function DocumentProvider({ children, documentId }: DocumentProviderProps
   // Initialize local state when document loads
   useEffect(() => {
     if (document) {
-      setTitle(document.title || '');
-      setContent(document.contentText || '');
+      setTitle((document as any)?.title || '');
+      setContent((document as any)?.contentText || '');
     }
   }, [document]);
 
@@ -88,7 +88,7 @@ export function DocumentProvider({ children, documentId }: DocumentProviderProps
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to save document');
+        throw new Error((errorData as any)?.error || 'Failed to save document');
       }
 
       const updatedDoc = await response.json();
@@ -108,7 +108,7 @@ export function DocumentProvider({ children, documentId }: DocumentProviderProps
   // Auto-save when title or content changes
   useEffect(() => {
     if (!document || !user?.id) return;
-    if (debouncedTitle === document.title && debouncedContent === document.contentText) return;
+    if (debouncedTitle === (document as any)?.title && debouncedContent === (document as any)?.contentText) return;
     
     const autoSave = async () => {
       try {
@@ -130,7 +130,7 @@ export function DocumentProvider({ children, documentId }: DocumentProviderProps
 
         // Update the cache optimistically
         mutate(`/api/documents/${documentId}`, {
-          ...document,
+          ...(document as any),
           title: debouncedTitle,
           contentText: debouncedContent,
           updatedAt: new Date().toISOString(),
@@ -151,7 +151,7 @@ export function DocumentProvider({ children, documentId }: DocumentProviderProps
   return (
     <DocumentContext.Provider
       value={{
-        document: document || null,
+        document: (document as any) || null,
         isLoading,
         error,
         title,

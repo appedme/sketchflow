@@ -68,7 +68,7 @@ function DocumentEditorContent({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => router.push(`/project/${projectId}/split?left=${documentId}&leftType=document&right=${projectId}&rightType=canvas`)}
+            onClick={() => router.push(`/project/${projectId}/split?left=${document?.id}&leftType=document&right=${projectId}&rightType=canvas`)}
             className="gap-2"
           >
             <SplitSquareHorizontal className="w-4 h-4" />

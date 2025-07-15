@@ -68,10 +68,10 @@ export function ProjectWorkspace({
         leftItemType={splitViewItem.type}
         rightItemId={projectId}
         rightItemType="canvas"
-        onClose={() => {
-          setSplitViewMode(false);
-          setSplitViewItem(null);
-        }}
+        // onClose={() => {
+        //   setSplitViewMode(false);
+        //   setSplitViewItem(null);
+        // }}
       />
     );
   }
@@ -81,14 +81,9 @@ export function ProjectWorkspace({
     if (fullScreenItem.type === 'document') {
       return (
         <FullScreenDocumentEditor
+          projectId={projectId}
           documentId={fullScreenItem.id}
           projectName={projectName}
-          onBack={() => setFullScreenItem(null)}
-          onSplitView={(itemId, itemType) => {
-            setSplitViewItem({ id: itemId, type: itemType });
-            setSplitViewMode(true);
-            setFullScreenItem(null);
-          }}
         />
       );
     } else {
@@ -178,16 +173,17 @@ export function ProjectWorkspace({
           <div className="absolute left-0 top-0 w-1/3 h-full bg-white border-r border-gray-200 shadow-lg z-20 flex flex-col overflow-hidden">
             <DocumentationPanel
               projectId={projectId}
-              onSplitView={(itemId, itemType) => {
-                setSplitViewItem({ id: itemId, type: itemType });
-                setSplitViewMode(true);
-                setShowDocumentPanel(false);
-              }}
-              onFullScreen={(itemId, itemType) => {
-                setFullScreenItem({ id: itemId, type: itemType });
-                setShowDocumentPanel(false);
-              }}
-              onClosePanel={() => setShowDocumentPanel(false)}
+              projectName={projectName}
+              // onSplitView={(itemId, itemType) => {
+              //   setSplitViewItem({ id: itemId, type: itemType });
+              //   setSplitViewMode(true);
+              //   setShowDocumentPanel(false);
+              // }}
+              // onFullScreen={(itemId, itemType) => {
+              //   setFullScreenItem({ id: itemId, type: itemType });
+              //   setShowDocumentPanel(false);
+              // }}
+              // onClosePanel={() => setShowDocumentPanel(false)}
             />
           </div>
         )}

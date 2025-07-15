@@ -21,7 +21,7 @@ export async function getTemplates(category?: string, popularOnly?: boolean) {
     }
     
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      query = query.where(and(...conditions)) as any;
     }
     
     const templateList = await query;

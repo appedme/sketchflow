@@ -33,9 +33,9 @@ export function useProjectState(projectId: string, excalidrawAPI: ExcalidrawImpe
         const response = await fetch(`/api/canvas/${projectId}`);
         if (response.ok) {
           const canvasData = await response.json();
-          setElements(canvasData.elements || []);
-          setAppState(prev => ({ ...prev, ...canvasData.appState }));
-          setTheme(canvasData.appState?.theme || "light");
+          setElements((canvasData as any)?.elements || []);
+          setAppState(prev => ({ ...prev, ...(canvasData as any)?.appState }));
+          setTheme((canvasData as any)?.appState?.theme || "light");
           return;
         }
       } catch (error) {

@@ -19,10 +19,7 @@ export function useAutoSave(
     setIsSaving(true);
     try {
       // Save to database via server action
-      await updateCanvas(canvasId, {
-        elements,
-        appState
-      });
+      await updateCanvas(canvasId, elements, appState);
       
       const now = new Date();
       const timeString = now.toLocaleTimeString([], { 

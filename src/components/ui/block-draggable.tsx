@@ -231,7 +231,7 @@ const DragHandle = React.memo(function DragHandle({
 
             if (isMultiple) {
               const elements = createDragPreviewElements(editor);
-              multiplePreviewRef.current?.append(...elements);
+              elements.forEach(el => multiplePreviewRef.current?.appendChild(el));
               multiplePreviewRef.current?.classList.remove('hidden');
             } else {
               editor.setOption(DndPlugin, 'draggingId', null);
@@ -328,7 +328,7 @@ const createDragPreviewElements = (editor: PlateEditor): HTMLElement[] => {
 
     ids.push(node.id as string);
     const wrapper = document.createElement('div');
-    wrapper.append(newDomNode);
+    wrapper.appendChild(newDomNode);
     wrapper.style.display = 'flow-root';
 
     const lastDomNode = sortedNodes[index - 1];

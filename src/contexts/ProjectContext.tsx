@@ -94,9 +94,9 @@ export function ProjectProvider({ children, projectId }: ProjectProviderProps) {
   return (
     <ProjectContext.Provider
       value={{
-        project: project || null,
-        documents,
-        canvases,
+        project: (project as any) || null,
+        documents: (documents as any) || [],
+        canvases: (canvases as any) || [],
         isLoading,
         error,
         mutateProject,

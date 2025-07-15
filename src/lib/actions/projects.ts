@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { nanoid } from 'nanoid';
 import { getDb } from '@/lib/db/connection';
 import { projects, templates, projectCollaborators, type NewProject } from '@/lib/db/schema';
-import { eq, and, desc, count, gte } from 'drizzle-orm';
+import { eq, and, desc, count, gte, sql } from 'drizzle-orm';
 
 export async function createProject(formData: FormData) {
   const { userId } = await auth();
@@ -290,7 +290,7 @@ export async function incrementProjectViews(projectId: string) {
     await db
       .update(projects)
       .set({
-        viewCount: projects.viewCount + 1,
+        viewCount: sql`${projects.viewCount} + 1`,
         updatedAt: new Date().toISOString(),
       })
       .where(eq(projects.id, projectId));

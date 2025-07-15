@@ -74,12 +74,12 @@ export function CanvasProvider({ children, projectId, canvasId }: CanvasProvider
   // Initialize local state when canvas loads
   useEffect(() => {
     if (canvasData) {
-      const newElements = canvasData.elements || [];
+      const newElements = (canvasData as any)?.elements || [];
       const newAppState = {
-        ...canvasData.appState,
+        ...(canvasData as any)?.appState,
         collaborators: new Map(), // Ensure collaborators is always a Map
-      } || { collaborators: new Map() };
-      const newFiles = canvasData.files || {};
+      };
+      const newFiles = (canvasData as any)?.files || {};
       
       setElements(newElements);
       setAppState(newAppState);
@@ -211,7 +211,7 @@ export function CanvasProvider({ children, projectId, canvasId }: CanvasProvider
   return (
     <CanvasContext.Provider
       value={{
-        canvas: canvasData || null,
+        canvas: (canvasData as any) || null,
         isLoading,
         error,
         elements,

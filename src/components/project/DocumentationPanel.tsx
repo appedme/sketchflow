@@ -164,8 +164,8 @@ export function DocumentationPanel({ projectId, projectName }: DocumentationPane
 
   // Combine and filter items
   const allItems = [
-    ...documents.map((doc: Document) => ({ ...doc, type: 'document' as const })),
-    ...canvases.map((canvas: Canvas) => ({ ...canvas, type: 'canvas' as const }))
+    ...((documents as Document[]) || []).map((doc: Document) => ({ ...doc, type: 'document' as const })),
+    ...((canvases as Canvas[]) || []).map((canvas: Canvas) => ({ ...canvas, type: 'canvas' as const }))
   ];
 
   const filteredItems = allItems.filter(item =>
