@@ -31,7 +31,7 @@ export function ExportToolbarButton(props: DropdownMenuProps) {
     const { default: html2canvas } = await import('html2canvas-pro');
 
     const style = document.createElement('style');
-    document.head.append(style);
+    document.head.appendChild(style);
 
     const canvas = await html2canvas(editor.api.toDOMNode(editor)!, {
       onclone: (document: Document) => {
@@ -63,7 +63,7 @@ export function ExportToolbarButton(props: DropdownMenuProps) {
     const link = document.createElement('a');
     link.href = blobUrl;
     link.download = filename;
-    document.body.append(link);
+    document.body.appendChild(link);
     link.click();
     link.remove();
 
