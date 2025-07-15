@@ -12,7 +12,10 @@ import {
   Search,
   SplitSquareHorizontal,
   X,
-  Maximize2
+  Maximize2,
+  Edit2,
+  Check,
+  X as XIcon
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import useSWR, { mutate } from 'swr';
@@ -50,6 +53,8 @@ export function DocumentationPanel({ projectId, projectName }: DocumentationPane
   const router = useRouter();
   const { user } = useUser();
   const [searchTerm, setSearchTerm] = useState('');
+  const [editingItem, setEditingItem] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState('');
 
   // Fetch documents and canvases with SWR
   const { data: documents = [], error: docsError } = useSWR(
@@ -115,6 +120,45 @@ export function DocumentationPanel({ projectId, projectName }: DocumentationPane
       router.push(`/project/${projectId}/canvas/${newCanvas.id}`);
     } catch (error) {
       console.error('Failed to create canvas:', error);
+    }
+  };
+
+  const startEditing = (item: any) => {
+    setEditingItem(item.id);
+    setEditingTitle(item.title);
+  };
+
+  const cancelEditing = () => {
+    setEditingItem(null);
+    setEditingTitle('');
+  };
+
+  const saveRename = async (item: any) => {
+    if (!user?.id || !editingTitle.trim()) return;
+    
+    try {
+      const endpoint = item.type === 'document' 
+        ? `/api/documents/${item.id}` 
+        : `/api/canvas/${item.id}`;
+      
+      const response = await fetch(endpoint, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: editingTitle.trim(),
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to rename item');
+
+      // Update the cache
+      mutate(`/api/projects/${projectId}/documents`);
+      mutate(`/api/projects/${projectId}/canvases`);
+      
+      setEditingItem(null);
+      setEditingTitle('');
+    } catch (error) {
+      console.error('Failed to rename item:', error);
     }
   };
 
@@ -202,6 +246,7 @@ export function DocumentationPanel({ projectId, projectName }: DocumentationPane
                 key={item.id}
                 className="p-4 hover:bg-gray-50 transition-colors cursor-pointer group"
                 onClick={() => {
+                  if (editingItem === item.id) return; // Don't navigate when editing
                   if (item.type === 'document') {
                     router.push(`/project/${projectId}/document/${item.id}`);
                   } else {
@@ -221,9 +266,49 @@ export function DocumentationPanel({ projectId, projectName }: DocumentationPane
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors truncate">
-                        {item.title}
-                      </h3>
+                      {editingItem === item.id ? (
+                        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                          <Input
+                            value={editingTitle}
+                            onChange={(e) => setEditingTitle(e.target.value)}
+                            className="h-6 text-sm font-medium"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                saveRename(item);
+                              } else if (e.key === 'Escape') {
+                                cancelEditing();
+                              }
+                            }}
+                            autoFocus
+                          />
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              saveRename(item);
+                            }}
+                            className="h-6 w-6 p-0"
+                          >
+                            <Check className="w-3 h-3 text-green-600" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              cancelEditing();
+                            }}
+                            className="h-6 w-6 p-0"
+                          >
+                            <XIcon className="w-3 h-3 text-red-600" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <h3 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors truncate">
+                          {item.title}
+                        </h3>
+                      )}
                       <div className="flex items-center gap-2 text-sm text-gray-500">
                         <span className="capitalize">{item.type}</span>
                         <span>•</span>
@@ -254,6 +339,18 @@ export function DocumentationPanel({ projectId, projectName }: DocumentationPane
                       variant="ghost"
                       onClick={(e) => {
                         e.stopPropagation();
+                        startEditing(item);
+                      }}
+                      className="h-8 w-8 p-0"
+                      title="Rename"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
                         if (item.type === 'document') {
                           router.push(`/project/${projectId}/document/${item.id}`);
                         } else {
@@ -261,6 +358,7 @@ export function DocumentationPanel({ projectId, projectName }: DocumentationPane
                         }
                       }}
                       className="h-8 w-8 p-0"
+                      title="Open"
                     >
                       <Maximize2 className="w-4 h-4" />
                     </Button>
@@ -276,6 +374,7 @@ export function DocumentationPanel({ projectId, projectName }: DocumentationPane
                         router.push(`/project/${projectId}/split?left=${leftId}&leftType=${leftType}&right=${rightId}&rightType=${rightType}`);
                       }}
                       className="h-8 w-8 p-0"
+                      title="Split View"
                     >
                       <SplitSquareHorizontal className="w-4 h-4" />
                     </Button>
