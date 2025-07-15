@@ -31,13 +31,7 @@ import {
     Eye
 } from "lucide-react";
 import Link from "next/link";
-import useSWR from 'swr';
-
-const fetcher = async (url: string) => {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('Failed to fetch');
-    return res.json();
-};
+import { useApi } from '@/hooks/useApi';
 
 const iconMap = {
     FileText,
@@ -77,9 +71,8 @@ export default function TemplatesPage() {
     }, [isLoaded, user, router]);
 
     // Fetch templates
-    const { data: templates = [], isLoading } = useSWR(
-        user ? '/api/templates' : null,
-        fetcher
+    const { data: templates = [], isLoading } = useApi<any[]>(
+        '/api/templates'
     );
 
     if (!isLoaded || !user) {

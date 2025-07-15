@@ -23,6 +23,8 @@ import "@excalidraw/excalidraw/index.css";
 import "../../styles/excalidraw-custom.css";
 import { CanvasProvider, useCanvas } from '@/contexts/CanvasContext';
 import { uploadImageFromDataURL } from '@/lib/imageUpload';
+import { LibraryPanel } from '@/components/canvas/LibraryPanel';
+import type { LibraryItem } from '@/lib/excalidraw-libraries';
 
 interface ExcalidrawCanvasProps {
   projectId: string;
@@ -232,6 +234,31 @@ function ExcalidrawCanvasContent({
     }
   }, [files, updateFiles]);
 
+  // Handle library items
+  const handleAddLibraryItems = useCallback((libraryItems: LibraryItem[]) => {
+    if (!excalidrawAPIRef.current) return;
+
+    try {
+      // Convert library items to Excalidraw elements
+      const elementsToAdd = libraryItems.flatMap(item =>
+        item.elements.map(element => ({
+          ...element,
+          id: `${element.id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          x: element.x + Math.random() * 100, // Add some randomness to position
+          y: element.y + Math.random() * 100,
+        }))
+      );
+
+      if (elementsToAdd.length > 0) {
+        // Add elements to the canvas
+        const newElements = [...elements, ...elementsToAdd];
+        updateElements(newElements);
+      }
+    } catch (error) {
+      console.error('Error adding library items:', error);
+    }
+  }, [elements, updateElements]);
+
   // Import functions
   const importFromJSON = useCallback(() => {
     if (sceneFileInputRef.current) {
@@ -387,6 +414,10 @@ function ExcalidrawCanvasContent({
             <MainMenu.Item onSelect={saveCanvas}>
               Save Canvas (Ctrl+S)
             </MainMenu.Item>
+          </MainMenu.Group>
+          <MainMenu.Separator />
+          <MainMenu.Group title="Libraries">
+            <LibraryPanel onAddLibraryItems={handleAddLibraryItems} />
           </MainMenu.Group>
         </MainMenu>
         <WelcomeScreen>

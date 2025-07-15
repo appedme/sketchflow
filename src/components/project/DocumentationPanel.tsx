@@ -1,15 +1,12 @@
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUser } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
@@ -19,41 +16,27 @@ import {
   Search,
   SplitSquareHorizontal,
   X,
-  Maximize2,
   Edit2,
   Check,
   X as XIcon,
   MoreHorizontal,
-  Filter,
-  SortAsc,
-  SortDesc,
-  Grid3X3,
-  List,
   Calendar,
   Clock,
   Eye,
-  Copy,
-  Trash2,
   Star,
   StarOff,
-  FolderPlus,
   Folder,
-  ChevronRight,
-  ChevronDown,
   Menu,
   ArrowUpDown,
   Hash,
   Type,
-  Image,
-  Link,
-  Bookmark,
-  Tag,
-  Users,
-  Share2
+  SortAsc,
+  SortDesc
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import useSWR, { mutate } from 'swr';
+import { mutate } from 'swr';
 import { cn } from '@/lib/utils';
+import { useApi } from '@/hooks/useApi';
 
 interface Document {
   id: string;
@@ -90,16 +73,9 @@ interface DocumentationPanelProps {
   isMobile?: boolean;
 }
 
-type ViewMode = 'list' | 'grid';
 type SortBy = 'updated' | 'created' | 'title' | 'type';
 type SortOrder = 'asc' | 'desc';
 type FilterBy = 'all' | 'documents' | 'canvases' | 'favorites';
-
-const fetcher = async (url: string) => {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Failed to fetch');
-  return res.json();
-};
 
 export function DocumentationPanel({
   projectId,
@@ -108,28 +84,22 @@ export function DocumentationPanel({
   isMobile = false
 }: DocumentationPanelProps) {
   const router = useRouter();
-  const { user } = useUser();
 
   // State management
   const [searchTerm, setSearchTerm] = useState('');
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [sortBy, setSortBy] = useState<SortBy>('updated');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [filterBy, setFilterBy] = useState<FilterBy>('all');
-  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
-  const [isSelectionMode, setIsSelectionMode] = useState(false);
 
   // Fetch documents and canvases with SWR
-  const { data: documents = [], error: docsError, isLoading: docsLoading } = useSWR(
-    user?.id ? `/api/projects/${projectId}/documents` : null,
-    fetcher
+  const { data: documents = [], error: docsError, isLoading: docsLoading } = useApi<Document[]>(
+    `/api/projects/${projectId}/documents`
   );
 
-  const { data: canvases = [], error: canvasError, isLoading: canvasLoading } = useSWR(
-    user?.id ? `/api/projects/${projectId}/canvases` : null,
-    fetcher
+  const { data: canvases = [], error: canvasError, isLoading: canvasLoading } = useApi<Canvas[]>(
+    `/api/projects/${projectId}/canvases`
   );
 
   // Combine and process items
@@ -204,8 +174,6 @@ export function DocumentationPanel({
 
   // Action handlers
   const createNewDocument = async () => {
-    if (!user?.id) return;
-
     try {
       const response = await fetch(`/api/projects/${projectId}/documents`, {
         method: 'POST',
@@ -228,8 +196,6 @@ export function DocumentationPanel({
   };
 
   const createNewCanvas = async () => {
-    if (!user?.id) return;
-
     try {
       const response = await fetch(`/api/projects/${projectId}/canvases`, {
         method: 'POST',
@@ -287,7 +253,7 @@ export function DocumentationPanel({
   };
 
   const saveRename = async (item: ContentItem) => {
-    if (!user?.id || !editingTitle.trim()) return;
+    if (!editingTitle.trim()) return;
 
     try {
       const endpoint = item.type === 'document'
@@ -315,7 +281,7 @@ export function DocumentationPanel({
   };
 
   const handleItemClick = (item: ContentItem) => {
-    if (editingItem === item.id || isSelectionMode) return;
+    if (editingItem === item.id) return;
 
     if (item.type === 'document') {
       router.push(`/project/${projectId}/document/${item.id}`);
@@ -324,143 +290,110 @@ export function DocumentationPanel({
     }
   };
 
-  const toggleItemSelection = (itemId: string) => {
-    const newSelection = new Set(selectedItems);
-    if (newSelection.has(itemId)) {
-      newSelection.delete(itemId);
-    } else {
-      newSelection.add(itemId);
-    }
-    setSelectedItems(newSelection);
-  };
-
-  // Mobile responsive wrapper
+  // Panel content
   const PanelContent = () => (
     <div className={cn("h-full flex flex-col bg-background", className)}>
-      {/* Enhanced Header */}
-      <div className="flex-shrink-0 border-b bg-card">
-        <div className="p-4 space-y-4">
-          {/* Title and Actions */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                <Folder className="w-4 h-4 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-lg font-semibold text-foreground truncate">{projectName}</h1>
-                <p className="text-sm text-muted-foreground">
-                  {processedItems.length} {processedItems.length === 1 ? 'item' : 'items'}
-                </p>
-              </div>
+      {/* Header */}
+      <div className="flex-shrink-0 border-b bg-card p-4 space-y-4">
+        {/* Title and Actions */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Folder className="w-4 h-4 text-primary" />
             </div>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="sm" className="gap-2">
-                  <Plus className="w-4 h-4" />
-                  <span className="hidden sm:inline">New</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={createNewDocument} className="gap-2">
-                  <FileText className="w-4 h-4" />
-                  New Document
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={createNewCanvas} className="gap-2">
-                  <CanvasIcon className="w-4 h-4" />
-                  New Canvas
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="min-w-0">
+              <h1 className="text-lg font-semibold text-foreground truncate">{projectName}</h1>
+              <p className="text-sm text-muted-foreground">
+                {processedItems.length} {processedItems.length === 1 ? 'item' : 'items'}
+              </p>
+            </div>
           </div>
 
-          {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              placeholder="Search documents and canvases..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-
-          {/* Filters and View Controls */}
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <Select value={filterBy} onValueChange={(value: FilterBy) => setFilterBy(value)}>
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Items</SelectItem>
-                  <SelectItem value="documents">Documents</SelectItem>
-                  <SelectItem value="canvases">Canvases</SelectItem>
-                  <SelectItem value="favorites">Favorites</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <ArrowUpDown className="w-4 h-4" />
-                    <span className="hidden sm:inline">Sort</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start">
-                  <DropdownMenuItem onClick={() => setSortBy('updated')}>
-                    <Clock className="w-4 h-4 mr-2" />
-                    Last Updated
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSortBy('created')}>
-                    <Calendar className="w-4 h-4 mr-2" />
-                    Date Created
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSortBy('title')}>
-                    <Type className="w-4 h-4 mr-2" />
-                    Name
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSortBy('type')}>
-                    <Hash className="w-4 h-4 mr-2" />
-                    Type
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}>
-                    {sortOrder === 'asc' ? (
-                      <>
-                        <SortDesc className="w-4 h-4 mr-2" />
-                        Descending
-                      </>
-                    ) : (
-                      <>
-                        <SortAsc className="w-4 h-4 mr-2" />
-                        Ascending
-                      </>
-                    )}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
-            <div className="flex items-center gap-1">
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('list')}
-                className="p-2"
-              >
-                <List className="w-4 h-4" />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" className="gap-2 flex-shrink-0">
+                <Plus className="w-4 h-4" />
+                <span className="hidden sm:inline">New</span>
               </Button>
-              <Button
-                variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('grid')}
-                className="p-2"
-              >
-                <Grid3X3 className="w-4 h-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={createNewDocument} className="gap-2">
+                <FileText className="w-4 h-4" />
+                New Document
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={createNewCanvas} className="gap-2">
+                <CanvasIcon className="w-4 h-4" />
+                New Canvas
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Input
+            placeholder="Search documents and canvases..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
+        {/* Filters */}
+        <div className="flex items-center gap-2 overflow-x-auto">
+          <Select value={filterBy} onValueChange={(value: FilterBy) => setFilterBy(value)}>
+            <SelectTrigger className="w-32 flex-shrink-0">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Items</SelectItem>
+              <SelectItem value="documents">Documents</SelectItem>
+              <SelectItem value="canvases">Canvases</SelectItem>
+              <SelectItem value="favorites">Favorites</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2 flex-shrink-0">
+                <ArrowUpDown className="w-4 h-4" />
+                <span className="hidden sm:inline">Sort</span>
               </Button>
-            </div>
-          </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem onClick={() => setSortBy('updated')}>
+                <Clock className="w-4 h-4 mr-2" />
+                Last Updated
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy('created')}>
+                <Calendar className="w-4 h-4 mr-2" />
+                Date Created
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy('title')}>
+                <Type className="w-4 h-4 mr-2" />
+                Name
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy('type')}>
+                <Hash className="w-4 h-4 mr-2" />
+                Type
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}>
+                {sortOrder === 'asc' ? (
+                  <>
+                    <SortDesc className="w-4 h-4 mr-2" />
+                    Descending
+                  </>
+                ) : (
+                  <>
+                    <SortAsc className="w-4 h-4 mr-2" />
+                    Ascending
+                  </>
+                )}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -482,11 +415,11 @@ export function DocumentationPanel({
               </Button>
             </div>
           ) : isLoading ? (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-3 p-3 rounded-lg border animate-pulse">
-                  <div className="w-10 h-10 bg-muted rounded-lg" />
-                  <div className="flex-1 space-y-2">
+                  <div className="w-10 h-10 bg-muted rounded-lg flex-shrink-0" />
+                  <div className="flex-1 space-y-2 min-w-0">
                     <div className="h-4 bg-muted rounded w-3/4" />
                     <div className="h-3 bg-muted rounded w-1/2" />
                   </div>
@@ -525,16 +458,11 @@ export function DocumentationPanel({
               )}
             </div>
           ) : (
-            <div className={cn(
-              viewMode === 'grid'
-                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-                : "space-y-2"
-            )}>
+            <div className="space-y-2">
               {processedItems.map((item) => (
                 <ContentItemCard
                   key={item.id}
                   item={item}
-                  viewMode={viewMode}
                   isEditing={editingItem === item.id}
                   editingTitle={editingTitle}
                   onEditingTitleChange={setEditingTitle}
@@ -544,11 +472,7 @@ export function DocumentationPanel({
                   onToggleFavorite={() => toggleFavorite(item)}
                   onClick={() => handleItemClick(item)}
                   onSplitView={() => {
-                    const leftId = item.id;
-                    const leftType = item.type;
-                    const rightId = projectId;
-                    const rightType = item.type === 'document' ? 'canvas' : 'document';
-                    router.push(`/project/${projectId}/split?left=${leftId}&leftType=${leftType}&right=${rightId}&rightType=${rightType}`);
+                    router.push(`/project/${projectId}/split?left=${item.id}&leftType=${item.type}&right=${projectId}&rightType=${item.type === 'document' ? 'canvas' : 'document'}`);
                   }}
                 />
               ))}
@@ -579,10 +503,9 @@ export function DocumentationPanel({
   return <PanelContent />;
 }
 
-// Content Item Card Component
+// Content Item Card Component (List view only)
 interface ContentItemCardProps {
   item: ContentItem;
-  viewMode: ViewMode;
   isEditing: boolean;
   editingTitle: string;
   onEditingTitleChange: (title: string) => void;
@@ -596,7 +519,6 @@ interface ContentItemCardProps {
 
 function ContentItemCard({
   item,
-  viewMode,
   isEditing,
   editingTitle,
   onEditingTitleChange,
@@ -609,155 +531,6 @@ function ContentItemCard({
 }: ContentItemCardProps) {
   const isDocument = item.type === 'document';
 
-  if (viewMode === 'grid') {
-    return (
-      <div
-        className="group relative p-4 rounded-lg border bg-card hover:shadow-md transition-all duration-200 cursor-pointer hover:border-primary/50"
-        onClick={onClick}
-      >
-        {/* Favorite Star */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 h-auto"
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleFavorite();
-          }}
-        >
-          {item.isFavorite ? (
-            <Star className="w-4 h-4 text-yellow-500 fill-current" />
-          ) : (
-            <StarOff className="w-4 h-4 text-muted-foreground" />
-          )}
-        </Button>
-
-        {/* Icon */}
-        <div className={cn(
-          "w-12 h-12 rounded-xl flex items-center justify-center mb-3",
-          isDocument
-            ? "bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
-            : "bg-purple-100 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400"
-        )}>
-          {isDocument ? (
-            <FileText className="w-6 h-6" />
-          ) : (
-            <CanvasIcon className="w-6 h-6" />
-          )}
-        </div>
-
-        {/* Content */}
-        <div className="space-y-2">
-          {isEditing ? (
-            <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
-              <Input
-                value={editingTitle}
-                onChange={(e) => onEditingTitleChange(e.target.value)}
-                className="h-8 text-sm font-medium"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    onSaveRename();
-                  } else if (e.key === 'Escape') {
-                    onCancelEditing();
-                  }
-                }}
-                autoFocus
-              />
-              <div className="flex gap-1">
-                <Button size="sm" onClick={onSaveRename} className="h-6 px-2">
-                  <Check className="w-3 h-3" />
-                </Button>
-                <Button size="sm" variant="outline" onClick={onCancelEditing} className="h-6 px-2">
-                  <XIcon className="w-3 h-3" />
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <>
-              <h3 className="font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2">
-                {item.title}
-              </h3>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Badge variant="secondary" className="text-xs">
-                  {item.type}
-                </Badge>
-                <span>•</span>
-                <span>{formatDistanceToNow(new Date(item.updatedAt), { addSuffix: true })}</span>
-              </div>
-              {isDocument && item.contentText && (
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {item.contentText}
-                </p>
-              )}
-              {!isDocument && (
-                <p className="text-sm text-muted-foreground">
-                  {item.elementCount || 0} elements
-                </p>
-              )}
-            </>
-          )}
-        </div>
-
-        {/* Actions */}
-        <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MoreHorizontal className="w-3 h-3" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={(e) => {
-                e.stopPropagation();
-                onClick();
-              }}>
-                <Eye className="w-4 h-4 mr-2" />
-                Open
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => {
-                e.stopPropagation();
-                onStartEditing();
-              }}>
-                <Edit2 className="w-4 h-4 mr-2" />
-                Rename
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => {
-                e.stopPropagation();
-                onSplitView();
-              }}>
-                <SplitSquareHorizontal className="w-4 h-4 mr-2" />
-                Split View
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={(e) => {
-                e.stopPropagation();
-                onToggleFavorite();
-              }}>
-                {item.isFavorite ? (
-                  <>
-                    <StarOff className="w-4 h-4 mr-2" />
-                    Remove from Favorites
-                  </>
-                ) : (
-                  <>
-                    <Star className="w-4 h-4 mr-2" />
-                    Add to Favorites
-                  </>
-                )}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-    );
-  }
-
-  // List view
   return (
     <div
       className="group flex items-center gap-3 p-3 rounded-lg border bg-card hover:shadow-sm transition-all duration-200 cursor-pointer hover:border-primary/50"
@@ -798,7 +571,7 @@ function ContentItemCard({
               size="sm"
               variant="ghost"
               onClick={onSaveRename}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 flex-shrink-0"
             >
               <Check className="w-4 h-4 text-green-600" />
             </Button>
@@ -806,7 +579,7 @@ function ContentItemCard({
               size="sm"
               variant="ghost"
               onClick={onCancelEditing}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 flex-shrink-0"
             >
               <XIcon className="w-4 h-4 text-red-600" />
             </Button>
@@ -820,22 +593,22 @@ function ContentItemCard({
               {item.isFavorite && (
                 <Star className="w-4 h-4 text-yellow-500 fill-current flex-shrink-0" />
               )}
-              <Badge variant="secondary" className="text-xs ml-auto">
+              <Badge variant="secondary" className="text-xs ml-auto flex-shrink-0">
                 {item.type}
               </Badge>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>{formatDistanceToNow(new Date(item.updatedAt), { addSuffix: true })}</span>
+              <span className="truncate">{formatDistanceToNow(new Date(item.updatedAt), { addSuffix: true })}</span>
               {isDocument && item.wordCount && (
                 <>
                   <span>•</span>
-                  <span>{item.wordCount} words</span>
+                  <span className="flex-shrink-0">{item.wordCount} words</span>
                 </>
               )}
               {!isDocument && (
                 <>
                   <span>•</span>
-                  <span>{item.elementCount || 0} elements</span>
+                  <span className="flex-shrink-0">{item.elementCount || 0} elements</span>
                 </>
               )}
             </div>
@@ -844,7 +617,7 @@ function ContentItemCard({
       </div>
 
       {/* Actions */}
-      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
         <Button
           variant="ghost"
           size="sm"
@@ -873,18 +646,6 @@ function ContentItemCard({
         >
           <Edit2 className="w-4 h-4" />
         </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            onSplitView();
-          }}
-          className="h-8 w-8 p-0"
-          title="Split View"
-        >
-          <SplitSquareHorizontal className="w-4 h-4" />
-        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -901,21 +662,32 @@ function ContentItemCard({
               e.stopPropagation();
               onClick();
             }}>
-              <Maximize2 className="w-4 h-4 mr-2" />
-              Open Full Screen
+              <Eye className="w-4 h-4 mr-2" />
+              Open
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Copy className="w-4 h-4 mr-2" />
-              Duplicate
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Share2 className="w-4 h-4 mr-2" />
-              Share
+            <DropdownMenuItem onClick={(e) => {
+              e.stopPropagation();
+              onSplitView();
+            }}>
+              <SplitSquareHorizontal className="w-4 h-4 mr-2" />
+              Split View
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete
+            <DropdownMenuItem onClick={(e) => {
+              e.stopPropagation();
+              onToggleFavorite();
+            }}>
+              {item.isFavorite ? (
+                <>
+                  <StarOff className="w-4 h-4 mr-2" />
+                  Remove from Favorites
+                </>
+              ) : (
+                <>
+                  <Star className="w-4 h-4 mr-2" />
+                  Add to Favorites
+                </>
+              )}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

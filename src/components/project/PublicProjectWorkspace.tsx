@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Eye } from 'lucide-react';
+import { ExternalLink, Eye, Menu, X } from 'lucide-react';
+import { DocumentationPanel } from './DocumentationPanel';
+import { PlateDocumentEditor } from './PlateDocumentEditor';
 import dynamic from 'next/dynamic';
 
 const ExcalidrawCanvas = dynamic(
@@ -24,47 +26,125 @@ const ExcalidrawCanvas = dynamic(
 );
 
 interface PublicProjectWorkspaceProps {
-  projectId: string;
-  projectName: string;
-  shareData?: any;
+  project: any;
+  shareToken: string;
+  shareSettings: any;
+  isEmbedded?: boolean;
+  embedType?: 'project' | 'document' | 'canvas';
+  embedId?: string;
 }
 
 export function PublicProjectWorkspace({
-  projectId,
-  projectName,
-  shareData
+  project,
+  shareToken,
+  shareSettings,
+  isEmbedded = false,
+  embedType,
+  embedId
 }: PublicProjectWorkspaceProps) {
-  return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      {/* Public Header */}
-      <div className="h-12 bg-white border-b border-gray-200 flex items-center justify-between px-4">
-        <div className="flex items-center gap-4">
-          <Eye className="w-4 h-4 text-gray-500" />
-          <h1 className="font-semibold text-lg text-gray-900">{projectName}</h1>
-          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-            Public View
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => window.open('https://sketchflow.space', '_blank')}
-            className="gap-2"
-          >
-            <ExternalLink className="w-4 h-4" />
-            Create Your Own
-          </Button>
-        </div>
-      </div>
+  const [showSidebar, setShowSidebar] = useState(!isEmbedded);
+  const [currentView, setCurrentView] = useState<'project' | 'document' | 'canvas'>(
+    embedType || 'project'
+  );
+  const [currentItemId, setCurrentItemId] = useState<string | null>(embedId || null);
 
-      {/* Canvas Content */}
-      <div className="flex-1">
-        <ExcalidrawCanvas
-          projectId={projectId}
-          projectName={projectName}
+  const showToolbar = !isEmbedded || shareSettings?.embedSettings?.toolbar !== false;
+
+  const renderContent = () => {
+    if (currentView === 'document' && currentItemId) {
+      return (
+        <PlateDocumentEditor
+          documentId={currentItemId}
+          projectId={project.id}
           isReadOnly={true}
         />
+      );
+    } else if (currentView === 'canvas' && currentItemId) {
+      return (
+        <ExcalidrawCanvas
+          canvasId={currentItemId}
+          projectId={project.id}
+          projectName={project.name}
+          isReadOnly={true}
+        />
+      );
+    } else {
+      // Default project view - show main canvas or first available item
+      return (
+        <ExcalidrawCanvas
+          projectId={project.id}
+          projectName={project.name}
+          isReadOnly={true}
+        />
+      );
+    }
+  };
+
+  return (
+    <div className="h-screen flex bg-background">
+      {/* Sidebar */}
+      {showSidebar && (
+        <div className="w-80 border-r bg-card flex-shrink-0">
+          <DocumentationPanel
+            projectId={project.id}
+            projectName={project.name}
+            className="h-full"
+          />
+        </div>
+      )}
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        {showToolbar && (
+          <div className="h-12 bg-card border-b flex items-center justify-between px-4 flex-shrink-0">
+            <div className="flex items-center gap-4">
+              {!showSidebar && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowSidebar(true)}
+                  className="p-2"
+                >
+                  <Menu className="w-4 h-4" />
+                </Button>
+              )}
+              <Eye className="w-4 h-4 text-muted-foreground" />
+              <h1 className="font-semibold text-lg text-foreground">{project.name}</h1>
+              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                {isEmbedded ? 'Embedded' : 'Public View'}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              {showSidebar && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowSidebar(false)}
+                  className="p-2"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              )}
+              {!isEmbedded && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open('https://sketchflow.space', '_blank')}
+                  className="gap-2"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Create Your Own
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Content Area */}
+        <div className="flex-1 overflow-hidden">
+          {renderContent()}
+        </div>
       </div>
     </div>
   );

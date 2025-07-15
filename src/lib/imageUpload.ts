@@ -24,7 +24,7 @@ export async function uploadImageToFreeImage(file: File): Promise<ImageUploadRes
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as any;
 
     if (data.success && data.image && data.image.url) {
       return {
@@ -51,10 +51,10 @@ export async function uploadImageFromDataURL(dataURL: string, filename: string =
     // Convert data URL to blob
     const response = await fetch(dataURL);
     const blob = await response.blob();
-    
+
     // Create file from blob
     const file = new File([blob], filename, { type: blob.type });
-    
+
     return await uploadImageToFreeImage(file);
   } catch (error) {
     console.error('Data URL conversion error:', error);
@@ -69,10 +69,10 @@ export async function uploadExcalidrawImage(imageData: ArrayBuffer, mimeType: st
   try {
     // Create blob from ArrayBuffer
     const blob = new Blob([imageData], { type: mimeType });
-    
+
     // Create file from blob
     const file = new File([blob], filename, { type: mimeType });
-    
+
     return await uploadImageToFreeImage(file);
   } catch (error) {
     console.error('Excalidraw image upload error:', error);

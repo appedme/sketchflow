@@ -21,13 +21,7 @@ import {
 import Link from "next/link";
 import { ProjectCard } from '@/components/dashboard/ProjectCard';
 import { ProjectFilters } from '@/components/dashboard/ProjectFilters';
-import useSWR from 'swr';
-
-const fetcher = async (url: string) => {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Failed to fetch');
-  return res.json();
-};
+import { useApi } from '@/hooks/useApi';
 
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
@@ -48,14 +42,12 @@ export default function DashboardPage() {
   }, [isLoaded, user, router]);
 
   // Fetch projects and stats
-  const { data: projects = [], isLoading: projectsLoading } = useSWR(
-    user ? '/api/projects' : null,
-    fetcher
+  const { data: projects = [], isLoading: projectsLoading } = useApi<any[]>(
+    '/api/projects'
   );
 
-  const { data: stats = { totalProjects: 0, thisWeek: 0, collaborators: 0, totalViews: 0 } } = useSWR(
-    user ? '/api/projects/stats' : null,
-    fetcher
+  const { data: stats = { totalProjects: 0, thisWeek: 0, collaborators: 0, totalViews: 0 } } = useApi<any>(
+    '/api/projects/stats'
   );
 
   if (!isLoaded || !user) {

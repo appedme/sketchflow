@@ -26,11 +26,14 @@ import {
   CheckCircle2,
   Clock,
   User,
-  FileText
+  FileText,
+  Image,
+  Upload
 } from 'lucide-react';
 import { useDebounce } from '@/hooks/use-debounce';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { uploadImageToFreeImage } from '@/lib/imageUpload';
 
 interface PlateDocumentEditorProps {
   documentId: string;
@@ -87,6 +90,7 @@ export function PlateDocumentEditor({
   const [isEditing, setIsEditing] = useState(!isReadOnly);
   const [localTitle, setLocalTitle] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   // Initialize editor with document content
   const editor = usePlateEditor({
@@ -210,6 +214,61 @@ export function PlateDocumentEditor({
   const handleManualSave = () => {
     if (document && editor) {
       saveDocument(localTitle, editor.children);
+    }
+  };
+
+  // Handle image upload
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !editor) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setError('Please select a valid image file');
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setError('Image file size must be less than 10MB');
+      return;
+    }
+
+    try {
+      setIsUploadingImage(true);
+      setError(null);
+
+      const result = await uploadImageToFreeImage(file);
+
+      if (result.success && result.url) {
+        // Insert image into editor
+        const imageNode = {
+          type: 'img',
+          url: result.url,
+          alt: file.name,
+          children: [{ text: '' }],
+        };
+
+        // Insert the image at the current cursor position
+        editor.insertNodes([imageNode]);
+
+        // Add a paragraph after the image
+        editor.insertNodes([{
+          type: 'p',
+          children: [{ text: '' }],
+        }]);
+
+        setHasUnsavedChanges(true);
+      } else {
+        setError(result.error || 'Failed to upload image');
+      }
+    } catch (err) {
+      console.error('Image upload error:', err);
+      setError('Failed to upload image');
+    } finally {
+      setIsUploadingImage(false);
+      // Reset the input
+      event.target.value = '';
     }
   };
 
@@ -384,6 +443,32 @@ export function PlateDocumentEditor({
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+              )}
+
+              {/* Image Upload */}
+              {isEditing && !isReadOnly && (
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    disabled={isUploadingImage}
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={isUploadingImage}
+                    className="gap-2"
+                  >
+                    {isUploadingImage ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Image className="w-4 h-4" />
+                    )}
+                    {isUploadingImage ? 'Uploading...' : 'Image'}
+                  </Button>
+                </div>
               )}
 
               {/* Manual Save */}
