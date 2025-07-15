@@ -11,7 +11,10 @@ export function HeroSection() {
       <div className="max-w-4xl mx-auto space-y-10">
         {/* Announcement Badge */}
         <div className="flex justify-center">
-          <Badge variant="secondary" className="px-4 py-2 text-sm font-medium">
+          <Badge
+            variant="secondary"
+            className="px-4 py-2 text-sm font-medium rounded-4xl border border-muted shadow-md"
+          >
             {hero.announcement}
           </Badge>
         </div>

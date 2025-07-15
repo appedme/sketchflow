@@ -1,8 +1,16 @@
-import { Navigation } from "@/components/landing/navigation";
-import { HeroSection } from "@/components/landing/hero-section";
-import { FeaturesSection } from "@/components/landing/features-section";
-import { UseCasesSection } from "@/components/landing/use-cases-section";
-import { Footer } from "@/components/landing/footer";
+import { 
+  Navigation,
+  HeroSection,
+  StatsSection,
+  FeaturesSection,
+  HowItWorksSection,
+  UseCasesSection,
+  TestimonialsSection,
+  PricingPreviewSection,
+  IntegrationSection,
+  CTASection,
+  Footer 
+} from "@/components/landing";
 
 export default function LandingPage() {
   return (
@@ -10,11 +18,16 @@ export default function LandingPage() {
       <Navigation />
       <main>
         <HeroSection />
+        <StatsSection />
         <FeaturesSection />
+        <HowItWorksSection />
         <UseCasesSection />
+        <TestimonialsSection />
+        <PricingPreviewSection />
+        <IntegrationSection />
+        <CTASection />
       </main>
       <Footer />
-      
     </div>
   );
 }
