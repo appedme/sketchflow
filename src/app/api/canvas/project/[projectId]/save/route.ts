@@ -13,7 +13,18 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body: any = await request.json();
+    let body: any;
+    try {
+      const text = await request.text();
+      if (!text || text.trim() === '') {
+        return NextResponse.json({ error: 'Empty request body' }, { status: 400 });
+      }
+      body = JSON.parse(text);
+    } catch (error) {
+      console.error('JSON parse error:', error);
+      return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
+    }
+    
     const { elements, appState, files } = body;
     const { projectId } = await params;
 

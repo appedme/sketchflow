@@ -22,6 +22,7 @@ import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import "@excalidraw/excalidraw/index.css";
 import "../../styles/excalidraw-custom.css";
 import { CanvasProvider, useCanvas } from '@/contexts/CanvasContext';
+import { uploadImageFromDataURL } from '@/lib/imageUpload';
 
 interface ExcalidrawCanvasProps {
   projectId: string;
@@ -144,6 +145,93 @@ function ExcalidrawCanvasContent({
     }
   }, [elements, appState, files, projectName]);
 
+  // Image upload handler
+  const handleImageUpload = useCallback(async (file: File): Promise<{ url: string; id: string; dataURL: string }> => {
+    try {
+      // Convert file to data URL first
+      const dataURL = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
+      });
+
+      // Upload to FreeImage.host
+      const result = await uploadImageFromDataURL(dataURL, file.name);
+      const id = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      if (result.success && result.url) {
+        console.log('Image uploaded successfully:', result.url);
+        
+        // Add to Excalidraw files
+        const newFiles = {
+          ...files,
+          [id]: {
+            mimeType: file.type,
+            id: id,
+            dataURL: result.url,
+            created: Date.now(),
+          }
+        };
+        updateFiles(newFiles);
+        
+        return {
+          url: result.url,
+          id: id,
+          dataURL: result.url
+        };
+      } else {
+        console.warn('Image upload failed, using local data URL:', result.error);
+        
+        // Add to Excalidraw files with local data URL
+        const newFiles = {
+          ...files,
+          [id]: {
+            mimeType: file.type,
+            id: id,
+            dataURL: dataURL,
+            created: Date.now(),
+          }
+        };
+        updateFiles(newFiles);
+        
+        return {
+          url: dataURL,
+          id: id,
+          dataURL: dataURL
+        };
+      }
+    } catch (error) {
+      console.error('Error in image upload:', error);
+      
+      // Fallback to local data URL
+      const dataURL = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
+      });
+      
+      const id = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Add to Excalidraw files
+      const newFiles = {
+        ...files,
+        [id]: {
+          mimeType: file.type,
+          id: id,
+          dataURL: dataURL,
+          created: Date.now(),
+        }
+      };
+      updateFiles(newFiles);
+
+      return {
+        url: dataURL,
+        id: id,
+        dataURL: dataURL
+      };
+    }
+  }, [files, updateFiles]);
+
   // Import functions
   const importFromJSON = useCallback(() => {
     if (sceneFileInputRef.current) {
@@ -221,6 +309,45 @@ function ExcalidrawCanvasContent({
           libraryItems: [],
         }}
         onChange={handleChange}
+        onPaste={async (data, event) => {
+          // Handle image paste from clipboard
+          const items = event?.clipboardData?.items;
+          if (items) {
+            for (let i = 0; i < items.length; i++) {
+              const item = items[i];
+              if (item.type.startsWith('image/')) {
+                const file = item.getAsFile();
+                if (file) {
+                  try {
+                    const result = await handleImageUpload(file);
+                    console.log('Image pasted and uploaded:', result.url);
+                    
+                    // Convert to ArrayBuffer for Excalidraw
+                    const response = await fetch(result.url);
+                    const arrayBuffer = await response.arrayBuffer();
+                    
+                    // Add to files object
+                    const newFiles = {
+                      ...files,
+                      [result.id]: {
+                        mimeType: file.type,
+                        id: result.id,
+                        dataURL: result.url,
+                        created: Date.now(),
+                      }
+                    };
+                    
+                    updateFiles(newFiles);
+                    return false; // Prevent default paste
+                  } catch (error) {
+                    console.error('Error handling pasted image:', error);
+                  }
+                }
+              }
+            }
+          }
+          return true; // Allow default paste for non-images
+        }}
         viewModeEnabled={isReadOnly}
         zenModeEnabled={false}
         gridModeEnabled={false}
