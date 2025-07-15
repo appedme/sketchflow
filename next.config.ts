@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import withPWA from 'next-pwa';
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -15,9 +16,42 @@ const nextConfig: NextConfig = {
     }
     return config;
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'freeimage.host',
+      },
+      {
+        protocol: 'https',
+        hostname: 'iili.io',
+      },
+    ],
+  },
 };
 
-export default nextConfig;
+export default withPWA({
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === 'development',
+  runtimeCaching: [
+    {
+      urlPattern: /^https?.*/,
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'offlineCache',
+        expiration: {
+          maxEntries: 200,
+        },
+      },
+    },
+  ],
+})(nextConfig);
 
 // added by create cloudflare to enable calling `getCloudflareContext()` in `next dev`
 import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare';
