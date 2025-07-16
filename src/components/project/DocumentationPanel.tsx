@@ -63,7 +63,7 @@ export function DocumentationPanel({
   const [editingTitle, setEditingTitle] = useState('');
   const [loadingFileId, setLoadingFileId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<'share' | 'export' | 'import'>('share');
+  const [dialogType, setDialogType] = useState<'share' | 'export'>('share');
 
   // Get current file ID from URL
   const getCurrentFileId = () => {
@@ -190,10 +190,7 @@ export function DocumentationPanel({
     setDialogOpen(true);
   };
 
-  const importProject = () => {
-    setDialogType('import');
-    setDialogOpen(true);
-  };
+
 
   const openProjectSettings = () => {
     router.push(`/project/${projectId}/settings`);
@@ -269,10 +266,7 @@ export function DocumentationPanel({
                   <Download className="h-4 w-4" />
                   Export Project
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={importProject} className="gap-2">
-                  <Upload className="h-4 w-4" />
-                  Import Project
-                </DropdownMenuItem>
+
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => router.push(`/project/${projectId}`)} className="gap-2">
                   <FolderOpen className="h-4 w-4" />
@@ -300,7 +294,7 @@ export function DocumentationPanel({
 
       {/* Project Actions */}
       <div className="p-2 border-b bg-muted/20">
-        <div className="grid grid-cols-3 gap-1">
+        <div className="grid grid-cols-2 gap-1">
           <Button
             variant="outline"
             size="sm"
@@ -318,15 +312,6 @@ export function DocumentationPanel({
           >
             <Download className="h-3.5 w-3.5" />
             Export
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-8 text-xs justify-center gap-1.5"
-            onClick={importProject}
-          >
-            <Upload className="h-3.5 w-3.5" />
-            Import
           </Button>
         </div>
       </div>

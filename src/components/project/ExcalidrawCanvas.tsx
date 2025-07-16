@@ -26,6 +26,7 @@ import { uploadImageFromDataURL } from '@/lib/imageUpload';
 import { LibraryPanel } from '@/components/canvas/LibraryPanel';
 import type { LibraryItem } from '@/lib/excalidraw-libraries';
 import { CanvasWelcomeScreen } from '@/components/canvas/CanvasWelcomeScreen';
+import Image from "next/image";
 
 interface ExcalidrawCanvasProps {
   projectId: string;
@@ -438,8 +439,18 @@ function ExcalidrawCanvasContent({
           </MainMenu.Group>
         </MainMenu>
         <WelcomeScreen>
-          <WelcomeScreen.Hints.MenuHint />
-          <WelcomeScreen.Hints.ToolbarHint />
+          <WelcomeScreen.Center>
+
+            <Image
+              src="/logo.svg"
+              height={100}
+              width={100}
+            />
+            <h1 className="text-xl">Sketchflow</h1>
+            <WelcomeScreen.Center.Heading>
+              Start creating your canvas
+            </WelcomeScreen.Center.Heading>
+          </WelcomeScreen.Center>
         </WelcomeScreen>
       </Excalidraw>
 
