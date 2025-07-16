@@ -56,8 +56,10 @@ export function OpenMojiSidebar({
                 setPopularIcons(openMojiService.getPopularIcons(50));
                 setGroups(openMojiService.getAllGroups());
 
-                // Set initial search results to popular icons
-                setSearchResults(openMojiService.getPopularIcons(50));
+                // Set initial search results to random popular icons
+                const popularIconsData = openMojiService.getPopularIcons(50);
+                const randomIcons = [...popularIconsData].sort(() => Math.random() - 0.5).slice(0, 30);
+                setSearchResults(randomIcons);
             } catch (error) {
                 console.error('Failed to load OpenMoji data:', error);
             } finally {
@@ -75,7 +77,9 @@ export function OpenMojiSidebar({
         setSearchQuery(query);
 
         if (!query.trim()) {
-            setSearchResults(popularIcons);
+            // Show random popular icons when no search query
+            const randomIcons = [...popularIcons].sort(() => Math.random() - 0.5).slice(0, 30);
+            setSearchResults(randomIcons);
             return;
         }
 
@@ -216,8 +220,8 @@ export function OpenMojiSidebar({
                             </TabsTrigger>
                         </TabsList>
 
-                        <TabsContent value="search" className="flex-1 mt-2">
-                            <ScrollArea className="h-full px-4">
+                        <TabsContent value="search" className="flex-1 mt-2 overflow-hidden">
+                            <ScrollArea className="h-full px-4" style={{ height: 'calc(100vh - 280px)' }}>
                                 {searchResults.length === 0 ? (
                                     <div className="text-center py-8">
                                         <Smile className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
@@ -271,8 +275,8 @@ export function OpenMojiSidebar({
                             </ScrollArea>
                         </TabsContent>
 
-                        <TabsContent value="groups" className="flex-1 mt-2">
-                            <ScrollArea className="h-full px-4">
+                        <TabsContent value="groups" className="flex-1 mt-2 overflow-hidden">
+                            <ScrollArea className="h-full px-4" style={{ height: 'calc(100vh - 280px)' }}>
                                 <div className="space-y-1">
                                     <Button
                                         variant={selectedGroup === '' ? 'default' : 'ghost'}

@@ -91,6 +91,7 @@ function Draggable(props: PlateElementProps) {
 
   const [multiplePreviewTop, setMultiplePreviewTop] = React.useState(0);
   const [isMultiple, setIsMultiple] = React.useState(false);
+  const multiplePreviewRef = React.useRef<HTMLDivElement>(null);
 
   // clear up virtual multiple preview when drag end
   React.useEffect(() => {

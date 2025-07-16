@@ -269,105 +269,168 @@ function ExcalidrawCanvasContent({
 
   // Handle OpenMoji icon selection
   const handleOpenMojiIconSelect = useCallback(async (icon: OpenMojiIcon, style: 'color' | 'black') => {
-    if (!excalidrawAPIRef.current) return;
+    if (!excalidrawAPIRef.current) {
+      console.error('Excalidraw API not available');
+      return;
+    }
+
+    console.log('Adding OpenMoji icon:', icon.annotation, icon.hexcode, style);
 
     try {
       // Get the center of the viewport for positioning
       const appState = excalidrawAPIRef.current.getAppState();
-      const centerX = appState.scrollX + (appState.width || 800) / 2;
-      const centerY = appState.scrollY + (appState.height || 600) / 2;
+      const centerX = (appState.scrollX || 0) + (appState.width || 800) / 2;
+      const centerY = (appState.scrollY || 0) + (appState.height || 600) / 2;
 
-      // Create image element for the icon
+      // Get icon URL
       const iconUrl = openMojiService.getIconUrl(icon.hexcode, style);
+      console.log('Icon URL:', iconUrl);
 
-      // Load the image to get its dimensions
+      // Create a unique file ID
+      const fileId = `openmoji_${icon.hexcode}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      // Fetch the SVG content
+      const response = await fetch(iconUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch icon: ${response.status} ${response.statusText}`);
+      }
+
+      const svgText = await response.text();
+      console.log('SVG fetched successfully, length:', svgText.length);
+
+      // Convert SVG to data URL
+      const svgDataUrl = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgText)))}`;
+
+      // Create image element to render SVG
       const img = document.createElement('img');
-      img.crossOrigin = 'anonymous';
 
-      img.onload = async () => {
+      img.onload = () => {
         try {
-          // Convert SVG to data URL for Excalidraw
+          console.log('Image loaded, creating canvas...');
+
+          // Create canvas for conversion
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
+
+          if (!ctx) {
+            console.error('Failed to get canvas context');
+            return;
+          }
 
           // Set canvas size
           canvas.width = 64;
           canvas.height = 64;
 
-          if (ctx) {
-            // Draw the image on canvas
-            ctx.drawImage(img, 0, 0, 64, 64);
-            const dataURL = canvas.toDataURL('image/png');
+          // Draw SVG to canvas
+          ctx.drawImage(img, 0, 0, 64, 64);
 
-            // Create file ID
-            const fileId = `openmoji_${icon.hexcode}_${Date.now()}`;
+          // Get PNG data URL
+          const pngDataUrl = canvas.toDataURL('image/png');
+          console.log('PNG data URL created, length:', pngDataUrl.length);
 
-            // Add to files
-            const newFiles = {
-              ...files,
-              [fileId]: {
-                mimeType: 'image/png' as any,
-                id: fileId,
-                dataURL: dataURL,
-                created: Date.now(),
-              }
-            };
-            updateFiles(newFiles as any);
+          // Create the file object for Excalidraw
+          const fileObject = {
+            mimeType: 'image/png' as const,
+            id: fileId,
+            dataURL: pngDataUrl,
+            created: Date.now(),
+          };
 
-            // Create image element with proper Excalidraw typing
-            const imageElement: ExcalidrawElement = {
-              type: 'image',
-              id: `openmoji_${icon.hexcode}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-              x: centerX - 32, // Center the 64px icon
-              y: centerY - 32,
-              width: 64,
-              height: 64,
-              angle: 0,
-              strokeColor: 'transparent',
-              backgroundColor: 'transparent',
-              fillStyle: 'solid',
-              strokeWidth: 0,
-              strokeStyle: 'solid',
-              roughness: 0,
-              opacity: 100,
-              groupIds: [],
-              frameId: null,
-              roundness: null,
-              seed: Math.floor(Math.random() * 1000000),
-              versionNonce: Math.floor(Math.random() * 1000000),
-              isDeleted: false,
-              boundElements: null,
-              updated: 1,
-              link: null,
-              locked: false,
-              fileId: fileId,
-              status: 'saved',
-              scale: [1, 1],
-              // Required properties for image elements
-              version: 1,
-              index: 'a0' as any,
-            } as any; // Type assertion to handle Excalidraw's complex typing
+          // Create image element using Excalidraw's expected structure
+          const imageElement = {
+            type: 'image' as const,
+            id: `openmoji_${icon.hexcode}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            x: centerX - 32,
+            y: centerY - 32,
+            width: 64,
+            height: 64,
+            angle: 0,
+            strokeColor: 'transparent',
+            backgroundColor: 'transparent',
+            fillStyle: 'solid' as const,
+            strokeWidth: 0,
+            strokeStyle: 'solid' as const,
+            roughness: 0,
+            opacity: 100,
+            groupIds: [],
+            frameId: null,
+            roundness: null,
+            seed: Math.floor(Math.random() * 1000000),
+            versionNonce: Math.floor(Math.random() * 1000000),
+            isDeleted: false,
+            boundElements: null,
+            updated: 1,
+            link: null,
+            locked: false,
+            fileId: fileId,
+            status: 'saved' as const,
+            scale: [1, 1] as [number, number]
+          };
 
-            // Add element to canvas
-            const newElements = [...elements, imageElement as ExcalidrawElement];
-            updateElements(newElements);
+          console.log('Created image element:', imageElement);
 
-            console.log(`Added OpenMoji icon: ${icon.annotation} (${icon.hexcode})`);
-          }
-        } catch (error) {
-          console.error('Error processing OpenMoji icon:', error);
+          // Get current scene state
+          const currentElements = excalidrawAPIRef.current!.getSceneElements();
+          const currentAppState = excalidrawAPIRef.current!.getAppState();
+          const currentFiles = excalidrawAPIRef.current!.getFiles();
+
+          console.log('Current elements:', currentElements.length);
+          console.log('Current files:', Object.keys(currentFiles).length);
+
+          // Add file to files object
+          const newFiles = {
+            ...currentFiles,
+            [fileId]: fileObject
+          };
+
+          // Add element to elements array
+          const newElements = [...currentElements, imageElement];
+
+          console.log('Updating scene with new element and file...');
+
+          // Update the scene with both new element and file
+          excalidrawAPIRef.current!.updateScene({
+            elements: newElements,
+            appState: currentAppState,
+            files: newFiles,
+          });
+
+          console.log(`✅ Successfully added OpenMoji icon: ${icon.annotation}`);
+          console.log('📊 New elements count:', newElements.length);
+          console.log('📁 New files count:', Object.keys(newFiles).length);
+          console.log('🎯 Element added at position:', { x: centerX - 32, y: centerY - 32 });
+          console.log('🔗 File ID:', fileId);
+
+          // Verify the element was actually added
+          setTimeout(() => {
+            const verifyElements = excalidrawAPIRef.current!.getSceneElements();
+            const verifyFiles = excalidrawAPIRef.current!.getFiles();
+            console.log('🔍 Verification - Elements in scene:', verifyElements.length);
+            console.log('🔍 Verification - Files in scene:', Object.keys(verifyFiles).length);
+            console.log('🔍 Verification - Our element exists:', verifyElements.some(el => el.id.includes(icon.hexcode)));
+            console.log('🔍 Verification - Our file exists:', fileId in verifyFiles);
+          }, 100);
+
+          // Close the sidebar after adding icon
+          setIsOpenMojiSidebarOpen(false);
+
+        } catch (canvasError) {
+          console.error('Error converting SVG to canvas:', canvasError);
         }
       };
 
-      img.onerror = () => {
-        console.error('Failed to load OpenMoji icon:', iconUrl);
+      img.onerror = (error) => {
+        console.error('Error loading SVG image:', error);
       };
 
-      img.src = iconUrl;
+      // Set image source to SVG data URL
+      img.src = svgDataUrl;
+
     } catch (error) {
       console.error('Error adding OpenMoji icon:', error);
+      alert(`Failed to add icon: ${icon.annotation}. Error: ${error.message}`);
     }
-  }, [elements, files, updateElements, updateFiles, openMojiService]);
+  }, [openMojiService]);
 
   // Import functions
   const importFromJSON = useCallback(() => {
@@ -519,6 +582,17 @@ function ExcalidrawCanvasContent({
         }}
       >
         <MainMenu>
+          <MainMenu.Group title="Libraries">
+            <LibraryPanel onAddLibraryItems={handleAddLibraryItems} />
+          </MainMenu.Group>
+          <MainMenu.Separator />
+          <MainMenu.Group title="Icons">
+            <MainMenu.Item onSelect={() => setIsOpenMojiSidebarOpen(true)}>
+              OpenMoji Icons
+            </MainMenu.Item>
+          </MainMenu.Group>
+          <MainMenu.Separator />
+
           <MainMenu.Group title="Export">
             <MainMenu.Item onSelect={exportToPNG}>
               Export to PNG
@@ -541,17 +615,9 @@ function ExcalidrawCanvasContent({
               Save Canvas (Ctrl+S)
             </MainMenu.Item>
           </MainMenu.Group>
-          <MainMenu.Separator />
-          <MainMenu.Group title="Libraries">
-            <LibraryPanel onAddLibraryItems={handleAddLibraryItems} />
-          </MainMenu.Group>
-          <MainMenu.Separator />
-          <MainMenu.Group title="Icons">
-            <MainMenu.Item onSelect={() => setIsOpenMojiSidebarOpen(true)}>
-              OpenMoji Icons
-            </MainMenu.Item>
-          </MainMenu.Group>
+
         </MainMenu>
+
         <WelcomeScreen>
           <WelcomeScreen.Center>
 

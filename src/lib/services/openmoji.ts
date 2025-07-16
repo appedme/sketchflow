@@ -56,7 +56,7 @@ export class OpenMojiService {
         }
     }
 
-    searchIcons(query: string, limit: number = 50): OpenMojiIcon[] {
+    searchIcons(query: string, limit: number = 100): OpenMojiIcon[] {
         if (!this.isLoaded || !query.trim()) {
             return [];
         }
