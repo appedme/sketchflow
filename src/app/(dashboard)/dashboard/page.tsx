@@ -26,12 +26,13 @@ export default function DashboardPage() {
     }
   }, [user, router]);
 
-  // Fetch projects
-  const { data: projects = [], isLoading: projectsLoading } = useApi<any[]>(
-    '/api/projects'
+  // Fetch projects - only when user is available
+  const { data: projects = [], isLoading: projectsLoading, error } = useApi<any[]>(
+    user ? '/api/projects' : null
   );
 
-  if (!user) {
+  // Show loading state while user is being determined
+  if (user === undefined) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -42,9 +43,14 @@ export default function DashboardPage() {
     );
   }
 
+  // Redirect if not authenticated
+  if (user === null) {
+    return null; // Will redirect in useEffect
+  }
+
   // Filter projects based on search
   const filteredProjects = projects.filter(project =>
-    project.title?.toLowerCase().includes(searchQuery.toLowerCase())
+    project.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -93,6 +99,13 @@ export default function DashboardPage() {
                 </div>
               </div>
             ))}
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground mb-4">Failed to load projects</p>
+            <Button variant="outline" onClick={() => window.location.reload()}>
+              Try again
+            </Button>
           </div>
         ) : filteredProjects.length > 0 ? (
           <div className="space-y-3">

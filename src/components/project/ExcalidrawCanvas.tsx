@@ -25,6 +25,7 @@ import { CanvasProvider, useCanvas } from '@/contexts/CanvasContext';
 import { uploadImageFromDataURL } from '@/lib/imageUpload';
 import { LibraryPanel } from '@/components/canvas/LibraryPanel';
 import type { LibraryItem } from '@/lib/excalidraw-libraries';
+import { CanvasWelcomeScreen } from '@/components/canvas/CanvasWelcomeScreen';
 
 interface ExcalidrawCanvasProps {
   projectId: string;
@@ -312,6 +313,9 @@ function ExcalidrawCanvasContent({
     );
   }
 
+  // Show welcome screen when canvas is empty
+  const showWelcomeScreen = elements.length === 0 && !isLoading;
+
   return (
     <div className="w-full h-full relative">
       {saving && (
@@ -319,6 +323,19 @@ function ExcalidrawCanvasContent({
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
           <span className="text-sm text-gray-600">Saving...</span>
         </div>
+      )}
+
+      {/* Custom Welcome Screen */}
+      {showWelcomeScreen && (
+        <CanvasWelcomeScreen
+          projectName={projectName}
+          onGetStarted={() => {
+            // Focus on the canvas to start drawing
+            if (excalidrawAPIRef.current) {
+              excalidrawAPIRef.current.setActiveTool({ type: 'selection' });
+            }
+          }}
+        />
       )}
 
       <Excalidraw
