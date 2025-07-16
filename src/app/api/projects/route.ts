@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUserId } from '@/lib/actions/auth';
-import { getProjects } from '@/lib/actions/projects';
+import { getProjects, createProject } from '@/lib/actions/projects';
 
 export async function GET(request: NextRequest) {
     try {
@@ -14,6 +14,36 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(projects);
     } catch (error) {
         console.error('Error fetching projects:', error);
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    }
+}
+
+export async function POST(request: NextRequest) {
+    try {
+        const userId = await getCurrentUserId();
+
+        if (!userId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const body = await request.json();
+        const { name, description, category, visibility } = body;
+
+        if (!name) {
+            return NextResponse.json({ error: 'Project name is required' }, { status: 400 });
+        }
+
+        const newProject = await createProject({
+            name,
+            description: description || '',
+            category: category || 'general',
+            visibility: visibility || 'private',
+            ownerId: userId
+        });
+
+        return NextResponse.json(newProject, { status: 201 });
+    } catch (error) {
+        console.error('Error creating project:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
