@@ -27,7 +27,7 @@ export default function DashboardPage() {
   }, [user, router]);
 
   // Fetch projects - only when user is available
-  const { data: projects = [], isLoading: projectsLoading, error } = useApi<any[]>(
+  const { data: projects = [], isLoading: projectsLoading, error, mutate: refreshProjects } = useApi<any[]>(
     user ? '/api/projects' : null
   );
 
@@ -110,7 +110,12 @@ export default function DashboardPage() {
         ) : filteredProjects.length > 0 ? (
           <div className="space-y-3">
             {filteredProjects.map((project) => (
-              <ProjectCard key={project.id} project={project} viewMode="list" />
+              <ProjectCard
+                key={project.id}
+                project={project}
+                viewMode="list"
+                onUpdate={refreshProjects}
+              />
             ))}
           </div>
         ) : (

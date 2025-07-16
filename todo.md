@@ -1,17 +1,5 @@
---- for text editor use - https://platejs.org/docs - done
---- for canvas use - https://excalidraw.com/
+
+in the docs panel add option of delete in 3 dots and in the share option add an export option that will export all the files in the form of json, when I toggle public on share option it doesnt works
 
 
 
-
-add pwa and use sharp image lib to create images for pwa see /public/logo.svg modify it in diff versions to create logo
-
-https://yoopta.dev/examples/withBaseFullSetup
-
-revamp hero section
-
-add a save button to the document editor http://localhost:3000/project/_NC_hs-15lnEnMhezxj3e/document/Vmvn161kt77WQH8FJjvh3
-and for saving the api http://localhost:3000/api/documents/Vmvn161kt77WQH8FJjvh3
-Request Method:
-PATCH
-is not working 

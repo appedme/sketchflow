@@ -5,7 +5,7 @@ export function Footer() {
     <footer className="py-12 px-4">
       <div className="max-w-6xl mx-auto">
         <Separator className="mb-8" />
-        
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Brand */}
           <div className="space-y-4">
@@ -47,9 +47,9 @@ export function Footer() {
         </div>
 
         <Separator className="mb-6" />
-        
+
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <p>&copy; 2024 SketchFlow. All rights reserved.</p>
+          <p>&copy; 2025 SketchFlow. All rights reserved.</p>
           <div className="flex gap-6">
             <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
             <a href="#" className="hover:text-foreground transition-colors">Terms</a>

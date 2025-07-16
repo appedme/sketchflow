@@ -302,7 +302,7 @@ const deletedNote = await db.delete(notes)
 
 // Delete with conditions
 await db.delete(notes)
-  .where(lt(notes.createdAt, new Date('2024-01-01')));
+  .where(lt(notes.createdAt, new Date('2025-01-01')));
 ```
 
 ## 🛠️ Troubleshooting

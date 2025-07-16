@@ -28,7 +28,8 @@ import {
   User,
   FileText,
   Image,
-  Upload
+  Upload,
+  Maximize2
 } from 'lucide-react';
 import { useDebounce } from '@/hooks/use-debounce';
 import { formatDistanceToNow } from 'date-fns';
@@ -445,38 +446,33 @@ export function PlateDocumentEditor({
                 </DropdownMenu>
               )}
 
-              {/* Image Upload */}
-              {isEditing && !isReadOnly && (
-                <div className="relative">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    disabled={isUploadingImage}
-                  />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={isUploadingImage}
-                    className="gap-2"
-                  >
-                    {isUploadingImage ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Image className="w-4 h-4" />
-                    )}
-                    {isUploadingImage ? 'Uploading...' : 'Image'}
-                  </Button>
-                </div>
-              )}
+              {/* Full Screen Toggle */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const editorElement = document.documentElement;
+                  if (!document.fullscreenElement) {
+                    editorElement.requestFullscreen().catch(err => {
+                      console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+                    });
+                  } else {
+                    document.exitFullscreen();
+                  }
+                }}
+                className="gap-2"
+              >
+                <Maximize2 className="w-4 h-4" />
+              </Button>
+
+
 
               {/* Manual Save */}
               {isEditing && !isReadOnly && (
                 <Button
                   size="sm"
                   onClick={handleManualSave}
-                  disabled={isSaving  }
+                  disabled={isSaving}
                   className="gap-2"
                 >
                   <Save className="w-4 h-4" />
