@@ -323,7 +323,9 @@ export async function POST(req: NextRequest) {
     } catch (error) {
       console.error('Pollinations.AI error:', error);
       // Fallback to OpenAI if Pollinations fails
-      provider = 'openai' as any;
+      // Re-declare provider as mutable
+      let mutableProvider: any = 'openai';
+      provider = mutableProvider;
     }
   }
 

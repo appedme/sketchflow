@@ -233,7 +233,7 @@ export function Navigation() {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       className="flex items-center gap-2 cursor-pointer"
-                      onClick={() => stackApp.signOut()}
+                      onClick={() => (stackApp as any).signOut()}
                     >
                       <LogOut className="h-4 w-4" />
                       Sign out

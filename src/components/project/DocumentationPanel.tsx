@@ -102,7 +102,7 @@ export function DocumentationPanel({
         body: JSON.stringify({ title: 'New Document', contentText: '' }),
       });
       if (!response.ok) throw new Error('Failed to create document');
-      const newDoc = await response.json();
+      const newDoc = await response.json() as { id: string };
       mutate(`/api/projects/${projectId}/documents`);
       router.push(`/project/${projectId}/document/${newDoc.id}`);
     } catch (error) {
@@ -118,7 +118,7 @@ export function DocumentationPanel({
         body: JSON.stringify({ title: 'New Canvas', elements: [] }),
       });
       if (!response.ok) throw new Error('Failed to create canvas');
-      const newCanvas = await response.json();
+      const newCanvas = await response.json() as { id: string };
       mutate(`/api/projects/${projectId}/canvases`);
       router.push(`/project/${projectId}/canvas/${newCanvas.id}`);
     } catch (error) {

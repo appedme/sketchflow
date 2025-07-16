@@ -73,7 +73,7 @@ function Draggable(props: PlateElementProps) {
   const { children, editor, element, path } = props;
   const blockSelectionApi = editor.getApi(BlockSelectionPlugin).blockSelection;
 
-  const { isDragging, multiplePreviewRef, previewRef, handleRef } =
+  const { isDragging, previewRef, handleRef } =
     useDraggable({
       element,
       onDropHandler: (_, { dragItem }) => {
@@ -203,7 +203,7 @@ function Gutter({
 const DragHandle = React.memo(function DragHandle({
   isDragging,
   isMultiple,
-  multiplePreviewRef,
+  // multiplePreviewRef,
   setIsMultiple,
   setMultiplePreviewTop,
 }: {

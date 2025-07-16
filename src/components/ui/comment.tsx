@@ -145,10 +145,12 @@ export function Comment(props: {
 
   const onCancel = () => {
     setEditingId(null);
-    commentEditor.tf.replaceNodes(initialValue, {
-      at: [],
-      children: true,
-    });
+    if (commentEditor?.tf) {
+      commentEditor.tf.replaceNodes(initialValue, {
+        at: [],
+        children: true,
+      });
+    }
   };
 
   const onSave = () => {
@@ -211,12 +213,14 @@ export function Comment(props: {
             <CommentMoreDropdown
               onCloseAutoFocus={() => {
                 setTimeout(() => {
-                  commentEditor.tf.focus({ edge: 'endEditor' });
+                  if (commentEditor?.tf) {
+                    commentEditor.tf.focus({ edge: 'endEditor' });
+                  }
                 }, 0);
               }}
               onRemoveComment={() => {
                 if (discussionLength === 1) {
-                  tf.comment.unsetMark({ id: comment.discussionId });
+                  (tf as any).comment.unsetMark({ id: comment.discussionId });
                   void removeDiscussion(comment.discussionId);
                 }
               }}
@@ -435,14 +439,14 @@ export function CommentCreateForm({
 
   React.useEffect(() => {
     if (commentEditor && focusOnMount) {
-      commentEditor.tf.focus();
+      commentEditor?.tf.focus();
     }
   }, [commentEditor, focusOnMount]);
 
   const onAddComment = React.useCallback(async () => {
     if (!commentValue) return;
 
-    commentEditor.tf.reset();
+    commentEditor?.tf.reset();
 
     if (discussionId) {
       // Get existing discussion
@@ -543,9 +547,9 @@ export function CommentCreateForm({
         },
         { at: path, split: true }
       );
-      editor.tf.unsetNodes([getDraftCommentKey()], { at: path });
+      editor?.tf.unsetNodes([getDraftCommentKey()], { at: path });
     });
-  }, [commentValue, commentEditor.tf, discussionId, editor, discussions]);
+  }, [commentValue, commentEditor?.tf, discussionId, editor, discussions]);
 
   return (
     <div className={cn('flex w-full', className)}>
@@ -559,7 +563,7 @@ export function CommentCreateForm({
 
       <div className="relative flex grow gap-2">
         <Plate
-          onChange={({ value }) => {
+          onChange={({ value }: { value: any }) => {
             setCommentValue(value);
           }}
           editor={commentEditor}

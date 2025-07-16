@@ -51,7 +51,7 @@ export function ShareExportDialog({
 
             if (!response.ok) throw new Error('Failed to create share link');
 
-            const { shareToken } = await response.json();
+            const { shareToken } = await response.json() as { shareToken: string };
             const url = `${window.location.origin}/share/${shareToken}`;
             setShareUrl(url);
         } catch (error) {
@@ -108,7 +108,7 @@ export function ShareExportDialog({
                     </DialogTitle>
                 </DialogHeader>
 
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "share" | "export")} className="w-full">
                     <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="share" className="gap-2">
                             <Share2 className="w-4 h-4" />

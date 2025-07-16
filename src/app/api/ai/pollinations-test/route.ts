@@ -131,7 +131,11 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-    const body = await req.json();
+    const body = await req.json() as {
+        action?: string;
+        prompt: string;
+        options?: any;
+    };
     const { action = 'text', prompt, options = {} } = body;
 
     try {

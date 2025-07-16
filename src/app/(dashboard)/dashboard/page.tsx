@@ -132,7 +132,7 @@ export default function DashboardPage() {
 
       if (!response.ok) throw new Error('Failed to create project');
 
-      const newProject = await response.json();
+      const newProject = await response.json() as { id: string };
       refreshProjects();
       router.push(`/project/${newProject.id}`);
     } catch (error) {
