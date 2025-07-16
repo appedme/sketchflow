@@ -69,170 +69,231 @@ const pricingPlans = [
 
 const faqs = [
   {
-    question: "Can I change my plan at any time?",
-    answer: "Yes, you can upgrade or downgrade your plan at any time. Changes will be reflected in your next billing cycle."
+    question: "When will paid plans be available?",
+    answer: "We plan to introduce paid plans after the beta period ends. Beta users will receive advance notice and special early-bird pricing."
   },
   {
-    question: "Is there a free trial?",
-    answer: "Yes, we offer a 14-day free trial for both Pro and Team plans. No credit card required."
+    question: "Will I lose my data when beta ends?",
+    answer: "No, all your projects and data will be preserved. You'll be able to continue using the platform seamlessly."
   },
   {
-    question: "What payment methods do you accept?",
-    answer: "We accept all major credit cards (Visa, MasterCard, American Express) and PayPal."
+    question: "What happens to my projects during beta?",
+    answer: "All projects created during beta are yours to keep. There are no limits on project creation or usage during this period."
   },
   {
-    question: "Can I cancel my subscription?",
-    answer: "Yes, you can cancel your subscription at any time. You'll continue to have access until the end of your billing period."
+    question: "Can I use this for commercial projects?",
+    answer: "Yes, you can use SketchFlow for commercial projects during the beta period at no cost."
   },
   {
-    question: "Do you offer discounts for annual billing?",
-    answer: "Yes, we offer a 20% discount when you choose annual billing for Pro and Team plans."
+    question: "How will early-bird pricing work?",
+    answer: "Beta users will receive exclusive discounts of up to 50% off regular pricing when paid plans launch."
   },
   {
-    question: "Is my data secure?",
+    question: "Is my data secure during beta?",
     answer: "Absolutely. We use enterprise-grade security measures including encryption at rest and in transit, regular backups, and SOC 2 compliance."
   }
 ];
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Header */}
       <div className="container mx-auto px-4 py-16">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-5xl font-heading font-bold tracking-tight hero-text mb-4">
-              Simple, Transparent Pricing
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-              Choose the perfect plan for your visual collaboration needs. Start free and scale as you grow.
+        <div className="text-center mb-16">
+          <Badge variant="secondary" className="mb-4">
+            Public Beta Preview
+          </Badge>
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Everything is Free During Beta
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-6">
+            We're currently in public beta! All features are completely free with generous limits. 
+            Enjoy unlimited access while we perfect the platform.
+          </p>
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 max-w-2xl mx-auto">
+            <p className="text-green-800 font-medium">
+              Beta Special: Unlimited projects, AI features, collaboration, and all premium tools - completely free!
             </p>
-            <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
-              <span className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-green-500" />
-                14-day free trial
-              </span>
-              <span className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-green-500" />
-                No setup fees
-              </span>
-              <span className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-green-500" />
-                Cancel anytime
-              </span>
-            </div>
           </div>
+        </div>
 
-          {/* Pricing Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
-            {pricingPlans.map((plan) => (
-              <Card
-                key={plan.name}
-                className={`relative ${plan.popular ? 'border-primary shadow-lg scale-105' : ''}`}
-              >
+        {/* Current Beta Benefits */}
+        <div className="mb-16">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-4">What You Get Right Now</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              During our public beta, you have access to everything without any restrictions.
+            </p>
+          </div>
+          
+          <Card className="max-w-4xl mx-auto border-green-200 bg-green-50">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl text-green-800">Beta Access - Free Forever</CardTitle>
+              <CardDescription className="text-green-700">
+                Full platform access with no limitations during beta
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-semibold mb-3 text-green-800">Core Features</h4>
+                  <ul className="space-y-2">
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-600" />
+                      <span>Unlimited projects</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-600" />
+                      <span>Advanced diagram tools</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-600" />
+                      <span>Real-time collaboration</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-600" />
+                      <span>AI-powered features</span>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-3 text-green-800">Premium Features</h4>
+                  <ul className="space-y-2">
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-600" />
+                      <span>Export to all formats</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-600" />
+                      <span>Advanced templates</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-600" />
+                      <span>Version history</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-600" />
+                      <span>Priority support</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div className="mt-6 text-center">
+                <Button asChild className="bg-green-600 hover:bg-green-700">
+                  <Link href="/sign-in">
+                    Start Using SketchFlow Free
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Future Pricing Preview */}
+        <div className="mb-16">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-4">Future Pricing Structure</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Here's what our pricing will look like when we exit beta. Current users will get special early-bird pricing!
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8 opacity-75">
+            {pricingPlans.map((plan, index) => (
+              <Card key={index} className={`relative ${plan.popular ? 'border-blue-500 shadow-lg scale-105' : ''}`}>
                 {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-primary text-primary-foreground px-3 py-1">
-                      <Star className="w-3 h-3 mr-1" />
-                      Most Popular
-                    </Badge>
-                  </div>
+                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-500">
+                    Most Popular
+                  </Badge>
                 )}
-
-                <CardHeader className="text-center pb-8">
+                <CardHeader className="text-center">
                   <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                  <CardDescription>{plan.description}</CardDescription>
                   <div className="mt-4">
                     <span className="text-4xl font-bold">{plan.price}</span>
-                    <span className="text-muted-foreground ml-1">/{plan.period}</span>
+                    <span className="text-muted-foreground">/{plan.period}</span>
                   </div>
-                  <CardDescription className="mt-2">
-                    {plan.description}
-                  </CardDescription>
                 </CardHeader>
-
-                <CardContent className="space-y-6">
-                  <ul className="space-y-3">
+                <CardContent>
+                  <ul className="space-y-3 mb-6">
                     {plan.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-center gap-3">
                         {feature.included ? (
-                          <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
+                          <Check className="h-5 w-5 text-green-500" />
                         ) : (
-                          <X className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                          <X className="h-5 w-5 text-muted-foreground" />
                         )}
-                        <span className={feature.included ? "" : "text-muted-foreground"}>
+                        <span className={feature.included ? '' : 'text-muted-foreground'}>
                           {feature.name}
                         </span>
                       </li>
                     ))}
                   </ul>
-
-                  <Link href="/join" className="block" >
-                    <Button
-                      variant={plan.ctaVariant}
-                      className="w-full"
-                      size="lg"
-                    >
-                      {plan.cta}
-                    </Button>
-                  </Link>
+                  <Button 
+                    className="w-full" 
+                    variant="outline"
+                    disabled
+                  >
+                    Coming Soon
+                  </Button>
                 </CardContent>
               </Card>
             ))}
           </div>
-
-          {/* Enterprise Section */}
-          <div className="bg-muted/50 rounded-lg p-8 mb-20">
-            <div className="text-center">
-              <h2 className="text-3xl font-heading font-bold mb-4">Need something more?</h2>
-              <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
-                For large organizations with specific requirements, we offer custom enterprise solutions
-                with dedicated support, advanced security, and tailored integrations.
+          
+          <div className="text-center mt-8">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-3xl mx-auto">
+              <h3 className="text-lg font-semibold text-blue-900 mb-2">Early Bird Benefits</h3>
+              <p className="text-blue-800">
+                Beta users will receive exclusive early-bird pricing with up to 50% off when we launch paid plans. 
+                Plus, you'll keep all your projects and data with no interruption!
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/contact" >
-                  <Button size="lg" variant="outline">
-                    Contact Sales
-                  </Button>
-                </Link>
-                <Button size="lg">
-                  Schedule Demo
-                </Button>
-              </div>
             </div>
           </div>
+        </div>
 
-          {/* FAQ Section */}
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12">
-              Frequently Asked Questions
-            </h2>
-            <div className="space-y-6">
-              {faqs.map((faq, index) => (
-                <Card key={index}>
-                  <CardHeader>
-                    <CardTitle className="text-lg">{faq.question}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">{faq.answer}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          {/* Bottom CTA */}
-          <div className="text-center mt-20">
-            <h2 className="text-2xl font-bold mb-4">
-              Ready to start your visual collaboration journey?
-            </h2>
-            <p className="text-muted-foreground mb-6">
-              Join thousands of teams already using SketchFlow to bring their ideas to life.
+        {/* FAQ Section */}
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Frequently Asked Questions</h2>
+            <p className="text-muted-foreground">
+              Everything you need to know about our beta program and future pricing.
             </p>
-            <Link href="/join" >
-              <Button size="lg">
-                Start Free Trial
+          </div>
+          
+          <div className="grid gap-6">
+            {faqs.map((faq, index) => (
+              <Card key={index}>
+                <CardHeader>
+                  <CardTitle className="text-lg">{faq.question}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">{faq.answer}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA Section */}
+        <div className="text-center mt-16">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white">
+            <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
+            <p className="text-xl mb-6 opacity-90">
+              Join thousands of users already creating amazing diagrams and collaborating seamlessly.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" variant="secondary" asChild>
+                <Link href="/sign-in">
+                  Start Creating for Free
+                </Link>
               </Button>
-            </Link>
+              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600" asChild>
+                <Link href="/contact">
+                  Contact Us
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </div>

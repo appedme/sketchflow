@@ -6,7 +6,6 @@ import {
   HowItWorksSection,
   UseCasesSection,
   TestimonialsSection,
-  PricingPreviewSection,
   IntegrationSection,
   CTASection,
   Footer 
@@ -23,7 +22,6 @@ export default function LandingPage() {
         <HowItWorksSection />
         <UseCasesSection />
         <TestimonialsSection />
-        <PricingPreviewSection />
         <IntegrationSection />
         <CTASection />
       </main>

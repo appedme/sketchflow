@@ -10,7 +10,7 @@ import {
   Search,
   Loader2
 } from "lucide-react";
-import Link from "next/link";
+
 import { ProjectCard } from '@/components/dashboard/ProjectCard';
 import { useApi } from '@/hooks/useApi';
 
