@@ -148,11 +148,10 @@ export function ProjectWorkspace({
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      {/* Top Toolbar */}
-      <div className="h-14 bg-background/95 backdrop-blur-sm border-b flex items-center justify-between px-4 shadow-sm">
-        <div className="flex items-center gap-4">
-          {/* Mobile Documentation Panel Trigger */}
+    <div className="h-screen flex flex-col bg-background">
+      {/* Clean Top Bar */}
+      <div className="h-12 border-b flex items-center justify-between px-4">
+        <div className="flex items-center gap-3">
           {isMobile ? (
             <DocumentationPanel
               projectId={projectId}
@@ -164,30 +163,26 @@ export function ProjectWorkspace({
               variant="ghost"
               size="sm"
               onClick={() => setShowDocumentPanel(!showDocumentPanel)}
-              className="gap-2 hover:bg-accent"
+              className="gap-2"
             >
-              <PanelLeftOpen className="w-4 h-4" />
-              <span className="hidden sm:inline">Docs</span>
+              {showDocumentPanel ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
+              Files
             </Button>
           )}
-          <Separator orientation="vertical" className="h-6" />
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-              <FileText className="w-4 h-4 text-primary" />
-            </div>
-            <h1 className="font-semibold text-lg text-foreground truncate">{projectName}</h1>
-          </div>
+          <div className="h-4 w-px bg-border" />
+          <h1 className="font-medium text-sm truncate">{projectName}</h1>
         </div>
         <div className="flex items-center gap-2">
           <ShareDialog projectId={projectId} projectName={projectName} />
           <Button
             size="sm"
-            className="gap-2 shadow-sm"
+            variant="outline"
             onClick={handleSave}
             disabled={saving}
+            className="gap-2"
           >
             <Save className="w-4 h-4" />
-            <span className="hidden sm:inline">{saving ? 'Saving...' : 'Save'}</span>
+            {saving ? 'Saving...' : 'Save'}
           </Button>
         </div>
       </div>
@@ -202,11 +197,10 @@ export function ProjectWorkspace({
 
         {/* Desktop Documentation Panel */}
         {!isMobile && showDocumentPanel && (
-          <div className="absolute left-0 top-0 w-96 h-full bg-background border-r shadow-xl z-20 animate-slide-in-left">
+          <div className="absolute left-0 top-0 w-80 h-full bg-background border-r z-20">
             <DocumentationPanel
               projectId={projectId}
               projectName={projectName}
-              className="border-0 shadow-none"
             />
           </div>
         )}
