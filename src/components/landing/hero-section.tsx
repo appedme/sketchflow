@@ -46,7 +46,7 @@ export function HeroSection() {
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
           <Link href={hero.cta.primary_link} >
-            <InteractiveHoverButton size="lg" className="px-8 py-3 text-base font-semibold">
+            <InteractiveHoverButton className="px-8 py-3 text-base font-semibold">
               {hero.cta.primary}
             </InteractiveHoverButton>
           </Link>

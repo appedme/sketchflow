@@ -130,7 +130,7 @@ export class OpenMojiService {
     }
 
     getBlackIconUrl(hexcode: string): string {
-        return `https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@master/color/svg/${hexcode}.svg`;
+        return `https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@master/black/svg/${hexcode}.svg`;
     }
 
     getIconUrl(hexcode: string, style: 'color' | 'black' = 'color'): string {
