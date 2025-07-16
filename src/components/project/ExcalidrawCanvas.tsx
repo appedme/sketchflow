@@ -1,5 +1,6 @@
 'use client';
 import { useCallback, useRef, useEffect, useState, useMemo } from "react";
+import { useRouter } from 'next/navigation';
 import {
   Excalidraw,
   MainMenu,
@@ -28,7 +29,10 @@ import type { LibraryItem } from '@/lib/excalidraw-libraries';
 import { CanvasWelcomeScreen } from '@/components/canvas/CanvasWelcomeScreen';
 import { OpenMojiSidebar } from '@/components/canvas/OpenMojiSidebar';
 import { OpenMojiService, OpenMojiIcon } from '@/lib/services/openmoji';
+import { PexelsSidebar } from '@/components/canvas/PexelsSidebar';
+import { PexelsService, PexelsPhoto } from '@/lib/services/pexels';
 import Image from "next/image";
+import { FileText, PencilRuler as CanvasIcon, Smile, Camera } from 'lucide-react';
 
 interface ExcalidrawCanvasProps {
   projectId: string;
@@ -43,6 +47,7 @@ function ExcalidrawCanvasContent({
   canvasId,
   isReadOnly = false
 }: ExcalidrawCanvasProps) {
+  const router = useRouter();
   const excalidrawAPIRef = useRef<ExcalidrawImperativeAPI | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const sceneFileInputRef = useRef<HTMLInputElement>(null);
@@ -50,6 +55,10 @@ function ExcalidrawCanvasContent({
   // OpenMoji sidebar state
   const [isOpenMojiSidebarOpen, setIsOpenMojiSidebarOpen] = useState(false);
   const openMojiService = useMemo(() => OpenMojiService.getInstance(), []);
+
+  // Pexels sidebar state
+  const [isPexelsSidebarOpen, setIsPexelsSidebarOpen] = useState(false);
+  const pexelsService = useMemo(() => PexelsService.getInstance(), []);
 
   const {
     elements,
@@ -267,7 +276,134 @@ function ExcalidrawCanvasContent({
     }
   }, [elements, updateElements]);
 
-  // Handle OpenMoji icon selection
+  // Handle Pexels image selection
+  const handlePexelsImageSelect = useCallback(async (photo: PexelsPhoto) => {
+    if (!excalidrawAPIRef.current) {
+      console.error('Excalidraw API not available');
+      return;
+    }
+
+    console.log('Adding Pexels image:', photo.alt, photo.id);
+
+    try {
+      // Get the center of the viewport for positioning
+      const appState = excalidrawAPIRef.current.getAppState();
+      const centerX = (appState.scrollX || 0) + (appState.width || 800) / 2;
+      const centerY = (appState.scrollY || 0) + (appState.height || 600) / 2;
+
+      // Use medium size for better quality
+      const imageUrl = photo.src.medium;
+      console.log('Image URL:', imageUrl);
+
+      // Create a unique file ID
+      const fileId = `pexels-${photo.id}-${Date.now()}`;
+
+      // Fetch the image and convert to data URL
+      const response = await fetch(imageUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+      }
+
+      const blob = await response.blob();
+      const dataUrl = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(blob);
+      });
+
+      console.log('Image converted to data URL, length:', dataUrl.length);
+
+      // Create the file object for Excalidraw
+      const fileObject = {
+        mimeType: blob.type as const,
+        id: fileId,
+        dataURL: dataUrl,
+        created: Date.now(),
+        lastRetrieved: Date.now()
+      };
+
+      // Calculate dimensions while maintaining aspect ratio
+      const maxWidth = 300;
+      const maxHeight = 300;
+      const aspectRatio = photo.width / photo.height;
+
+      let width = maxWidth;
+      let height = maxWidth / aspectRatio;
+
+      if (height > maxHeight) {
+        height = maxHeight;
+        width = maxHeight * aspectRatio;
+      }
+
+      // Create image element
+      const imageElement = {
+        type: 'image' as const,
+        id: `pexels-element-${photo.id}-${Date.now()}`,
+        x: centerX - width / 2,
+        y: centerY - height / 2,
+        width: width,
+        height: height,
+        angle: 0,
+        strokeColor: 'transparent',
+        backgroundColor: 'transparent',
+        fillStyle: 'solid' as const,
+        strokeWidth: 0,
+        strokeStyle: 'solid' as const,
+        roughness: 0,
+        opacity: 100,
+        groupIds: [],
+        frameId: null,
+        roundness: null,
+        seed: Math.floor(Math.random() * 1000000),
+        versionNonce: Math.floor(Math.random() * 1000000),
+        isDeleted: false,
+        boundElements: null,
+        updated: Date.now(),
+        link: null,
+        locked: false,
+        fileId: fileId,
+        status: 'saved' as const,
+        scale: [1, 1] as [number, number]
+      };
+
+      console.log('Created image element with fileId:', fileId);
+
+      // Get current scene state
+      const currentElements = excalidrawAPIRef.current.getSceneElements();
+      const currentFiles = excalidrawAPIRef.current.getFiles();
+
+      // Create new files object with our file
+      const newFiles = {
+        ...currentFiles,
+        [fileId]: fileObject
+      };
+
+      // Create new elements array with our element
+      const newElements = [...currentElements, imageElement];
+
+      console.log('Updating scene with new element and file...');
+
+      // Update the scene with both new element and file
+      excalidrawAPIRef.current.updateScene({
+        elements: newElements,
+        files: newFiles,
+      });
+
+      console.log(`✅ Successfully added Pexels image: ${photo.alt}`);
+      console.log('📊 New elements count:', newElements.length);
+      console.log('📁 New files count:', Object.keys(newFiles).length);
+      console.log('🔗 File ID:', fileId);
+
+      // Close the sidebar after adding image
+      setIsPexelsSidebarOpen(false);
+
+    } catch (error) {
+      console.error('Error adding Pexels image:', error);
+      alert(`Failed to add image: ${photo.alt}. Please try again.`);
+    }
+  }, []);
+
+  // Handle OpenMoji icon selection - using proper Excalidraw file handling
   const handleOpenMojiIconSelect = useCallback(async (icon: OpenMojiIcon, style: 'color' | 'black') => {
     if (!excalidrawAPIRef.current) {
       console.error('Excalidraw API not available');
@@ -287,9 +423,9 @@ function ExcalidrawCanvasContent({
       console.log('Icon URL:', iconUrl);
 
       // Create a unique file ID
-      const fileId = `openmoji_${icon.hexcode}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const fileId = `openmoji-${icon.hexcode}-${Date.now()}`;
 
-      // Fetch the SVG content
+      // Fetch the SVG content and convert to PNG data URL
       const response = await fetch(iconUrl);
       if (!response.ok) {
         throw new Error(`Failed to fetch icon: ${response.status} ${response.statusText}`);
@@ -298,139 +434,160 @@ function ExcalidrawCanvasContent({
       const svgText = await response.text();
       console.log('SVG fetched successfully, length:', svgText.length);
 
-      // Convert SVG to data URL
+      // Convert SVG to PNG data URL using proper method
       const svgDataUrl = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgText)))}`;
 
-      // Create image element to render SVG
       const img = document.createElement('img');
 
-      img.onload = () => {
-        try {
-          console.log('Image loaded, creating canvas...');
+      const pngDataUrl = await new Promise<string>((resolve, reject) => {
+        img.onload = () => {
+          try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
 
-          // Create canvas for conversion
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
+            if (!ctx) {
+              reject(new Error('Failed to get canvas context'));
+              return;
+            }
 
-          if (!ctx) {
-            console.error('Failed to get canvas context');
-            return;
+            canvas.width = 64;
+            canvas.height = 64;
+            ctx.drawImage(img, 0, 0, 64, 64);
+
+            const dataUrl = canvas.toDataURL('image/png');
+            resolve(dataUrl);
+          } catch (error) {
+            reject(error);
           }
+        };
 
-          // Set canvas size
-          canvas.width = 64;
-          canvas.height = 64;
+        img.onerror = () => reject(new Error('Failed to load SVG image'));
+        img.src = svgDataUrl;
+      });
 
-          // Draw SVG to canvas
-          ctx.drawImage(img, 0, 0, 64, 64);
+      console.log('PNG data URL created, length:', pngDataUrl.length);
 
-          // Get PNG data URL
-          const pngDataUrl = canvas.toDataURL('image/png');
-          console.log('PNG data URL created, length:', pngDataUrl.length);
-
-          // Create the file object for Excalidraw
-          const fileObject = {
-            mimeType: 'image/png' as const,
-            id: fileId,
-            dataURL: pngDataUrl,
-            created: Date.now(),
-          };
-
-          // Create image element using Excalidraw's expected structure
-          const imageElement = {
-            type: 'image' as const,
-            id: `openmoji_${icon.hexcode}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            x: centerX - 32,
-            y: centerY - 32,
-            width: 64,
-            height: 64,
-            angle: 0,
-            strokeColor: 'transparent',
-            backgroundColor: 'transparent',
-            fillStyle: 'solid' as const,
-            strokeWidth: 0,
-            strokeStyle: 'solid' as const,
-            roughness: 0,
-            opacity: 100,
-            groupIds: [],
-            frameId: null,
-            roundness: null,
-            seed: Math.floor(Math.random() * 1000000),
-            versionNonce: Math.floor(Math.random() * 1000000),
-            isDeleted: false,
-            boundElements: null,
-            updated: 1,
-            link: null,
-            locked: false,
-            fileId: fileId,
-            status: 'saved' as const,
-            scale: [1, 1] as [number, number]
-          };
-
-          console.log('Created image element:', imageElement);
-
-          // Get current scene state
-          const currentElements = excalidrawAPIRef.current!.getSceneElements();
-          const currentAppState = excalidrawAPIRef.current!.getAppState();
-          const currentFiles = excalidrawAPIRef.current!.getFiles();
-
-          console.log('Current elements:', currentElements.length);
-          console.log('Current files:', Object.keys(currentFiles).length);
-
-          // Add file to files object
-          const newFiles = {
-            ...currentFiles,
-            [fileId]: fileObject
-          };
-
-          // Add element to elements array
-          const newElements = [...currentElements, imageElement];
-
-          console.log('Updating scene with new element and file...');
-
-          // Update the scene with both new element and file
-          excalidrawAPIRef.current!.updateScene({
-            elements: newElements,
-            appState: currentAppState,
-            files: newFiles,
-          });
-
-          console.log(`✅ Successfully added OpenMoji icon: ${icon.annotation}`);
-          console.log('📊 New elements count:', newElements.length);
-          console.log('📁 New files count:', Object.keys(newFiles).length);
-          console.log('🎯 Element added at position:', { x: centerX - 32, y: centerY - 32 });
-          console.log('🔗 File ID:', fileId);
-
-          // Verify the element was actually added
-          setTimeout(() => {
-            const verifyElements = excalidrawAPIRef.current!.getSceneElements();
-            const verifyFiles = excalidrawAPIRef.current!.getFiles();
-            console.log('🔍 Verification - Elements in scene:', verifyElements.length);
-            console.log('🔍 Verification - Files in scene:', Object.keys(verifyFiles).length);
-            console.log('🔍 Verification - Our element exists:', verifyElements.some(el => el.id.includes(icon.hexcode)));
-            console.log('🔍 Verification - Our file exists:', fileId in verifyFiles);
-          }, 100);
-
-          // Close the sidebar after adding icon
-          setIsOpenMojiSidebarOpen(false);
-
-        } catch (canvasError) {
-          console.error('Error converting SVG to canvas:', canvasError);
-        }
+      // Create the file object for Excalidraw
+      const fileObject = {
+        mimeType: 'image/png' as const,
+        id: fileId,
+        dataURL: pngDataUrl,
+        created: Date.now(),
+        lastRetrieved: Date.now()
       };
 
-      img.onerror = (error) => {
-        console.error('Error loading SVG image:', error);
+      // Create image element using consistent ID
+      const imageElement = {
+        type: 'image' as const,
+        id: `openmoji-element-${icon.hexcode}-${Date.now()}`,
+        x: centerX - 32,
+        y: centerY - 32,
+        width: 64,
+        height: 64,
+        angle: 0,
+        strokeColor: 'transparent',
+        backgroundColor: 'transparent',
+        fillStyle: 'solid' as const,
+        strokeWidth: 0,
+        strokeStyle: 'solid' as const,
+        roughness: 0,
+        opacity: 100,
+        groupIds: [],
+        frameId: null,
+        roundness: null,
+        seed: Math.floor(Math.random() * 1000000),
+        versionNonce: Math.floor(Math.random() * 1000000),
+        isDeleted: false,
+        boundElements: null,
+        updated: Date.now(),
+        link: null,
+        locked: false,
+        fileId: fileId, // This must match the file object ID
+        status: 'saved' as const,
+        scale: [1, 1] as [number, number]
       };
 
-      // Set image source to SVG data URL
-      img.src = svgDataUrl;
+      console.log('Created image element with fileId:', fileId);
+
+      // Get current scene state
+      const currentElements = excalidrawAPIRef.current.getSceneElements();
+      const currentFiles = excalidrawAPIRef.current.getFiles();
+
+      console.log('Current elements:', currentElements.length);
+      console.log('Current files:', Object.keys(currentFiles).length);
+
+      // Create new files object with our file
+      const newFiles = {
+        ...currentFiles,
+        [fileId]: fileObject
+      };
+
+      // Create new elements array with our element
+      const newElements = [...currentElements, imageElement];
+
+      console.log('Updating scene with new element and file...');
+      console.log('File object:', fileObject);
+
+      // Update the scene with both new element and file
+      excalidrawAPIRef.current.updateScene({
+        elements: newElements,
+        files: newFiles,
+      });
+
+      console.log(`✅ Successfully added OpenMoji icon: ${icon.annotation}`);
+      console.log('� New  elements count:', newElements.length);
+      console.log('📁 New files count:', Object.keys(newFiles).length);
+      console.log('🔗 File ID:', fileId);
+
+      // Verify the element was actually added
+      setTimeout(() => {
+        const verifyElements = excalidrawAPIRef.current!.getSceneElements();
+        const verifyFiles = excalidrawAPIRef.current!.getFiles();
+        console.log('🔍 Verification - Elements in scene:', verifyElements.length);
+        console.log('🔍 Verification - Files in scene:', Object.keys(verifyFiles).length);
+        console.log('🔍 Verification - Our element exists:', verifyElements.some(el => el.id.includes(icon.hexcode)));
+        console.log('🔍 Verification - Our file exists:', fileId in verifyFiles);
+      }, 100);
+
+      // Close the sidebar after adding icon
+      setIsOpenMojiSidebarOpen(false);
 
     } catch (error) {
       console.error('Error adding OpenMoji icon:', error);
-      alert(`Failed to add icon: ${icon.annotation}. Error: ${error.message}`);
+      alert(`Failed to add icon: ${icon.annotation}. Please try again.`);
     }
   }, [openMojiService]);
+
+  // Create new document and canvas functions
+  const createNewDocument = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/projects/${projectId}/documents`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: 'New Document', contentText: '' }),
+      });
+      if (!response.ok) throw new Error('Failed to create document');
+      const newDoc = await response.json() as { id: string };
+      router.push(`/project/${projectId}/document/${newDoc.id}`);
+    } catch (error) {
+      console.error('Failed to create document:', error);
+    }
+  }, [projectId, router]);
+
+  const createNewCanvas = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/projects/${projectId}/canvases`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: 'New Canvas', elements: [] }),
+      });
+      if (!response.ok) throw new Error('Failed to create canvas');
+      const newCanvas = await response.json() as { id: string };
+      router.push(`/project/${projectId}/canvas/${newCanvas.id}`);
+    } catch (error) {
+      console.error('Failed to create canvas:', error);
+    }
+  }, [projectId, router]);
 
   // Import functions
   const importFromJSON = useCallback(() => {
@@ -582,13 +739,37 @@ function ExcalidrawCanvasContent({
         }}
       >
         <MainMenu>
+          <MainMenu.Group title="Create">
+            <MainMenu.Item
+              icon={<FileText className="h-5 w-5 text-blue-500" />}
+              onSelect={createNewDocument}
+            >
+              New Document
+            </MainMenu.Item>
+            <MainMenu.Item
+              icon={<CanvasIcon className="h-5 w-5 text-purple-500" />}
+              onSelect={createNewCanvas}
+            >
+              New Canvas
+            </MainMenu.Item>
+          </MainMenu.Group>
+          <MainMenu.Separator />
           <MainMenu.Group title="Libraries">
             <LibraryPanel onAddLibraryItems={handleAddLibraryItems} />
           </MainMenu.Group>
           <MainMenu.Separator />
           <MainMenu.Group title="Icons">
-            <MainMenu.Item onSelect={() => setIsOpenMojiSidebarOpen(true)}>
+            <MainMenu.Item
+              icon={<Smile className="h-5 w-5 text-blue-500" />}
+              onSelect={() => setIsOpenMojiSidebarOpen(true)}
+            >
               OpenMoji Icons
+            </MainMenu.Item>
+            <MainMenu.Item
+              icon={<Camera className="h-5 w-5 text-green-500" />}
+              onSelect={() => setIsPexelsSidebarOpen(true)}
+            >
+              Pexels Images
             </MainMenu.Item>
           </MainMenu.Group>
           <MainMenu.Separator />
@@ -655,6 +836,13 @@ function ExcalidrawCanvasContent({
         isOpen={isOpenMojiSidebarOpen}
         onClose={() => setIsOpenMojiSidebarOpen(false)}
         onIconSelect={handleOpenMojiIconSelect}
+      />
+
+      {/* Pexels Sidebar */}
+      <PexelsSidebar
+        isOpen={isPexelsSidebarOpen}
+        onClose={() => setIsPexelsSidebarOpen(false)}
+        onImageSelect={handlePexelsImageSelect}
       />
     </div>
   );
