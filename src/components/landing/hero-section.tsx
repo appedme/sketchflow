@@ -2,6 +2,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LANDING_CONTENT } from "@/constants/landing";
 import Link from "next/link";
+import { Announcement } from "./announcement";
+import { HyperText } from "../magicui/hyper-text";
+import { InteractiveHoverButton } from "../magicui/interactive-hover-button";
 
 export function HeroSection() {
   const { hero } = LANDING_CONTENT;
@@ -11,19 +14,14 @@ export function HeroSection() {
       <div className="max-w-4xl mx-auto space-y-10">
         {/* Announcement Badge */}
         <div className="flex justify-center">
-          <Badge
-            variant="secondary"
-            className="px-4 py-2 text-sm font-medium rounded-4xl border border-muted shadow-md"
-          >
-            {hero.announcement}
-          </Badge>
+        <Announcement text={hero.announcement} />
         </div>
 
         {/* Brand and Hero Content */}
         <div className="space-y-6">
           <div className="flex items-center justify-center gap-3">
             <h1 className="text-5xl md:text-7xl font-heading font-bold tracking-tight hero-text">
-              SketchFlow
+              <HyperText>SketchFlow</HyperText>
             </h1>
             <Badge variant="outline" className="text-xs font-semibold">
               {hero.badge}
@@ -31,7 +29,7 @@ export function HeroSection() {
           </div>
 
           <div className="space-y-3">
-            <h2 className="text-3xl md:text-5xl font-heading font-bold tracking-tight hero-text">
+            <h2 className="text-3xl md:text-4xl font-heading font-bold tracking-tight hero-text">
               {hero.title}
             </h2>
             <h3 className="text-xl md:text-2xl font-medium text-muted-foreground">
@@ -48,15 +46,15 @@ export function HeroSection() {
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
           <Link href={hero.cta.primary_link} >
-            <Button size="lg" className="px-8 py-3 text-base font-semibold">
+            <InteractiveHoverButton size="lg" className="px-8 py-3 text-base font-semibold">
               {hero.cta.primary}
-            </Button>
+            </InteractiveHoverButton>
           </Link>
-          <Link href={hero.cta.secondary_link} >
+          {/* <Link href={hero.cta.secondary_link} >
             <Button variant="outline" size="lg" className="px-8 py-3 text-base font-semibold">
               {hero.cta.secondary}
             </Button>
-          </Link>
+          </Link> */}
         </div>
       </div>
     </section>

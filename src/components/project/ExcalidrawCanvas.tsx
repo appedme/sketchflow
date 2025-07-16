@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useRef, useEffect } from "react";
+import { useCallback, useRef, useEffect, useState, useMemo } from "react";
 import {
   Excalidraw,
   MainMenu,
@@ -26,6 +26,8 @@ import { uploadImageFromDataURL } from '@/lib/imageUpload';
 import { LibraryPanel } from '@/components/canvas/LibraryPanel';
 import type { LibraryItem } from '@/lib/excalidraw-libraries';
 import { CanvasWelcomeScreen } from '@/components/canvas/CanvasWelcomeScreen';
+import { OpenMojiSidebar } from '@/components/canvas/OpenMojiSidebar';
+import { OpenMojiService, OpenMojiIcon } from '@/lib/services/openmoji';
 import Image from "next/image";
 
 interface ExcalidrawCanvasProps {
@@ -44,6 +46,10 @@ function ExcalidrawCanvasContent({
   const excalidrawAPIRef = useRef<ExcalidrawImperativeAPI | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const sceneFileInputRef = useRef<HTMLInputElement>(null);
+
+  // OpenMoji sidebar state
+  const [isOpenMojiSidebarOpen, setIsOpenMojiSidebarOpen] = useState(false);
+  const openMojiService = useMemo(() => OpenMojiService.getInstance(), []);
 
   const {
     elements,
@@ -261,6 +267,108 @@ function ExcalidrawCanvasContent({
     }
   }, [elements, updateElements]);
 
+  // Handle OpenMoji icon selection
+  const handleOpenMojiIconSelect = useCallback(async (icon: OpenMojiIcon, style: 'color' | 'black') => {
+    if (!excalidrawAPIRef.current) return;
+
+    try {
+      // Get the center of the viewport for positioning
+      const appState = excalidrawAPIRef.current.getAppState();
+      const centerX = appState.scrollX + (appState.width || 800) / 2;
+      const centerY = appState.scrollY + (appState.height || 600) / 2;
+
+      // Create image element for the icon
+      const iconUrl = openMojiService.getIconUrl(icon.hexcode, style);
+
+      // Load the image to get its dimensions
+      const img = document.createElement('img');
+      img.crossOrigin = 'anonymous';
+
+      img.onload = async () => {
+        try {
+          // Convert SVG to data URL for Excalidraw
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+
+          // Set canvas size
+          canvas.width = 64;
+          canvas.height = 64;
+
+          if (ctx) {
+            // Draw the image on canvas
+            ctx.drawImage(img, 0, 0, 64, 64);
+            const dataURL = canvas.toDataURL('image/png');
+
+            // Create file ID
+            const fileId = `openmoji_${icon.hexcode}_${Date.now()}`;
+
+            // Add to files
+            const newFiles = {
+              ...files,
+              [fileId]: {
+                mimeType: 'image/png' as any,
+                id: fileId,
+                dataURL: dataURL,
+                created: Date.now(),
+              }
+            };
+            updateFiles(newFiles as any);
+
+            // Create image element with proper Excalidraw typing
+            const imageElement: ExcalidrawElement = {
+              type: 'image',
+              id: `openmoji_${icon.hexcode}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+              x: centerX - 32, // Center the 64px icon
+              y: centerY - 32,
+              width: 64,
+              height: 64,
+              angle: 0,
+              strokeColor: 'transparent',
+              backgroundColor: 'transparent',
+              fillStyle: 'solid',
+              strokeWidth: 0,
+              strokeStyle: 'solid',
+              roughness: 0,
+              opacity: 100,
+              groupIds: [],
+              frameId: null,
+              roundness: null,
+              seed: Math.floor(Math.random() * 1000000),
+              versionNonce: Math.floor(Math.random() * 1000000),
+              isDeleted: false,
+              boundElements: null,
+              updated: 1,
+              link: null,
+              locked: false,
+              fileId: fileId,
+              status: 'saved',
+              scale: [1, 1],
+              // Required properties for image elements
+              version: 1,
+              index: 'a0' as any,
+            } as any; // Type assertion to handle Excalidraw's complex typing
+
+            // Add element to canvas
+            const newElements = [...elements, imageElement as ExcalidrawElement];
+            updateElements(newElements);
+
+            console.log(`Added OpenMoji icon: ${icon.annotation} (${icon.hexcode})`);
+          }
+        } catch (error) {
+          console.error('Error processing OpenMoji icon:', error);
+        }
+      };
+
+      img.onerror = () => {
+        console.error('Failed to load OpenMoji icon:', iconUrl);
+      };
+
+      img.src = iconUrl;
+    } catch (error) {
+      console.error('Error adding OpenMoji icon:', error);
+    }
+  }, [elements, files, updateElements, updateFiles, openMojiService]);
+
   // Import functions
   const importFromJSON = useCallback(() => {
     if (sceneFileInputRef.current) {
@@ -437,12 +545,19 @@ function ExcalidrawCanvasContent({
           <MainMenu.Group title="Libraries">
             <LibraryPanel onAddLibraryItems={handleAddLibraryItems} />
           </MainMenu.Group>
+          <MainMenu.Separator />
+          <MainMenu.Group title="Icons">
+            <MainMenu.Item onSelect={() => setIsOpenMojiSidebarOpen(true)}>
+              OpenMoji Icons
+            </MainMenu.Item>
+          </MainMenu.Group>
         </MainMenu>
         <WelcomeScreen>
           <WelcomeScreen.Center>
 
             <Image
               src="/logo.svg"
+              alt="SketchFlow Logo"
               height={100}
               width={100}
             />
@@ -467,6 +582,13 @@ function ExcalidrawCanvasContent({
         accept=".excalidraw,.json"
         onChange={handleSceneFileChange}
         style={{ display: 'none' }}
+      />
+
+      {/* OpenMoji Sidebar */}
+      <OpenMojiSidebar
+        isOpen={isOpenMojiSidebarOpen}
+        onClose={() => setIsOpenMojiSidebarOpen(false)}
+        onIconSelect={handleOpenMojiIconSelect}
       />
     </div>
   );

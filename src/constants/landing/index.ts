@@ -5,7 +5,7 @@ export const LANDING_CONTENT = {
     title: "Sketch. Document. Collaborate.",
     subtitle: "All in one place",
     description: "Transform your ideas into visual stories with powerful diagramming and seamless documentation.",
-    announcement: "New: Project Embedding & Export Features Coming Soon!",
+    announcement: "Welcome to Sketchflow 👋",
     cta: {
       primary: "Start Creating",
       primary_link: "/dashboard",

@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Code, Building, GraduationCap, Calendar, Palette, Search, PenTool, User } from "lucide-react";
 import { LANDING_CONTENT } from "@/constants/landing";
 import { cn } from "@/lib/utils";
+import { BorderBeam } from "../magicui/border-beam";
 
 const iconMap = {
   Code,
@@ -32,7 +33,7 @@ export function UseCasesSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {useCases.map((useCase, index) => {
             const Icon = iconMap[useCase.icon as keyof typeof iconMap];
-            
+
             return (
               <Card key={index} className="text-center hover:shadow-lg transition-shadow">
                 <CardHeader>
@@ -45,6 +46,7 @@ export function UseCasesSection() {
                   <CardDescription className="text-sm">
                     {useCase.description}
                   </CardDescription>
+                  <BorderBeam duration={8} size={100} />
                 </CardContent>
               </Card>
             );

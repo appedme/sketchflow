@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PenTool, FileText, Share2, Zap } from "lucide-react";
+import { BorderBeam } from "../magicui/border-beam";
 
 export function HowItWorksSection() {
   const steps = [
@@ -60,6 +61,8 @@ export function HowItWorksSection() {
                   <CardDescription className="text-base">
                     {step.description}
                   </CardDescription>
+                  <BorderBeam duration={8} size={100} />
+
                 </CardContent>
               </Card>
             );

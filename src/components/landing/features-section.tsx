@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Users, Share } from "lucide-react";
 import { LANDING_CONTENT } from "@/constants/landing";
+import { BorderBeam } from "../magicui/border-beam";
 
 const iconMap = {
   FileText,
@@ -26,9 +27,10 @@ export function FeaturesSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {features.map((feature, index) => {
             const Icon = iconMap[feature.icon as keyof typeof iconMap];
-            
+
             return (
-              <Card key={index} className="text-center">
+              <Card key={index} className="text-center relative overflow-hidden   w-full">
+
                 <CardHeader>
                   <div className="mx-auto mb-4 w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                     <Icon className="w-6 h-6 text-primary" />
@@ -40,6 +42,8 @@ export function FeaturesSection() {
                     {feature.description}
                   </CardDescription>
                 </CardContent>
+                <BorderBeam duration={8} size={100} />
+
               </Card>
             );
           })}
