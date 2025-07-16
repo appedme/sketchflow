@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stackServerApp } from '@/lib/stack';
-import { getCanvas, updateCanvasMetadata } from '@/lib/actions/canvases';
+import { getCanvas, updateCanvasMetadata, deleteCanvas } from '@/lib/actions/canvases';
 
 export async function GET(
   request: NextRequest,
@@ -61,6 +61,27 @@ export async function PATCH(
     return NextResponse.json(updatedCanvas);
   } catch (error) {
     console.error('Error updating canvas:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ canvasId: string }> }
+) {
+  try {
+    const user = await stackServerApp.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { canvasId } = await params;
+    const result = await deleteCanvas(canvasId, user.id);
+
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error('Error deleting canvas:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

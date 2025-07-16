@@ -29,7 +29,8 @@ import {
   Mail,
   Twitter,
   Linkedin,
-  Loader2
+  Loader2,
+  Download
 } from "lucide-react";
 
 interface ShareDialogProps {
@@ -158,6 +159,36 @@ export function ShareDialog({
     }
   }, [isOpen]);
 
+  // Handle public toggle change
+  const handlePublicToggle = async (checked: boolean) => {
+    setIsPublic(checked);
+    if (shareData) {
+      // Clear existing share data to force recreation with new settings
+      setShareData(null);
+    }
+  };
+
+  const exportProject = async () => {
+    try {
+      const response = await fetch(`/api/projects/${projectId}/export`);
+      if (!response.ok) throw new Error('Failed to export project');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `${projectName}-export.json`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error exporting project:', error);
+      alert('Failed to export project. Please try again.');
+    }
+  };
+
   const copyToClipboard = async (text: string, type: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -233,7 +264,7 @@ export function ShareDialog({
                 <Switch
                   id="public-access"
                   checked={isPublic}
-                  onCheckedChange={setIsPublic}
+                  onCheckedChange={handlePublicToggle}
                 />
                 <Label htmlFor="public-access">
                   Make project publicly accessible
@@ -273,6 +304,23 @@ export function ShareDialog({
                     {loading ? "Loading..." : copied === "url" ? "Copied!" : "Copy"}
                   </Button>
                 </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-3">
+                <h4 className="font-medium">Export Project</h4>
+                <p className="text-sm text-muted-foreground">
+                  Download all project files as JSON
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={exportProject}
+                  className="gap-2 w-full"
+                >
+                  <Download className="w-4 h-4" />
+                  Export as JSON
+                </Button>
               </div>
 
               <Separator />

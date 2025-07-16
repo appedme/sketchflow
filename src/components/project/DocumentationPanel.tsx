@@ -18,7 +18,12 @@ import {
   Edit2,
   SplitSquareHorizontal,
   Maximize,
-  Trash2
+  Trash2,
+  Share,
+  Download,
+  Upload,
+  Settings,
+  FolderOpen
 } from 'lucide-react';
 import { mutate } from 'swr';
 import { cn } from '@/lib/utils';
@@ -136,6 +141,85 @@ export function DocumentationPanel({
     setEditingTitle('');
   };
 
+  const deleteItem = async (id: string, type: 'document' | 'canvas', title: string) => {
+    if (!confirm(`Are you sure you want to delete "${title}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const endpoint = type === 'document' ? `/api/documents/${id}` : `/api/canvas/${id}`;
+      const response = await fetch(endpoint, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) throw new Error(`Failed to delete ${type}`);
+
+      // Refresh the lists
+      mutate(`/api/projects/${projectId}/documents`);
+      mutate(`/api/projects/${projectId}/canvases`);
+    } catch (error) {
+      console.error(`Failed to delete ${type}:`, error);
+      alert(`Failed to delete ${type}. Please try again.`);
+    }
+  };
+
+  const shareProject = () => {
+    // This will be handled by the ShareDialog component in the parent
+    const event = new CustomEvent('openShareDialog', { detail: { projectId, projectName } });
+    window.dispatchEvent(event);
+  };
+
+  const exportProject = async () => {
+    try {
+      const response = await fetch(`/api/projects/${projectId}/export`);
+      if (!response.ok) throw new Error('Failed to export project');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `${projectName}-export.json`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error exporting project:', error);
+      alert('Failed to export project. Please try again.');
+    }
+  };
+
+  const importProject = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        
+        // Basic validation
+        if (!data.project || !data.documents || !data.canvases) {
+          throw new Error('Invalid project file format');
+        }
+
+        alert('Import functionality will be implemented soon. File format is valid.');
+      } catch (error) {
+        console.error('Error importing project:', error);
+        alert('Failed to import project. Please check the file format.');
+      }
+    };
+    input.click();
+  };
+
+  const openProjectSettings = () => {
+    router.push(`/project/${projectId}/settings`);
+  };
+
   const PanelContent = () => (
     <div className={cn("h-full flex flex-col", className)}>
       {/* Header */}
@@ -147,23 +231,55 @@ export function DocumentationPanel({
             </div>
             <h2 className="font-medium text-sm">Files</h2>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button size="sm" variant="ghost" className="h-7 w-7 p-0 hover:bg-primary/10">
-                <Plus className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={createNewDocument} className="gap-2">
-                <FileText className="h-4 w-4 text-blue-500" />
-                New Document
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={createNewCanvas} className="gap-2">
-                <CanvasIcon className="h-4 w-4 text-purple-500" />
-                New Canvas
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center gap-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" variant="ghost" className="h-7 w-7 p-0 hover:bg-primary/10">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={createNewDocument} className="gap-2">
+                  <FileText className="h-4 w-4 text-blue-500" />
+                  New Document
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={createNewCanvas} className="gap-2">
+                  <CanvasIcon className="h-4 w-4 text-purple-500" />
+                  New Canvas
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" variant="ghost" className="h-7 w-7 p-0 hover:bg-primary/10">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={shareProject} className="gap-2">
+                  <Share className="h-4 w-4" />
+                  Share Project
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={exportProject} className="gap-2">
+                  <Download className="h-4 w-4" />
+                  Export Project
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={importProject} className="gap-2">
+                  <Upload className="h-4 w-4" />
+                  Import Project
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => router.push(`/project/${projectId}`)} className="gap-2">
+                  <FolderOpen className="h-4 w-4" />
+                  Open Project
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={openProjectSettings} className="gap-2">
+                  <Settings className="h-4 w-4" />
+                  Project Settings
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
 
         <div className="relative">
@@ -247,6 +363,14 @@ export function DocumentationPanel({
                             <SplitSquareHorizontal className="h-4 w-4" />
                             Split View
                           </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            onClick={() => deleteItem(doc.id, 'document', doc.title)} 
+                            className="gap-2 text-red-600 focus:text-red-600"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </>
@@ -309,6 +433,14 @@ export function DocumentationPanel({
                           >
                             <SplitSquareHorizontal className="h-4 w-4" />
                             Split View
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            onClick={() => deleteItem(canvas.id, 'canvas', canvas.title)} 
+                            className="gap-2 text-red-600 focus:text-red-600"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

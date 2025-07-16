@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stackServerApp } from '@/lib/stack';
-import { getDocument, updateDocument } from '@/lib/actions/documents';
+import { getDocument, updateDocument, deleteDocument } from '@/lib/actions/documents';
 
 export async function GET(
   request: NextRequest,
@@ -51,6 +51,27 @@ export async function PATCH(
     return NextResponse.json(updatedDocument);
   } catch (error) {
     console.error('Error updating document:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ documentId: string }> }
+) {
+  try {
+    const user = await stackServerApp.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { documentId } = await params;
+    const result = await deleteDocument(documentId, user.id);
+
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error('Error deleting document:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
