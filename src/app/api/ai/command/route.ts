@@ -7,6 +7,77 @@ import { delay as originalDelay } from '@ai-sdk/provider-utils';
 import { convertToCoreMessages, streamText } from 'ai';
 import { NextResponse } from 'next/server';
 
+// Pollinations.AI API client
+class PollinationsAI {
+  private baseUrl = 'https://text.pollinations.ai';
+
+  async generateText(prompt: string, options: {
+    model?: string;
+    system?: string;
+    maxTokens?: number;
+    temperature?: number;
+  } = {}) {
+    const { model = 'openai', system, maxTokens = 2048, temperature = 0.7 } = options;
+
+    // Combine system and user prompt
+    const fullPrompt = system ? `${system}\n\nUser: ${prompt}` : prompt;
+
+    try {
+      const response = await fetch(`${this.baseUrl}/openai`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            ...(system ? [{ role: 'system', content: system }] : []),
+            { role: 'user', content: prompt }
+          ],
+          max_tokens: maxTokens,
+          temperature: temperature,
+          stream: true
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Pollinations API error: ${response.status}`);
+      }
+
+      return response;
+    } catch (error) {
+      console.error('Pollinations.AI error:', error);
+      throw error;
+    }
+  }
+
+  async generateImage(prompt: string, options: {
+    width?: number;
+    height?: number;
+    model?: string;
+    seed?: number;
+  } = {}) {
+    const { width = 1024, height = 1024, model = 'flux', seed } = options;
+
+    const params = new URLSearchParams({
+      width: width.toString(),
+      height: height.toString(),
+      model,
+      ...(seed && { seed: seed.toString() })
+    });
+
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?${params}`;
+
+    return {
+      url: imageUrl,
+      prompt,
+      model,
+      width,
+      height
+    };
+  }
+}
+
 /**
  * Detects the first chunk in a buffer.
  *
@@ -129,9 +200,134 @@ const CHUNKING_REGEXPS = {
 };
 
 export async function POST(req: NextRequest) {
-  const body = await req.json() as { apiKey?: string; messages: any[]; system?: string };
-  const { apiKey: key, messages, system } = body;
+  const body = await req.json() as {
+    apiKey?: string;
+    messages: any[];
+    system?: string;
+    provider?: 'openai' | 'pollinations';
+    action?: 'text' | 'image';
+    imageOptions?: {
+      width?: number;
+      height?: number;
+      model?: string;
+      seed?: number;
+    };
+  };
 
+  const {
+    apiKey: key,
+    messages,
+    system,
+    provider = 'pollinations',
+    action = 'text',
+    imageOptions = {}
+  } = body;
+
+  // Handle image generation requests
+  if (action === 'image') {
+    const pollinations = new PollinationsAI();
+
+    // Extract image prompt from the last message
+    const lastMessage = messages[messages.length - 1];
+    const imagePrompt = lastMessage?.content || '';
+
+    if (!imagePrompt) {
+      return NextResponse.json(
+        { error: 'Image prompt is required' },
+        { status: 400 }
+      );
+    }
+
+    try {
+      const imageResult = await pollinations.generateImage(imagePrompt, imageOptions);
+
+      return NextResponse.json({
+        type: 'image',
+        data: imageResult,
+        message: `Generated image for: "${imagePrompt}"`
+      });
+    } catch (error) {
+      console.error('Image generation error:', error);
+      return NextResponse.json(
+        { error: 'Failed to generate image' },
+        { status: 500 }
+      );
+    }
+  }
+
+  // Handle text generation with Pollinations.AI
+  if (provider === 'pollinations') {
+    const pollinations = new PollinationsAI();
+
+    // Extract the last user message
+    const lastMessage = messages[messages.length - 1];
+    const userPrompt = lastMessage?.content || '';
+
+    if (!userPrompt) {
+      return NextResponse.json(
+        { error: 'Prompt is required' },
+        { status: 400 }
+      );
+    }
+
+    try {
+      // Use simple GET request for basic text generation
+      const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(userPrompt)}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'text/plain',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Pollinations API error: ${response.status}`);
+      }
+
+      const text = await response.text();
+
+      // Create a streaming response similar to OpenAI format
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        start(controller) {
+          // Split text into chunks for streaming effect
+          const words = text.split(' ');
+          let index = 0;
+
+          const sendChunk = () => {
+            if (index < words.length) {
+              const chunk = words[index] + (index < words.length - 1 ? ' ' : '');
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+                choices: [{
+                  delta: { content: chunk }
+                }]
+              })}\n\n`));
+              index++;
+              setTimeout(sendChunk, 50); // Delay between words
+            } else {
+              controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+              controller.close();
+            }
+          };
+
+          sendChunk();
+        }
+      });
+
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+        },
+      });
+    } catch (error) {
+      console.error('Pollinations.AI error:', error);
+      // Fallback to OpenAI if Pollinations fails
+      provider = 'openai' as any;
+    }
+  }
+
+  // Handle OpenAI requests (original logic)
   const apiKey = key || process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
@@ -147,6 +343,7 @@ export async function POST(req: NextRequest) {
   let isInTable = false;
   let isInList = false;
   let isInLink = false;
+
   try {
     const result = streamText({
       experimental_transform: smoothStream({
@@ -206,7 +403,8 @@ export async function POST(req: NextRequest) {
     });
 
     return result.toDataStreamResponse();
-  } catch {
+  } catch (error) {
+    console.error('OpenAI error:', error);
     return NextResponse.json(
       { error: 'Failed to process AI request' },
       { status: 500 }

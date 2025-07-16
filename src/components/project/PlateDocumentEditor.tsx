@@ -451,13 +451,13 @@ export function PlateDocumentEditor({
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  const editorElement = document.documentElement;
-                  if (!document.fullscreenElement) {
-                    editorElement.requestFullscreen().catch(err => {
+                  const documentElement = window.document.documentElement;
+                  if (!window.document.fullscreenElement) {
+                    documentElement.requestFullscreen().catch(err => {
                       console.error(`Error attempting to enable full-screen mode: ${err.message}`);
                     });
                   } else {
-                    document.exitFullscreen();
+                    window.document.exitFullscreen();
                   }
                 }}
                 className="gap-2"
