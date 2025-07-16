@@ -43,3 +43,6 @@ next-env.d.ts
 .dev.vars*
 public/sw*
 public/workbox-*
+.kiro/*
+.gitignore
+.kiro/

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { stackServerApp } from '@/lib/stack';
 import { getFileContent } from '@/lib/actions/files';
 
 export async function GET(
@@ -7,14 +7,14 @@ export async function GET(
   { params }: { params: Promise<{ fileId: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    
-    if (!userId) {
+    const user = await stackServerApp.getUser();
+
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { fileId } = await params;
-    const fileData = await getFileContent(fileId, userId);
+    const fileData = await getFileContent(fileId, user.id);
 
     if (!fileData) {
       return NextResponse.json({ error: 'File not found' }, { status: 404 });

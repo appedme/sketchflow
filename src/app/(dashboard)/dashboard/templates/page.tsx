@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '@stackframe/stack';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -57,7 +57,7 @@ const categories = [
 ];
 
 export default function TemplatesPage() {
-    const { user, isLoaded } = useUser();
+    const user = useUser();
     const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
@@ -65,17 +65,17 @@ export default function TemplatesPage() {
 
     // Redirect if not authenticated
     useEffect(() => {
-        if (isLoaded && !user) {
+        if (user === null) {
             router.push('/sign-in');
         }
-    }, [isLoaded, user, router]);
+    }, [user, router]);
 
     // Fetch templates
     const { data: templates = [], isLoading } = useApi<any[]>(
         '/api/templates'
     );
 
-    if (!isLoaded || !user) {
+    if (!user) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
                 <div className="text-center space-y-4">

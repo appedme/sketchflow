@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, ReactNode } from 'react';
 import useSWR, { mutate } from 'swr';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '@stackframe/stack';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useState, useEffect } from 'react';
 
@@ -47,11 +47,11 @@ interface DocumentProviderProps {
 }
 
 export function DocumentProvider({ children, documentId }: DocumentProviderProps) {
-  const { user } = useUser();
+  const user = useUser();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [saving, setSaving] = useState(false);
-  
+
   // Debounce title and content for auto-save
   const debouncedTitle = useDebounce(title, 1000);
   const debouncedContent = useDebounce(content, 2000);
@@ -72,7 +72,7 @@ export function DocumentProvider({ children, documentId }: DocumentProviderProps
   // Manual save function
   const saveDocument = async () => {
     if (!document || !user?.id) return;
-    
+
     try {
       setSaving(true);
       const response = await fetch(`/api/documents/${documentId}`, {
@@ -95,7 +95,7 @@ export function DocumentProvider({ children, documentId }: DocumentProviderProps
 
       // Update the cache with the response
       mutate(`/api/documents/${documentId}`, updatedDoc, false);
-      
+
     } catch (error) {
       console.error('Failed to save document:', error);
       // You could add a toast notification here
@@ -109,7 +109,7 @@ export function DocumentProvider({ children, documentId }: DocumentProviderProps
   useEffect(() => {
     if (!document || !user?.id) return;
     if (debouncedTitle === (document as any)?.title && debouncedContent === (document as any)?.contentText) return;
-    
+
     const autoSave = async () => {
       try {
         setSaving(true);
@@ -135,14 +135,14 @@ export function DocumentProvider({ children, documentId }: DocumentProviderProps
           contentText: debouncedContent,
           updatedAt: new Date().toISOString(),
         }, false);
-        
+
       } catch (error) {
         console.error('Failed to auto-save document:', error);
       } finally {
         setSaving(false);
       }
     };
-    
+
     autoSave();
   }, [debouncedTitle, debouncedContent, document, documentId, user?.id, mutateDocument]);
 

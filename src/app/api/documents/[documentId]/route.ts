@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { stackServerApp } from '@/lib/stack';
 import { getDocument, updateDocument } from '@/lib/actions/documents';
 
 export async function GET(
@@ -7,14 +7,14 @@ export async function GET(
   { params }: { params: Promise<{ documentId: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    
-    if (!userId) {
+    const user = await stackServerApp.getUser();
+
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { documentId } = await params;
-    const document = await getDocument(documentId, userId);
+    const document = await getDocument(documentId, user.id);
 
     if (!document) {
       return NextResponse.json({ error: 'Document not found' }, { status: 404 });
@@ -32,9 +32,9 @@ export async function PATCH(
   { params }: { params: Promise<{ documentId: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    
-    if (!userId) {
+    const user = await stackServerApp.getUser();
+
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -46,7 +46,7 @@ export async function PATCH(
       title,
       contentText,
       content
-    }, userId);
+    }, user.id);
 
     return NextResponse.json(updatedDocument);
   } catch (error) {

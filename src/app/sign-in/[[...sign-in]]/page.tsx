@@ -1,4 +1,4 @@
-import { SignIn } from '@clerk/nextjs';
+import { SignIn } from "@stackframe/stack";
 
 export default function SignInPage() {
   return (
@@ -12,18 +12,8 @@ export default function SignInPage() {
             Sign in to your SketchFlow account
           </p>
         </div>
-        
-        <SignIn 
-          appearance={{
-            elements: {
-              rootBox: "mx-auto",
-              card: "shadow-lg border",
-            }
-          }}
-          afterSignInUrl="/dashboard"
-          redirectUrl="/dashboard"
-          signUpUrl="/join"
-        />
+
+        <SignIn />
       </div>
     </div>
   );

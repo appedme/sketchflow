@@ -23,7 +23,6 @@
     "@ai-sdk/provider-utils": "^2.2.8",
     "@ai-sdk/react": "^1.2.12",
     "@ariakit/react": "^0.4.17",
-    "@clerk/nextjs": "^6.23.3",
     "@emoji-mart/data": "^1.2.1",
     "@excalidraw/excalidraw": "^0.18.0",
     "@faker-js/faker": "^9.9.0",

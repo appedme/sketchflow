@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { stackServerApp } from '@/lib/stack';
 import { getProject, updateProject } from '@/lib/actions/projects';
 
 export async function GET(
@@ -7,14 +7,14 @@ export async function GET(
   { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const user = await stackServerApp.getUser();
 
-    if (!userId) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { projectId } = await params;
-    const project = await getProject(projectId, userId);
+    const project = await getProject(projectId, user.id);
 
     if (!project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
@@ -32,16 +32,16 @@ export async function PATCH(
   { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const user = await stackServerApp.getUser();
 
-    if (!userId) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { projectId } = await params;
     const body: any = await request.json();
 
-    const updatedProject = await updateProject(projectId, body, userId);
+    const updatedProject = await updateProject(projectId, body, user.id);
 
     return NextResponse.json(updatedProject);
   } catch (error) {

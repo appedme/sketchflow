@@ -476,7 +476,7 @@ export function PlateDocumentEditor({
                 <Button
                   size="sm"
                   onClick={handleManualSave}
-                  disabled={isSaving || !hasUnsavedChanges}
+                  disabled={isSaving  }
                   className="gap-2"
                 >
                   <Save className="w-4 h-4" />

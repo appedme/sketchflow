@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, ReactNode } from 'react';
 import useSWR from 'swr';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '@stackframe/stack';
 
 interface Project {
   id: string;
@@ -71,8 +71,8 @@ interface ProjectProviderProps {
 }
 
 export function ProjectProvider({ children, projectId }: ProjectProviderProps) {
-  const { user } = useUser();
-  
+  const user = useUser();
+
   const { data: project, error: projectError, mutate: mutateProject } = useSWR(
     user?.id && projectId ? `/api/projects/${projectId}` : null,
     fetcher

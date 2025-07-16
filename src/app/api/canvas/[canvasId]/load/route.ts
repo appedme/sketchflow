@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { stackServerApp } from '@/lib/stack';
 import { getCanvas } from '@/lib/actions/canvases';
 
 export async function GET(
@@ -7,23 +7,23 @@ export async function GET(
   { params }: { params: Promise<{ canvasId: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    
-    if (!userId) {
+    const user = await stackServerApp.getUser();
+
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { canvasId } = await params;
 
     // Get the specific canvas
-    const canvas = await getCanvas(canvasId, userId);
+    const canvas = await getCanvas(canvasId, user.id);
     console.log('Found canvas:', canvas ? { id: canvas.id, title: canvas.title, hasElements: !!canvas.elements } : 'none');
-    
+
     if (!canvas) {
-      return NextResponse.json({ 
-        elements: [], 
-        appState: {}, 
-        files: {} 
+      return NextResponse.json({
+        elements: [],
+        appState: {},
+        files: {}
       });
     }
 

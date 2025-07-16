@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUserId } from '@/lib/actions/auth';
 import { nanoid } from 'nanoid';
 import { getDb } from '@/lib/db/connection';
 import { shares, projects, documents, canvases, projectCollaborators, type NewShare } from '@/lib/db/schema';
@@ -19,7 +19,7 @@ export async function createShare(
     expiresAt?: string;
   }
 ) {
-  const { userId } = await auth();
+  const userId = await getCurrentUserId();
 
   if (!userId) {
     throw new Error('User not authenticated');

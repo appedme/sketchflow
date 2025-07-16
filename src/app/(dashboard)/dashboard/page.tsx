@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '@stackframe/stack';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ import { ProjectFilters } from '@/components/dashboard/ProjectFilters';
 import { useApi } from '@/hooks/useApi';
 
 export default function DashboardPage() {
-  const { user, isLoaded } = useUser();
+  const user = useUser();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -36,10 +36,10 @@ export default function DashboardPage() {
 
   // Redirect if not authenticated
   useEffect(() => {
-    if (isLoaded && !user) {
+    if (user === null) {
       router.push('/sign-in');
     }
-  }, [isLoaded, user, router]);
+  }, [user, router]);
 
   // Fetch projects and stats
   const { data: projects = [], isLoading: projectsLoading } = useApi<any[]>(
@@ -50,7 +50,7 @@ export default function DashboardPage() {
     '/api/projects/stats'
   );
 
-  if (!isLoaded || !user) {
+  if (!user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -84,7 +84,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-foreground mb-2">
-                Welcome back, {user?.firstName || 'there'}
+                Welcome back, {user?.displayName?.split(' ')[0] || 'there'}
               </h1>
               <p className="text-muted-foreground">
                 Manage your projects and collaborate with your team

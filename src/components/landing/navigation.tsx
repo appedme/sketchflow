@@ -8,7 +8,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { LANDING_CONTENT } from "@/constants/landing";
-import { useUser, SignOutButton, UserButton } from "@clerk/nextjs";
+import { useUser, useStackApp } from "@stackframe/stack";
 import Link from "next/link";
 import { Menu, X, Sparkles, Zap, Users, BookOpen, ArrowRight, User, Settings, LogOut, LayoutDashboard, Palette, Code, Building, GraduationCap, Calendar, Search, PenTool } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -51,7 +51,8 @@ const useCases = [
 
 export function Navigation() {
   const { navigation } = LANDING_CONTENT;
-  const { isSignedIn, user } = useUser();
+  const user = useUser();
+  const stackApp = useStackApp();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -64,11 +65,11 @@ export function Navigation() {
   }, []);
 
   const getUserInitials = () => {
-    if (user?.fullName) {
-      return user.fullName.split(' ').map(n => n[0]).join('').toUpperCase();
+    if (user?.displayName) {
+      return user.displayName.split(' ').map(n => n[0]).join('').toUpperCase();
     }
-    if (user?.emailAddresses?.[0]?.emailAddress) {
-      return user.emailAddresses[0].emailAddress[0].toUpperCase();
+    if (user?.primaryEmail) {
+      return user.primaryEmail[0].toUpperCase();
     }
     return 'U';
   };
@@ -185,7 +186,7 @@ export function Navigation() {
 
           {/* Auth Section */}
           <div className="flex items-center gap-3">
-            {isSignedIn ? (
+            {user ? (
               <div className="flex items-center gap-3">
                 <Link href="/dashboard" className="hidden sm:block" >
                   <Button variant="outline" size="sm" className="gap-2">
@@ -194,7 +195,51 @@ export function Navigation() {
                   </Button>
                 </Link>
 
-                <UserButton />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="relative h-8 w-8 rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user?.profileImageUrl || ""} alt={user?.displayName || ""} />
+                        <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <div className="flex items-center justify-start gap-2 p-2">
+                      <div className="flex flex-col space-y-1 leading-none">
+                        {user?.displayName && (
+                          <p className="font-medium">{user.displayName}</p>
+                        )}
+                        {user?.primaryEmail && (
+                          <p className="w-[200px] truncate text-sm text-muted-foreground">
+                            {user.primaryEmail}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard" className="flex items-center gap-2">
+                        <LayoutDashboard className="h-4 w-4" />
+                        Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings" className="flex items-center gap-2">
+                        <Settings className="h-4 w-4" />
+                        Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="flex items-center gap-2 cursor-pointer"
+                      onClick={() => stackApp.signOut()}
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             ) : (
               <div className="flex items-center gap-3">
@@ -283,7 +328,7 @@ export function Navigation() {
                       </Link>
                     </div>
 
-                    {!isSignedIn && (
+                    {!user && (
                       <div className="flex flex-col gap-3 pt-4 border-t">
                         <Link href="/sign-in" onClick={() => setIsMobileMenuOpen(false)} >
                           <Button variant="outline" className="w-full">

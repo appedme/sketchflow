@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { stackServerApp } from '@/lib/stack';
 import { updateShareSettings, deleteShare } from '@/lib/actions/sharing';
 
 export async function PATCH(
@@ -7,9 +7,9 @@ export async function PATCH(
   { params }: { params: Promise<{ shareToken: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    
-    if (!userId) {
+    const user = await stackServerApp.getUser();
+
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -21,7 +21,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Share token required' }, { status: 400 });
     }
 
-    const result = await updateShareSettings(shareToken, settings, userId);
+    const result = await updateShareSettings(shareToken, settings, user.id);
 
     return NextResponse.json(result);
   } catch (error) {
@@ -35,9 +35,9 @@ export async function DELETE(
   { params }: { params: Promise<{ shareToken: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    
-    if (!userId) {
+    const user = await stackServerApp.getUser();
+
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -47,7 +47,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Share token required' }, { status: 400 });
     }
 
-    const result = await deleteShare(shareToken, userId);
+    const result = await deleteShare(shareToken, user.id);
 
     return NextResponse.json(result);
   } catch (error) {

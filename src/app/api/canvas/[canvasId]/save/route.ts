@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { stackServerApp } from '@/lib/stack';
 import { updateCanvas } from '@/lib/actions/canvases';
 
 export async function POST(
@@ -7,9 +7,9 @@ export async function POST(
   { params }: { params: Promise<{ canvasId: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    
-    if (!userId) {
+    const user = await stackServerApp.getUser();
+
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -22,11 +22,11 @@ export async function POST(
     const { canvasId } = await params;
 
     // Update the specific canvas
-    await updateCanvas(canvasId, elements, appState, files, userId);
+    await updateCanvas(canvasId, elements, appState, files, user.id);
 
-    return NextResponse.json({ 
-      success: true, 
-      canvasId 
+    return NextResponse.json({
+      success: true,
+      canvasId
     });
   } catch (error) {
     console.error('Error saving canvas:', error);

@@ -29,7 +29,7 @@ import {
 import Link from "next/link";
 import { deleteProject } from '@/lib/actions/projects';
 import { useRouter } from 'next/navigation';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '@stackframe/stack';
 
 interface ProjectDropdownProps {
   project: {
@@ -41,7 +41,7 @@ interface ProjectDropdownProps {
 export function ProjectDropdown({ project }: ProjectDropdownProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
-  const { user } = useUser();
+  const user = useUser();
 
   const handleDelete = async () => {
     if (!user) return;

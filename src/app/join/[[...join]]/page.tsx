@@ -1,4 +1,4 @@
-import { SignUp } from '@clerk/nextjs';
+import { SignUp } from "@stackframe/stack";
 
 export default function JoinPage() {
   return (
@@ -12,19 +12,9 @@ export default function JoinPage() {
             Create your account to start collaborating visually
           </p>
         </div>
-        
-        <SignUp 
-          appearance={{
-            elements: {
-              rootBox: "mx-auto",
-              card: "shadow-lg border",
-            }
-          }}
-          afterSignUpUrl="/dashboard"
-          redirectUrl="/dashboard"
-          signInUrl="/sign-in"
-        />
-        
+
+        <SignUp />
+
         <div className="mt-8 text-center text-sm text-muted-foreground">
           <p>
             By signing up, you agree to our{" "}

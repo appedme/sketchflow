@@ -1,13 +1,13 @@
 "use server";
 
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUserId } from '@/lib/actions/auth';
 import { nanoid } from 'nanoid';
 import { getDb } from '@/lib/db/connection';
 import { documents, projects, projectCollaborators, type NewDocument } from '@/lib/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 
 export async function createDocument(projectId: string, title: string, content?: any) {
-  const { userId } = await auth();
+  const userId = await getCurrentUserId();
 
   if (!userId) {
     throw new Error('User not authenticated');
@@ -200,7 +200,7 @@ export async function updateDocument(
   },
   userId?: string
 ) {
-  const { userId: authUserId } = await auth();
+  const authUserId = await getCurrentUserId();
   const currentUserId = userId || authUserId;
 
   if (!currentUserId) {
@@ -354,7 +354,7 @@ function calculateReadingTime(wordCount: number): number {
 }
 
 export async function toggleDocumentFavorite(documentId: string, userId?: string) {
-  const { userId: authUserId } = await auth();
+  const authUserId = await getCurrentUserId();
   const currentUserId = userId || authUserId;
 
   if (!currentUserId) {

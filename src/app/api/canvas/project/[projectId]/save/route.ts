@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { stackServerApp } from '@/lib/stack';
 import { getCanvases, updateCanvas, createCanvas } from '@/lib/actions/canvases';
 
 export async function POST(
@@ -7,9 +7,9 @@ export async function POST(
   { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    
-    if (!userId) {
+    const user = await stackServerApp.getUser();
+
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -24,16 +24,16 @@ export async function POST(
       console.error('JSON parse error:', error);
       return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
     }
-    
+
     const { elements, appState, files } = body;
     const { projectId } = await params;
 
     // Get existing canvases for this project
-    const canvases = await getCanvases(projectId, userId);
-    
+    const canvases = await getCanvases(projectId, user.id);
+
     // Find the main canvas or create one if none exists
     let targetCanvas = canvases.find(c => c.title === 'Main Canvas') || canvases[0];
-    
+
     if (!targetCanvas) {
       // Create a new main canvas if none exists
       targetCanvas = await createCanvas(projectId, 'Main Canvas', elements, appState);
@@ -42,9 +42,9 @@ export async function POST(
       await updateCanvas(targetCanvas.id, elements, appState, files);
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      canvasId: targetCanvas.id 
+    return NextResponse.json({
+      success: true,
+      canvasId: targetCanvas.id
     });
   } catch (error) {
     console.error('Error saving canvas:', error);

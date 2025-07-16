@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import { useAuth } from '@clerk/nextjs';
+import { useUser } from '@stackframe/stack';
 
 // Default fetcher function
 const fetcher = async (url: string): Promise<any> => {
@@ -16,10 +16,10 @@ const fetcher = async (url: string): Promise<any> => {
 
 // Custom hook for API calls with authentication
 export function useApi<T = any>(url: string | null, options?: any) {
-    const { isLoaded, userId } = useAuth();
+    const user = useUser();
 
     // Don't fetch if user is not loaded or not authenticated
-    const shouldFetch = isLoaded && userId && url;
+    const shouldFetch = user && url;
 
     return useSWR<T>(shouldFetch ? url : null, fetcher, {
         revalidateOnFocus: false,

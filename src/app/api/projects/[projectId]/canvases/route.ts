@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { stackServerApp } from '@/lib/stack';
 import { getCanvases, createCanvas } from '@/lib/actions/canvases';
 
 export async function GET(
@@ -7,14 +7,14 @@ export async function GET(
   { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    
-    if (!userId) {
+    const user = await stackServerApp.getUser();
+
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { projectId } = await params;
-    const canvases = await getCanvases(projectId, userId);
+    const canvases = await getCanvases(projectId, user.id);
 
     return NextResponse.json(canvases);
   } catch (error) {
@@ -28,9 +28,9 @@ export async function POST(
   { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    
-    if (!userId) {
+    const user = await stackServerApp.getUser();
+
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -38,7 +38,7 @@ export async function POST(
     const body: any = await request.json();
     const { title, elements, appState, files } = body;
 
-    const canvas = await createCanvas(projectId, title, elements, appState, files, userId);
+    const canvas = await createCanvas(projectId, title, elements, appState, files, user.id);
 
     return NextResponse.json(canvas, { status: 201 });
   } catch (error) {

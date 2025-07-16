@@ -1,13 +1,13 @@
 "use server";
 
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUserId } from '@/lib/actions/auth';
 import { nanoid } from 'nanoid';
 import { getDb } from '@/lib/db/connection';
 import { canvases, projects, projectCollaborators, type NewCanvas } from '@/lib/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 
 export async function createCanvas(projectId: string, title: string, elements?: any, appState?: any, files?: any, userId?: string) {
-  const { userId: authUserId } = await auth();
+  const authUserId = await getCurrentUserId();
   const currentUserId = userId || authUserId;
 
   if (!currentUserId) {
@@ -194,7 +194,7 @@ export async function getCanvas(canvasId: string, userId: string) {
 }
 
 export async function updateCanvas(canvasId: string, elements: any, appState: any, files?: any, userId?: string) {
-  const { userId: authUserId } = await auth();
+  const authUserId = await getCurrentUserId();
   const currentUserId = userId || authUserId;
 
   if (!currentUserId) {
@@ -259,7 +259,7 @@ export async function updateCanvas(canvasId: string, elements: any, appState: an
 }
 
 export async function updateCanvasMetadata(canvasId: string, updates: { title?: string; elements?: any; appState?: any; files?: any }, userId?: string) {
-  const { userId: authUserId } = await auth();
+  const authUserId = await getCurrentUserId();
   const currentUserId = userId || authUserId;
 
   if (!currentUserId) {
@@ -369,9 +369,8 @@ export async function deleteCanvas(canvasId: string, userId: string) {
     console.error('Error deleting canvas:', error);
     throw new Error('Failed to delete canvas');
   }
-} export
-  async function toggleCanvasFavorite(canvasId: string, userId?: string) {
-  const { userId: authUserId } = await auth();
+} export async function toggleCanvasFavorite(canvasId: string, userId?: string) {
+  const authUserId = await getCurrentUserId();
   const currentUserId = userId || authUserId;
 
   if (!currentUserId) {

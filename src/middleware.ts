@@ -1,15 +1,24 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { stackServerApp } from "@/lib/stack";
+import { NextRequest, NextResponse } from "next/server";
 
-const isProtectedRoute = createRouteMatcher([
-  '/dashboard(.*)',
-  '/profile(.*)',
-]);
+const protectedRoutes = [
+  '/dashboard',
+  '/profile',
+  '/project',
+];
 
-export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) {
-    await auth.protect();
+export default async function middleware(request: NextRequest) {
+  const user = await stackServerApp.getUser();
+  const isProtectedRoute = protectedRoutes.some(route =>
+    request.nextUrl.pathname.startsWith(route)
+  );
+
+  if (isProtectedRoute && !user) {
+    return NextResponse.redirect(new URL('/sign-in', request.url));
   }
-});
+
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: [

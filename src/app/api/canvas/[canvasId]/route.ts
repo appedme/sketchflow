@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { stackServerApp } from '@/lib/stack';
 import { getCanvas, updateCanvasMetadata } from '@/lib/actions/canvases';
 
 export async function GET(
@@ -7,15 +7,15 @@ export async function GET(
   { params }: { params: Promise<{ canvasId: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    
-    if (!userId) {
+    const user = await stackServerApp.getUser();
+
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { canvasId } = await params;
-    const canvas = await getCanvas(canvasId, userId);
-    
+    const canvas = await getCanvas(canvasId, user.id);
+
     if (!canvas) {
       return NextResponse.json({ error: 'Canvas not found' }, { status: 404 });
     }
@@ -36,9 +36,9 @@ export async function PATCH(
   { params }: { params: Promise<{ canvasId: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    
-    if (!userId) {
+    const user = await stackServerApp.getUser();
+
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -56,7 +56,7 @@ export async function PATCH(
       elements,
       appState,
       files
-    }, userId);
+    }, user.id);
 
     return NextResponse.json(updatedCanvas);
   } catch (error) {

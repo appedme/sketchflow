@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, ReactNode, useState, useCallback, useRef, useEffect } from 'react';
 import useSWR, { mutate } from 'swr';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '@stackframe/stack';
 import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import type { AppState, BinaryFiles } from "@excalidraw/excalidraw/types";
 
@@ -51,7 +51,7 @@ interface CanvasProviderProps {
 }
 
 export function CanvasProvider({ children, projectId, canvasId }: CanvasProviderProps) {
-  const { user } = useUser();
+  const user = useUser();
   const [elements, setElements] = useState<readonly ExcalidrawElement[]>([]);
   const [appState, setAppState] = useState<Partial<AppState>>({
     collaborators: new Map(),
@@ -62,7 +62,7 @@ export function CanvasProvider({ children, projectId, canvasId }: CanvasProvider
   const lastSavedStateRef = useRef<string>('');
 
   // Determine the correct API endpoint
-  const apiUrl = canvasId 
+  const apiUrl = canvasId
     ? `/api/canvas/${canvasId}/load`
     : `/api/canvas/project/${projectId}/load`;
 
@@ -80,11 +80,11 @@ export function CanvasProvider({ children, projectId, canvasId }: CanvasProvider
         collaborators: new Map(), // Ensure collaborators is always a Map
       };
       const newFiles = (canvasData as any)?.files || {};
-      
+
       setElements(newElements);
       setAppState(newAppState);
       setFiles(newFiles);
-      
+
       // Update the last saved state reference
       lastSavedStateRef.current = JSON.stringify({
         elements: newElements,
@@ -145,8 +145,8 @@ export function CanvasProvider({ children, projectId, canvasId }: CanvasProvider
 
     try {
       setSaving(true);
-      
-      const saveUrl = canvasId 
+
+      const saveUrl = canvasId
         ? `/api/canvas/${canvasId}/save`
         : `/api/canvas/project/${projectId}/save`;
 
@@ -167,7 +167,7 @@ export function CanvasProvider({ children, projectId, canvasId }: CanvasProvider
       }
 
       const result = await response.json();
-      
+
       // Update the last saved state reference
       lastSavedStateRef.current = JSON.stringify({
         elements: elementsToSave,
@@ -176,10 +176,10 @@ export function CanvasProvider({ children, projectId, canvasId }: CanvasProvider
       });
 
       // Update the cache optimistically
-      const cacheKey = canvasId 
+      const cacheKey = canvasId
         ? `/api/canvas/${canvasId}/load`
         : `/api/canvas/project/${projectId}/load`;
-        
+
       mutate(cacheKey, {
         elements: elementsToSave,
         appState: appStateToSave,

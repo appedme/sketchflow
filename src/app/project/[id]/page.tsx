@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server';
+import { stackServerApp } from '@/lib/stack';
 import { redirect, notFound } from 'next/navigation';
 import { ProjectWorkspace } from '@/components/project/ProjectWorkspace';
 import { getProject } from '@/lib/actions/projects';
@@ -10,17 +10,17 @@ interface ProjectPageProps {
 }
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
-  const { userId } = await auth();
-  
-  if (!userId) {
+  const user = await stackServerApp.getUser();
+
+  if (!user) {
     redirect('/sign-in');
   }
 
   const { id } = await params;
 
   // Fetch real project data from database
-  const project = await getProject(id, userId);
-  
+  const project = await getProject(id, user.id);
+
   if (!project) {
     notFound();
   }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '@stackframe/stack';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -29,7 +29,7 @@ const fetcher = async (url: string) => {
 };
 
 export function DocumentPanel({ projectId }: DocumentPanelProps) {
-  const { user } = useUser();
+  const user = useUser();
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [saving, setSaving] = useState(false);
@@ -58,7 +58,7 @@ export function DocumentPanel({ projectId }: DocumentPanelProps) {
   useEffect(() => {
     if (!selectedDoc || !user?.id) return;
     if (debouncedTitle === selectedDoc.title && debouncedContent === selectedDoc.contentText) return;
-    
+
     const saveDocument = async () => {
       try {
         setSaving(true);
@@ -75,20 +75,20 @@ export function DocumentPanel({ projectId }: DocumentPanelProps) {
 
         // Update the cache
         mutate(`/api/projects/${projectId}/documents`);
-        
+
       } catch (error) {
         console.error('Failed to save document:', error);
       } finally {
         setSaving(false);
       }
     };
-    
+
     saveDocument();
   }, [debouncedTitle, debouncedContent, selectedDoc, user?.id, projectId]);
 
   const createNewDocument = async () => {
     if (!user?.id) return;
-    
+
     try {
       const response = await fetch(`/api/projects/${projectId}/documents`, {
         method: 'POST',
@@ -102,10 +102,10 @@ export function DocumentPanel({ projectId }: DocumentPanelProps) {
       if (!response.ok) throw new Error('Failed to create document');
 
       const newDoc = await response.json();
-      
+
       // Update the cache
       mutate(`/api/projects/${projectId}/documents`);
-      
+
       // Select the new document
       setSelectedDoc(newDoc as Document);
     } catch (error) {
@@ -146,7 +146,7 @@ export function DocumentPanel({ projectId }: DocumentPanelProps) {
               New
             </Button>
           </div>
-          
+
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -175,11 +175,10 @@ export function DocumentPanel({ projectId }: DocumentPanelProps) {
                 <button
                   key={doc.id}
                   onClick={() => setSelectedDoc(doc)}
-                  className={`w-full text-left p-3 rounded-lg mb-2 transition-colors ${
-                    selectedDoc?.id === doc.id
-                      ? 'bg-blue-100 border border-blue-200'
-                      : 'bg-white hover:bg-gray-50 border border-gray-200'
-                  }`}
+                  className={`w-full text-left p-3 rounded-lg mb-2 transition-colors ${selectedDoc?.id === doc.id
+                    ? 'bg-blue-100 border border-blue-200'
+                    : 'bg-white hover:bg-gray-50 border border-gray-200'
+                    }`}
                 >
                   <div className="flex items-start gap-3">
                     <FileText className="w-4 h-4 text-blue-600 mt-1 flex-shrink-0" />

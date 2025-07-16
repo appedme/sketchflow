@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUserId } from '@/lib/actions/auth';
 import { nanoid } from 'nanoid';
 import { getDb } from '@/lib/db/connection';
 import { files, projectCollaborators, type NewFile } from '@/lib/db/schema';
@@ -12,7 +12,7 @@ function getR2Storage() {
   if (typeof globalThis !== 'undefined' && 'STORAGE' in globalThis) {
     return globalThis.STORAGE as R2Bucket;
   }
-  
+
   throw new Error('R2 Storage not available. Make sure R2 binding is configured.');
 }
 
@@ -22,8 +22,8 @@ export async function uploadFile(
   documentId?: string,
   canvasId?: string
 ) {
-  const { userId } = await auth();
-  
+  const userId = await getCurrentUserId();
+
   if (!userId) {
     throw new Error('User not authenticated');
   }
@@ -31,7 +31,7 @@ export async function uploadFile(
   try {
     const db = getDb();
     const storage = getR2Storage();
-    
+
     // Check permissions if uploading to a project
     if (projectId) {
       const collaboration = await db
@@ -96,7 +96,7 @@ export async function uploadFile(
 export async function getFile(fileId: string, userId: string) {
   try {
     const db = getDb();
-    
+
     const file = await db
       .select()
       .from(files)
@@ -140,7 +140,7 @@ export async function getFileContent(fileId: string, userId: string) {
   try {
     const db = getDb();
     const storage = getR2Storage();
-    
+
     // Get file metadata and check permissions
     const fileData = await getFile(fileId, userId);
     if (!fileData) {
@@ -171,7 +171,7 @@ export async function deleteFile(fileId: string, userId: string) {
   try {
     const db = getDb();
     const storage = getR2Storage();
-    
+
     // Get file and check permissions
     const fileData = await getFile(fileId, userId);
     if (!fileData) {
@@ -214,7 +214,7 @@ export async function deleteFile(fileId: string, userId: string) {
 export async function getProjectFiles(projectId: string, userId: string) {
   try {
     const db = getDb();
-    
+
     // Check project access
     const collaboration = await db
       .select()

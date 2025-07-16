@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { ClerkProvider } from '@clerk/nextjs'
+import { StackProvider } from "@stackframe/stack";
+import { stackClientApp } from "@/lib/stack";
 import { Nunito } from 'next/font/google'
 import { PWAInstallPrompt } from '@/components/PWAInstallPrompt'
 import "./globals.css";
@@ -83,7 +84,7 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#000000" />
         <meta name="msapplication-tap-highlight" content="no" />
         <meta name="theme-color" content="#000000" />
-        
+
         {/* Additional PWA Icons */}
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -91,17 +92,17 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <link rel="mask-icon" href="/logo.svg" color="#000000" />
         <link rel="shortcut icon" href="/favicon.ico" />
-        
+
         {/* Preload critical resources */}
         <link rel="preload" href="/logo.svg" as="image" type="image/svg+xml" />
       </head>
       <body
         className={`${nunito.variable} antialiased`}
       >
-        <ClerkProvider>
+        <StackProvider app={stackClientApp}>
           {children}
           <PWAInstallPrompt />
-        </ClerkProvider>
+        </StackProvider>
       </body>
     </html>
   );

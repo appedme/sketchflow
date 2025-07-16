@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server';
+import { stackServerApp } from '@/lib/stack';
 import { redirect } from 'next/navigation';
 import { SplitViewWorkspace } from '@/components/project/SplitViewWorkspace';
 
@@ -15,9 +15,9 @@ interface SplitViewPageProps {
 }
 
 export default async function SplitViewPage({ params, searchParams }: SplitViewPageProps) {
-  const { userId } = await auth();
-  
-  if (!userId) {
+  const user = await stackServerApp.getUser();
+
+  if (!user) {
     redirect('/sign-in');
   }
 

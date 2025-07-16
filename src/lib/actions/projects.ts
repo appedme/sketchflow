@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUserId } from '@/lib/actions/auth';
 import { redirect } from 'next/navigation';
 import { nanoid } from 'nanoid';
 import { getDb } from '@/lib/db/connection';
@@ -8,7 +8,7 @@ import { projects, templates, projectCollaborators, type NewProject } from '@/li
 import { eq, and, desc, count, gte, sql } from 'drizzle-orm';
 
 export async function createProject(formData: FormData) {
-  const { userId } = await auth();
+  const userId = await getCurrentUserId();
 
   if (!userId) {
     redirect('/sign-in');
@@ -311,7 +311,7 @@ export async function incrementProjectViews(projectId: string) {
 }
 
 export async function toggleProjectFavorite(projectId: string, userId?: string) {
-  const { userId: authUserId } = await auth();
+  const authUserId = await getCurrentUserId();
   const currentUserId = userId || authUserId;
 
   if (!currentUserId) {
@@ -367,7 +367,7 @@ export async function toggleProjectFavorite(projectId: string, userId?: string) 
 }
 
 export async function updateProjectTags(projectId: string, tags: string[], userId?: string) {
-  const { userId: authUserId } = await auth();
+  const authUserId = await getCurrentUserId();
   const currentUserId = userId || authUserId;
 
   if (!currentUserId) {
