@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { ShareExportDialog } from './ShareExportDialog';
 import {
   Plus,
   FileText,
@@ -61,6 +62,8 @@ export function DocumentationPanel({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
   const [loadingFileId, setLoadingFileId] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogType, setDialogType] = useState<'share' | 'export' | 'import'>('share');
 
   // Get current file ID from URL
   const getCurrentFileId = () => {
@@ -178,56 +181,18 @@ export function DocumentationPanel({
   };
 
   const shareProject = () => {
-    // This will be handled by the ShareDialog component in the parent
-    const event = new CustomEvent('openShareDialog', { detail: { projectId, projectName } });
-    window.dispatchEvent(event);
+    setDialogType('share');
+    setDialogOpen(true);
   };
 
-  const exportProject = async () => {
-    try {
-      const response = await fetch(`/api/projects/${projectId}/export`);
-      if (!response.ok) throw new Error('Failed to export project');
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = `${projectName}-export.json`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error('Error exporting project:', error);
-      alert('Failed to export project. Please try again.');
-    }
+  const exportProject = () => {
+    setDialogType('export');
+    setDialogOpen(true);
   };
 
   const importProject = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (!file) return;
-
-      try {
-        const text = await file.text();
-        const data = JSON.parse(text);
-
-        // Basic validation
-        if (!data.project || !data.documents || !data.canvases) {
-          throw new Error('Invalid project file format');
-        }
-
-        alert('Import functionality will be implemented soon. File format is valid.');
-      } catch (error) {
-        console.error('Error importing project:', error);
-        alert('Failed to import project. Please check the file format.');
-      }
-    };
-    input.click();
+    setDialogType('import');
+    setDialogOpen(true);
   };
 
   const openProjectSettings = () => {
@@ -599,19 +564,39 @@ export function DocumentationPanel({
 
   if (isMobile) {
     return (
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="sm" className="gap-2">
-            <Menu className="w-4 h-4" />
-            Files
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-80 p-0">
-          <PanelContent />
-        </SheetContent>
-      </Sheet>
+      <>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="sm" className="gap-2">
+              <Menu className="w-4 h-4" />
+              Files
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-80 p-0">
+            <PanelContent />
+          </SheetContent>
+        </Sheet>
+        <ShareExportDialog
+          isOpen={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+          projectId={projectId}
+          projectName={projectName}
+          defaultTab={dialogType}
+        />
+      </>
     );
   }
 
-  return <PanelContent />;
+  return (
+    <>
+      <PanelContent />
+      <ShareExportDialog
+        isOpen={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        projectId={projectId}
+        projectName={projectName}
+        defaultTab={dialogType}
+      />
+    </>
+  );
 }

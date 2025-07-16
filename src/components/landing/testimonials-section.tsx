@@ -8,7 +8,7 @@ export function TestimonialsSection() {
       name: "Sarah Chen",
       role: "Product Designer",
       company: "TechCorp",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+      avatar: "",
       content: "SketchFlow has revolutionized how our team collaborates on design projects. The seamless integration between diagramming and documentation is a game-changer.",
       rating: 5
     },
@@ -16,7 +16,7 @@ export function TestimonialsSection() {
       name: "Marcus Rodriguez",
       role: "Software Architect",
       company: "DevStudio",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+      avatar: "",
       content: "Finally, a tool that understands developers. Creating system diagrams and keeping documentation in sync has never been easier.",
       rating: 5
     },
@@ -24,7 +24,7 @@ export function TestimonialsSection() {
       name: "Emily Watson",
       role: "Project Manager",
       company: "InnovateLab",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+      avatar: "",
       content: "The project organization features are outstanding. We've reduced our planning time by 50% since switching to SketchFlow.",
       rating: 5
     }

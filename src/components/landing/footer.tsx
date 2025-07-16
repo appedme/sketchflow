@@ -6,7 +6,7 @@ export function Footer() {
       <div className="max-w-6xl mx-auto">
         <Separator className="mb-8" />
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* Brand */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">SketchFlow</h3>
@@ -19,19 +19,8 @@ export function Footer() {
           <div className="space-y-4">
             <h4 className="text-sm font-semibold">Product</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#features" className="hover:text-foreground transition-colors">Features</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Pricing</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Documentation</a></li>
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-semibold">Company</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-foreground transition-colors">About</a></li>
-              <li><a href="#contact" className="hover:text-foreground transition-colors">Contact</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Blog</a></li>
+              <li><a href="/pricing" className="hover:text-foreground transition-colors">Pricing</a></li>
+              <li><a href="/dashboard" className="hover:text-foreground transition-colors">Dashboard</a></li>
             </ul>
           </div>
 
@@ -39,9 +28,8 @@ export function Footer() {
           <div className="space-y-4">
             <h4 className="text-sm font-semibold">Support</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-foreground transition-colors">Help Center</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Community</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Status</a></li>
+              <li><a href="/contact" className="hover:text-foreground transition-colors">Contact</a></li>
+              <li><a href="https://tally.so/r/n0qO8y" className="hover:text-foreground transition-colors" target="_blank" rel="noopener noreferrer">Report Issues</a></li>
             </ul>
           </div>
         </div>

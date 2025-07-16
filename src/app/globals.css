@@ -11,7 +11,7 @@
 /* Custom Styles */
 :root {
   --background: oklch(0.9911 0 0);
-  --foreground: oklch(0.2046 0 0);
+  --foreground: oklch(0.2046 0 1);
   --card: oklch(0.9911 0 0);
   --card-foreground: oklch(0.2046 0 0);
   --popover: oklch(0.9911 0 0);

@@ -28,10 +28,10 @@ export const metadata: Metadata = {
     siteName: 'SketchFlow',
     images: [
       {
-        url: '/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: 'SketchFlow Logo',
+        url: '/og.png',
+        width: 1496,
+        height: 1122,
+        alt: 'SketchFlow OG',
       },
     ],
   },
