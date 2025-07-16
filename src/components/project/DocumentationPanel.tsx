@@ -23,7 +23,9 @@ import {
   Download,
   Upload,
   Settings,
-  FolderOpen
+  FolderOpen,
+  ArrowLeft,
+  Home
 } from 'lucide-react';
 import { mutate } from 'swr';
 import { cn } from '@/lib/utils';
@@ -58,6 +60,18 @@ export function DocumentationPanel({
   const [searchTerm, setSearchTerm] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
+  const [loadingFileId, setLoadingFileId] = useState<string | null>(null);
+
+  // Get current file ID from URL
+  const getCurrentFileId = () => {
+    if (typeof window === 'undefined') return null;
+    const path = window.location.pathname;
+    const documentMatch = path.match(/\/document\/([^\/]+)/);
+    const canvasMatch = path.match(/\/canvas\/([^\/]+)/);
+    return documentMatch?.[1] || canvasMatch?.[1] || null;
+  };
+
+  const currentFileId = getCurrentFileId();
 
   // Fetch data
   const { data: documents = [], isLoading: docsLoading } = useApi<Document[]>(
@@ -173,7 +187,7 @@ export function DocumentationPanel({
     try {
       const response = await fetch(`/api/projects/${projectId}/export`);
       if (!response.ok) throw new Error('Failed to export project');
-      
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -201,7 +215,7 @@ export function DocumentationPanel({
       try {
         const text = await file.text();
         const data = JSON.parse(text);
-        
+
         // Basic validation
         if (!data.project || !data.documents || !data.canvases) {
           throw new Error('Invalid project file format');
@@ -220,12 +234,38 @@ export function DocumentationPanel({
     router.push(`/project/${projectId}/settings`);
   };
 
+  const handleFileClick = async (fileId: string, type: 'document' | 'canvas') => {
+    setLoadingFileId(fileId);
+    try {
+      const url = type === 'document'
+        ? `/project/${projectId}/document/${fileId}`
+        : `/project/${projectId}/canvas/${fileId}`;
+      router.push(url);
+    } finally {
+      // Clear loading after a short delay to show the animation
+      setTimeout(() => setLoadingFileId(null), 500);
+    }
+  };
+
+  const goToDashboard = () => {
+    router.push('/dashboard');
+  };
+
   const PanelContent = () => (
     <div className={cn("h-full flex flex-col", className)}>
       {/* Header */}
       <div className="p-4 border-b space-y-3 bg-muted/30">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0 hover:bg-primary/10"
+              onClick={goToDashboard}
+              title="Back to Dashboard"
+            >
+              <Home className="w-3 h-3" />
+            </Button>
             <div className="w-5 h-5 rounded bg-primary/10 flex items-center justify-center">
               <FileText className="w-3 h-3 text-primary" />
             </div>
@@ -293,6 +333,39 @@ export function DocumentationPanel({
         </div>
       </div>
 
+      {/* Project Actions */}
+      <div className="p-2 border-b bg-muted/20">
+        <div className="grid grid-cols-3 gap-1">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 text-xs justify-center gap-1.5"
+            onClick={shareProject}
+          >
+            <Share className="h-3.5 w-3.5" />
+            Share
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 text-xs justify-center gap-1.5"
+            onClick={exportProject}
+          >
+            <Download className="h-3.5 w-3.5" />
+            Export
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 text-xs justify-center gap-1.5"
+            onClick={importProject}
+          >
+            <Upload className="h-3.5 w-3.5" />
+            Import
+          </Button>
+        </div>
+      </div>
+
       {/* Content */}
       <ScrollArea className="flex-1">
         <div className="p-2">
@@ -309,7 +382,10 @@ export function DocumentationPanel({
             <div className="space-y-1">
               {/* Documents */}
               {filteredDocs.map((doc) => (
-                <div key={doc.id} className="group flex items-center gap-2 p-2 rounded hover:bg-accent transition-colors">
+                <div key={doc.id} className={cn(
+                  "group flex items-center gap-2 p-2 rounded hover:bg-accent transition-colors",
+                  currentFileId === doc.id && "bg-primary/10 border border-primary/20"
+                )}>
                   {editingId === doc.id ? (
                     <>
                       <FileText className="h-4 w-4 text-blue-500 flex-shrink-0" />
@@ -327,13 +403,34 @@ export function DocumentationPanel({
                     </>
                   ) : (
                     <>
-                      <FileText className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                      <button
-                        onClick={() => router.push(`/project/${projectId}/document/${doc.id}`)}
-                        className="text-sm truncate flex-1 text-left"
-                      >
-                        {doc.title}
-                      </button>
+                      {loadingFileId === doc.id ? (
+                        <div className="flex items-center gap-2 flex-1">
+                          <div className="relative">
+                            <FileText className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                            <div className="absolute inset-0 animate-pulse bg-blue-500/20 rounded" />
+                          </div>
+                          <div className="flex items-center gap-2 flex-1">
+                            <Loader2 className="h-3 w-3 animate-spin text-blue-500" />
+                            <span className="text-sm text-blue-600 font-medium">Opening...</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <FileText className={cn(
+                            "h-4 w-4 flex-shrink-0",
+                            currentFileId === doc.id ? "text-primary" : "text-blue-500"
+                          )} />
+                          <button
+                            onClick={() => handleFileClick(doc.id, 'document')}
+                            className={cn(
+                              "text-sm truncate flex-1 text-left transition-colors",
+                              currentFileId === doc.id && "text-primary font-medium"
+                            )}
+                          >
+                            {doc.title}
+                          </button>
+                        </>
+                      )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
@@ -364,8 +461,8 @@ export function DocumentationPanel({
                             Split View
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem 
-                            onClick={() => deleteItem(doc.id, 'document', doc.title)} 
+                          <DropdownMenuItem
+                            onClick={() => deleteItem(doc.id, 'document', doc.title)}
                             className="gap-2 text-red-600 focus:text-red-600"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -380,7 +477,10 @@ export function DocumentationPanel({
 
               {/* Canvases */}
               {filteredCanvases.map((canvas) => (
-                <div key={canvas.id} className="group flex items-center gap-2 p-2 rounded hover:bg-accent transition-colors">
+                <div key={canvas.id} className={cn(
+                  "group flex items-center gap-2 p-2 rounded hover:bg-accent transition-colors",
+                  currentFileId === canvas.id && "bg-primary/10 border border-primary/20"
+                )}>
                   {editingId === canvas.id ? (
                     <>
                       <CanvasIcon className="h-4 w-4 text-purple-500 flex-shrink-0" />
@@ -398,13 +498,34 @@ export function DocumentationPanel({
                     </>
                   ) : (
                     <>
-                      <CanvasIcon className="h-4 w-4 text-purple-500 flex-shrink-0" />
-                      <button
-                        onClick={() => router.push(`/project/${projectId}/canvas/${canvas.id}`)}
-                        className="text-sm truncate flex-1 text-left"
-                      >
-                        {canvas.title}
-                      </button>
+                      {loadingFileId === canvas.id ? (
+                        <div className="flex items-center gap-2 flex-1">
+                          <div className="relative">
+                            <CanvasIcon className="h-4 w-4 text-purple-500 flex-shrink-0" />
+                            <div className="absolute inset-0 animate-pulse bg-purple-500/20 rounded" />
+                          </div>
+                          <div className="flex items-center gap-2 flex-1">
+                            <Loader2 className="h-3 w-3 animate-spin text-purple-500" />
+                            <span className="text-sm text-purple-600 font-medium">Opening...</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <CanvasIcon className={cn(
+                            "h-4 w-4 flex-shrink-0",
+                            currentFileId === canvas.id ? "text-primary" : "text-purple-500"
+                          )} />
+                          <button
+                            onClick={() => handleFileClick(canvas.id, 'canvas')}
+                            className={cn(
+                              "text-sm truncate flex-1 text-left transition-colors",
+                              currentFileId === canvas.id && "text-primary font-medium"
+                            )}
+                          >
+                            {canvas.title}
+                          </button>
+                        </>
+                      )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
@@ -435,8 +556,8 @@ export function DocumentationPanel({
                             Split View
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem 
-                            onClick={() => deleteItem(canvas.id, 'canvas', canvas.title)} 
+                          <DropdownMenuItem
+                            onClick={() => deleteItem(canvas.id, 'canvas', canvas.title)}
                             className="gap-2 text-red-600 focus:text-red-600"
                           >
                             <Trash2 className="h-4 w-4" />

@@ -7,6 +7,7 @@ import { getDb } from '@/lib/db/connection';
 import { projects, templates, projectCollaborators, type NewProject } from '@/lib/db/schema';
 import { eq, and, desc, count, gte, sql } from 'drizzle-orm';
 
+// Server action for form submissions (with FormData)
 export async function createProject(formData: FormData) {
   const userId = await getCurrentUserId();
 
@@ -74,6 +75,67 @@ export async function createProject(formData: FormData) {
     if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
       throw error; // Re-throw redirect errors
     }
+    throw new Error('Failed to create project');
+  }
+}
+
+// API function for JSON data
+export async function createProjectFromData(data: {
+  name: string;
+  description?: string;
+  category: string;
+  visibility: string;
+  ownerId: string;
+  templateId?: string;
+}) {
+  try {
+    const db = getDb();
+
+    // Ensure user exists in database first
+    const { createOrUpdateUser } = await import('./auth');
+    await createOrUpdateUser();
+
+    // Validate required fields
+    if (!data.name || !data.category || !data.visibility) {
+      throw new Error('Missing required fields');
+    }
+
+    const projectId = nanoid();
+
+    const newProject: NewProject = {
+      id: projectId,
+      name: data.name,
+      description: data.description || null,
+      category: data.category,
+      visibility: data.visibility,
+      templateId: data.templateId && data.templateId !== 'blank' ? data.templateId : null,
+      ownerId: data.ownerId,
+      viewCount: 0,
+      isFavorite: false,
+      tags: [],
+      status: 'active',
+      lastActivityAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Insert project
+    await db.insert(projects).values(newProject);
+
+    // Add owner as collaborator
+    await db.insert(projectCollaborators).values({
+      id: nanoid(),
+      projectId,
+      userId: data.ownerId,
+      role: 'owner',
+      invitedBy: data.ownerId,
+      invitedAt: new Date().toISOString(),
+      acceptedAt: new Date().toISOString(),
+    });
+
+    return newProject;
+  } catch (error) {
+    console.error('Error creating project:', error);
     throw new Error('Failed to create project');
   }
 }

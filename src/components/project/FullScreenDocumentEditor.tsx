@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, PanelLeftOpen, SplitSquareHorizontal, FileText } from 'lucide-react';
+import { ArrowLeft, PanelLeftOpen, SplitSquareHorizontal, FileText, Maximize, Minimize } from 'lucide-react';
 import { PlateDocumentEditor } from './PlateDocumentEditor';
 import { DocumentationPanel } from './DocumentationPanel';
 
@@ -23,6 +23,7 @@ export function FullScreenDocumentEditor({
   const router = useRouter();
   const [showDocumentPanel, setShowDocumentPanel] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   // Detect mobile screen size
   useEffect(() => {
@@ -33,6 +34,33 @@ export function FullScreenDocumentEditor({
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Full screen functionality
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => {
+        setIsFullScreen(true);
+      }).catch((err) => {
+        console.error('Error attempting to enable full-screen mode:', err);
+      });
+    } else {
+      document.exitFullscreen().then(() => {
+        setIsFullScreen(false);
+      }).catch((err) => {
+        console.error('Error attempting to exit full-screen mode:', err);
+      });
+    }
+  };
+
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleFullScreenChange = () => {
+      setIsFullScreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullScreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullScreenChange);
   }, []);
 
   return (
@@ -83,6 +111,22 @@ export function FullScreenDocumentEditor({
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleFullScreen}
+            className="gap-2"
+            title={isFullScreen ? "Exit Full Screen" : "Enter Full Screen"}
+          >
+            {isFullScreen ? (
+              <Minimize className="w-4 h-4" />
+            ) : (
+              <Maximize className="w-4 h-4" />
+            )}
+            <span className="hidden sm:inline">
+              {isFullScreen ? "Exit Full Screen" : "Full Screen"}
+            </span>
+          </Button>
           <Button
             variant="outline"
             size="sm"

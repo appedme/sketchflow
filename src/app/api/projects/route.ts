@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUserId } from '@/lib/actions/auth';
-import { getProjects, createProject } from '@/lib/actions/projects';
+import { getProjects, createProjectFromData } from '@/lib/actions/projects';
 
 export async function GET(request: NextRequest) {
     try {
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Project name is required' }, { status: 400 });
         }
 
-        const newProject = await createProject({
+        const newProject = await createProjectFromData({
             name,
             description: description || '',
             category: category || 'general',
