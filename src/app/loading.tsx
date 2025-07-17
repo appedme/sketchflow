@@ -1,11 +1,9 @@
-export default function Loading() {
+import { Loading } from "@/components/loading";
+
+export default function AppLoading() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
-      <img
-        src="/logo.svg"
-        alt="Loading..."
-        className="animate-pluse h-16 w-16"
-      />
+      <Loading size="lg" text="Loading SketchFlow..." />
     </div>
   );
 }

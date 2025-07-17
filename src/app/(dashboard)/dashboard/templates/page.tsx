@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useApi } from '@/hooks/useApi';
+import { Loading } from '@/components/loading';
 
 const iconMap = {
     FileText,
@@ -78,13 +79,7 @@ export default function TemplatesPage() {
     if (!user) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
-                <div className="text-center space-y-4">
-                    <img src="/logo.svg" alt="SketchFlow" className="w-16 h-16 mx-auto animate-pulse" />
-                    <div className="space-y-2">
-                        <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
-                        <p className="text-muted-foreground">Loading templates...</p>
-                    </div>
-                </div>
+                <Loading size="lg" text="Loading templates..." />
             </div>
         );
     }
@@ -188,9 +183,7 @@ export default function TemplatesPage() {
                 {/* Templates Content */}
                 {isLoading ? (
                     <div className="text-center py-12">
-                        <img src="/logo.svg" alt="SketchFlow" className="w-16 h-16 mx-auto animate-pulse mb-4" />
-                        <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary mb-4" />
-                        <p className="text-muted-foreground">Loading templates...</p>
+                        <Loading size="md" text="Loading templates..." />
                     </div>
                 ) : (
                     <Tabs defaultValue="all" className="w-full">

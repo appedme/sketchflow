@@ -41,6 +41,7 @@ import { ProjectCard } from '@/components/dashboard/ProjectCard';
 import { ProjectFilters } from '@/components/dashboard/ProjectFilters';
 import { useApi } from '@/hooks/useApi';
 import { cn } from '@/lib/utils';
+import { Loading } from '@/components/loading';
 
 interface Project {
   id: string;
@@ -92,10 +93,7 @@ export default function DashboardPage() {
   if (user === undefined) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <Loader2 className="w-6 h-6 animate-spin mx-auto text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Loading...</p>
-        </div>
+        <Loading size="md" text="Loading dashboard..." />
       </div>
     );
   }

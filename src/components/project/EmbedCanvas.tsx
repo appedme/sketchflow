@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
+import { Loading } from '@/components/loading';
 
 // Dynamically import components to avoid SSR issues
 const ExcalidrawCanvas = dynamic(
@@ -10,10 +11,7 @@ const ExcalidrawCanvas = dynamic(
     ssr: false,
     loading: () => (
       <div className="h-full w-full flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading project...</p>
-        </div>
+        <Loading size="md" text="Loading project..." />
       </div>
     )
   }
@@ -58,10 +56,7 @@ export function EmbedCanvas({ projectId, projectName, showToolbar, allowEdit }: 
       <div className="flex-1 overflow-hidden">
         <Suspense fallback={
           <div className="h-full w-full flex items-center justify-center bg-gray-50">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading canvas...</p>
-            </div>
+            <Loading size="md" text="Loading canvas..." />
           </div>
         }>
           <ExcalidrawCanvas
