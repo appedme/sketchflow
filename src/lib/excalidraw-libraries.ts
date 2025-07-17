@@ -85,6 +85,28 @@ export function getLibraryPreviewUrl(library: ExcalidrawLibrary): string {
 export function getDefaultLibraries(): ExcalidrawLibrary[] {
     return [
         {
+            id: "software-architecture",
+            name: "Software Architecture",
+            description: "Collection of software architecture diagrams and components for system design.",
+            authors: [{ name: "youritjang" }],
+            source: "libraries/youritjang/software-architecture.excalidrawlib",
+            preview: "libraries/youritjang/software-architecture.png",
+            created: "2024-01-01",
+            updated: "2024-01-01",
+            version: 1
+        },
+        {
+            id: "aws-architecture-icons",
+            name: "AWS Architecture Icons",
+            description: "Complete collection of AWS architecture icons for cloud infrastructure diagrams.",
+            authors: [{ name: "childishgirl" }],
+            source: "libraries/childishgirl/aws-architecture-icons.excalidrawlib",
+            preview: "libraries/childishgirl/aws-architecture-icons.png",
+            created: "2024-01-01",
+            updated: "2024-01-01",
+            version: 1
+        },
+        {
             id: "3MQwFMPiYkC",
             name: "Polygons",
             description: "Collection of regular polygons: triangle, pentagon, hexagon, octagon, decagon & dodecagon.",

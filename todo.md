@@ -4,7 +4,7 @@ eraser.io like rectagle dublicate
 
 
 
-
+There is a feature in eraser.io that when you put a rectangle or any shape in the canvas and over over it in all sides of the rectangle, we get a plus icon and when we click on plus then more rectangle is generated, one more rectangle in that side and it's connected to each other so if possible, then create this feature in it
 
 
 add openmoji simpleicons https://simpleicons.org/ unsplash undraw api
