@@ -38,17 +38,25 @@ interface ShareDialogProps {
   projectName: string;
   itemType?: 'project' | 'document' | 'canvas';
   itemId?: string;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function ShareDialog({
   projectId,
   projectName,
   itemType = 'project',
-  itemId
+  itemId,
+  isOpen: externalIsOpen,
+  onOpenChange: externalOnOpenChange
 }: ShareDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  
+  // Use external state if provided, otherwise use internal state
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const setIsOpen = externalOnOpenChange || setInternalIsOpen;
   const [copied, setCopied] = useState<string | null>(null);
-  const [isPublic, setIsPublic] = useState(false);
+  const [isPublic, setIsPublic] = useState(true); // Default to public
   const [embedSize, setEmbedSize] = useState("medium");
   const [showToolbar, setShowToolbar] = useState(true);
   const [allowEdit, setAllowEdit] = useState(false);
@@ -93,22 +101,13 @@ export function ShareDialog({
       }
 
       // Then create the share
-      const response = await fetch('/api/share', {
+      const response = await fetch('/api/projects/share', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          itemId: targetItemId,
-          itemType,
-          settings: {
-            shareType: isPublic ? 'public' : 'private',
-            embedSettings: {
-              toolbar: showToolbar,
-              edit: allowEdit,
-              size: embedSize,
-            },
-          },
+          projectId: targetItemId,
         }),
       });
 

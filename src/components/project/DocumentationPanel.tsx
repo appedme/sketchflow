@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ShareExportDialog } from './ShareExportDialog';
+import { ShareDialog } from './ShareDialog';
 import {
   Plus,
   FileText,
@@ -62,8 +62,7 @@ export function DocumentationPanel({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
   const [loadingFileId, setLoadingFileId] = useState<string | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<'share' | 'export'>('share');
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
   // Get current file ID from URL
   const getCurrentFileId = () => {
@@ -181,13 +180,28 @@ export function DocumentationPanel({
   };
 
   const shareProject = () => {
-    setDialogType('share');
-    setDialogOpen(true);
+    setShareDialogOpen(true);
   };
 
-  const exportProject = () => {
-    setDialogType('export');
-    setDialogOpen(true);
+  const exportProject = async () => {
+    try {
+      const response = await fetch(`/api/projects/${projectId}/export`);
+      if (!response.ok) throw new Error('Failed to export project');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `${projectName}-export.json`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error exporting project:', error);
+      alert('Failed to export project. Please try again.');
+    }
   };
 
 
@@ -561,12 +575,11 @@ export function DocumentationPanel({
             <PanelContent />
           </SheetContent>
         </Sheet>
-        <ShareExportDialog
-          isOpen={dialogOpen}
-          onClose={() => setDialogOpen(false)}
-          projectId={projectId}
+        <ShareDialog 
+          projectId={projectId} 
           projectName={projectName}
-          defaultTab={dialogType}
+          isOpen={shareDialogOpen}
+          onOpenChange={setShareDialogOpen}
         />
       </>
     );
@@ -575,12 +588,11 @@ export function DocumentationPanel({
   return (
     <>
       <PanelContent />
-      <ShareExportDialog
-        isOpen={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        projectId={projectId}
+      <ShareDialog 
+        projectId={projectId} 
         projectName={projectName}
-        defaultTab={dialogType}
+        isOpen={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
       />
     </>
   );

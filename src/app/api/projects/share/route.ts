@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
             shareToken = existingShare[0].shareToken;
         } else {
             // Create new share
-            shareToken = nanoid(12); // Short, URL-friendly token
+            shareToken = nanoid(32); // Longer token for better security
 
             await db.insert(shares).values({
                 id: nanoid(),
@@ -72,7 +72,18 @@ export async function POST(request: NextRequest) {
             })
             .where(eq(projects.id, projectId));
 
-        return NextResponse.json({ shareToken }, { status: 200 });
+        const baseUrl = process.env.NODE_ENV === 'production' 
+            ? "https://sketchflow.space" 
+            : (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+
+        const shareUrl = `${baseUrl}/share/${shareToken}`;
+        const embedUrl = `${baseUrl}/embed/project/${projectId}`;
+
+        return NextResponse.json({ 
+            shareToken,
+            shareUrl,
+            embedUrl
+        }, { status: 200 });
     } catch (error) {
         console.error('Error creating share link:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
