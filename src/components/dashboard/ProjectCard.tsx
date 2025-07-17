@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useRouter } from 'next/navigation';
 import {
     FileText,
     Clock,
@@ -36,6 +37,7 @@ import {
     ClipboardList,
     Folder
 } from "lucide-react";
+import { ProjectLoadingOverlay } from './ProjectLoadingOverlay';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -70,6 +72,7 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCardProps) {
+    const router = useRouter();
     const [isEditing, setIsEditing] = useState(false);
     const [editedName, setEditedName] = useState(project.name);
     const [editedDescription, setEditedDescription] = useState(project.description || '');
@@ -80,6 +83,14 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
     );
     const [newTag, setNewTag] = useState('');
     const [isUpdating, setIsUpdating] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const openProjectSettings = () => {
+        setIsLoading(true);
+        setTimeout(() => {
+            router.push(`/project/${project.id}/settings`);
+        }, 800);
+    };
 
     const handleSave = async () => {
         setIsUpdating(true);
@@ -195,6 +206,7 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
     if (viewMode === "list") {
         return (
             <>
+                <ProjectLoadingOverlay isLoading={isLoading} />
                 <Card className="group hover:shadow-lg transition-all duration-300 bg-white border-slate-200 hover:border-slate-300">
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
@@ -204,12 +216,19 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                         {project.name.charAt(0).toUpperCase()}
                                     </div>
                                 </div>
-                                
+
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <Link 
+                                        <Link
                                             href={`/project/${project.id}`}
                                             className="font-semibold text-slate-900 hover:text-blue-600 transition-colors truncate text-lg group-hover:text-blue-600"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setIsLoading(true);
+                                                setTimeout(() => {
+                                                    window.location.href = `/project/${project.id}`;
+                                                }, 800);
+                                            }}
                                         >
                                             {project.name}
                                         </Link>
@@ -220,13 +239,13 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                             {getVisibilityIcon(project.visibility)}
                                         </div>
                                     </div>
-                                    
+
                                     {project.description && (
                                         <p className="text-slate-600 text-sm mb-3 line-clamp-2 leading-relaxed">
                                             {project.description}
                                         </p>
                                     )}
-                                    
+
                                     <div className="flex items-center gap-4 text-sm text-slate-500 mb-3">
                                         <span className="flex items-center gap-1">
                                             <Clock className="w-3 h-3" />
@@ -241,7 +260,7 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                             {formatDistanceToNow(new Date(project.createdAt), { addSuffix: true })}
                                         </span>
                                     </div>
-                                    
+
                                     {/* Tags */}
                                     {project.tags && project.tags.length > 0 && (
                                         <div className="flex flex-wrap gap-1">
@@ -266,7 +285,7 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                     <span className="mr-1">{getCategoryIcon(project.category)}</span>
                                     {project.category}
                                 </Badge>
-                                
+
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-slate-100 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -274,11 +293,19 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end" className="w-48">
-                                        <DropdownMenuItem asChild>
-                                            <Link href={`/project/${project.id}`} className="flex items-center">
+                                        <DropdownMenuItem>
+                                            <div
+                                                className="flex items-center cursor-pointer"
+                                                onClick={() => {
+                                                    setIsLoading(true);
+                                                    setTimeout(() => {
+                                                        window.location.href = `/project/${project.id}`;
+                                                    }, 800);
+                                                }}
+                                            >
                                                 <ExternalLink className="mr-2 h-4 w-4" />
                                                 Open Project
-                                            </Link>
+                                            </div>
                                         </DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => setIsEditing(true)}>
                                             <Edit2 className="mr-2 h-4 w-4" />
@@ -296,6 +323,10 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                                     Add to favorites
                                                 </>
                                             )}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={openProjectSettings}>
+                                            <Settings className="mr-2 h-4 w-4" />
+                                            Project Settings
                                         </DropdownMenuItem>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem>
@@ -432,6 +463,7 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
     // Grid view
     return (
         <>
+            <ProjectLoadingOverlay isLoading={isLoading} />
             <Card className="group hover:shadow-xl transition-all duration-300 bg-white border-slate-200 hover:border-slate-300 hover:-translate-y-1">
                 <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
@@ -452,11 +484,19 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-48">
-                                    <DropdownMenuItem asChild>
-                                        <Link href={`/project/${project.id}`} className="flex items-center">
+                                    <DropdownMenuItem>
+                                        <div
+                                            className="flex items-center cursor-pointer"
+                                            onClick={() => {
+                                                setIsLoading(true);
+                                                setTimeout(() => {
+                                                    window.location.href = `/project/${project.id}`;
+                                                }, 800);
+                                            }}
+                                        >
                                             <ExternalLink className="mr-2 h-4 w-4" />
                                             Open Project
-                                        </Link>
+                                        </div>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => setIsEditing(true)}>
                                         <Edit2 className="mr-2 h-4 w-4" />
@@ -474,6 +514,10 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                                 Add to favorites
                                             </>
                                         )}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={openProjectSettings}>
+                                        <Settings className="mr-2 h-4 w-4" />
+                                        Project Settings
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem>
@@ -493,15 +537,22 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                             </DropdownMenu>
                         </div>
                     </div>
-                    
+
                     <div>
-                        <Link 
+                        <Link
                             href={`/project/${project.id}`}
                             className="font-semibold text-slate-900 hover:text-blue-600 transition-colors block mb-2 group-hover:text-blue-600"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                setIsLoading(true);
+                                setTimeout(() => {
+                                    window.location.href = `/project/${project.id}`;
+                                }, 800);
+                            }}
                         >
                             {project.name}
                         </Link>
-                        
+
                         {project.description && (
                             <p className="text-slate-600 text-sm line-clamp-2 leading-relaxed mb-3">
                                 {project.description}

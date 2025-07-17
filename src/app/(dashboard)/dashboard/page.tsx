@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useUser } from '@stackframe/stack';
+import { UserButton, useUser } from '@stackframe/stack';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,7 +65,7 @@ type FilterBy = 'all' | 'favorites' | 'recent' | 'shared';
 export default function DashboardPage() {
   const user = useUser();
   const router = useRouter();
-  
+
   // State
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -157,12 +157,12 @@ export default function DashboardPage() {
       if (searchQuery && !project.name.toLowerCase().includes(searchQuery.toLowerCase())) {
         return false;
       }
-      
+
       // Category filter
       if (selectedCategory !== 'all' && project.category !== selectedCategory) {
         return false;
       }
-      
+
       // Tag filter
       if (selectedTags.length > 0) {
         const projectTags = project.tags || [];
@@ -170,7 +170,7 @@ export default function DashboardPage() {
           return false;
         }
       }
-      
+
       // Status filter
       switch (filterBy) {
         case 'favorites':
@@ -187,7 +187,7 @@ export default function DashboardPage() {
     })
     .sort((a, b) => {
       let comparison = 0;
-      
+
       switch (sortBy) {
         case 'name':
           comparison = a.name.localeCompare(b.name);
@@ -203,7 +203,7 @@ export default function DashboardPage() {
           comparison = new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
           break;
       }
-      
+
       return sortOrder === 'desc' ? -comparison : comparison;
     });
 
@@ -233,14 +233,17 @@ export default function DashboardPage() {
                 Manage your projects and bring your ideas to life
               </p>
             </div>
-            <Button
-              className="gap-2"
-              onClick={handleCreateProject}
-              disabled={isLoading}
-            >
-              <Plus className="w-4 h-4" />
-              {isLoading ? 'Creating...' : 'New Project'}
-            </Button>
+            <div className="flex items-center gap-4">
+              <Button
+                className="gap-2"
+                onClick={handleCreateProject}
+                disabled={isLoading}
+              >
+                <Plus className="w-4 h-4" />
+                {isLoading ? 'Creating...' : 'New Project'}
+              </Button>
+              <UserButton />
+            </div>
           </div>
 
           {/* Stats Cards */}
@@ -258,7 +261,7 @@ export default function DashboardPage() {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="bg-white border-slate-200">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
@@ -272,7 +275,7 @@ export default function DashboardPage() {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="bg-white border-slate-200">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
@@ -286,7 +289,7 @@ export default function DashboardPage() {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="bg-white border-slate-200">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
