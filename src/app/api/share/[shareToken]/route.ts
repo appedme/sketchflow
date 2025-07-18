@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getShare, getPublicProject } from '@/lib/actions/sharing';
+import { getShare, getPublicProject } from '@/lib/actions/public-sharing';
 
 export async function GET(
   request: NextRequest,

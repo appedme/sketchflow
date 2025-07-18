@@ -48,10 +48,11 @@ interface CanvasProviderProps {
   children: ReactNode;
   projectId: string;
   canvasId?: string;
+  shareToken?: string; // For public access
 }
 
-export function CanvasProvider({ children, projectId, canvasId }: CanvasProviderProps) {
-  const user = useUser();
+export function CanvasProvider({ children, projectId, canvasId, shareToken }: CanvasProviderProps) {
+  const user = shareToken ? null : useUser(); // Don't require user in public mode
   const [elements, setElements] = useState<readonly ExcalidrawElement[]>([]);
   const [appState, setAppState] = useState<Partial<AppState>>({
     collaborators: new Map(),
@@ -62,12 +63,14 @@ export function CanvasProvider({ children, projectId, canvasId }: CanvasProvider
   const lastSavedStateRef = useRef<string>('');
 
   // Determine the correct API endpoint
-  const apiUrl = canvasId
+  const apiUrl = shareToken && canvasId
+    ? `/api/public/canvases/${canvasId}?shareToken=${shareToken}`
+    : canvasId
     ? `/api/canvas/${canvasId}/load`
     : `/api/canvas/project/${projectId}/load`;
 
   const { data: canvasData, error, mutate: mutateCanvas } = useSWR(
-    user?.id ? apiUrl : null,
+    shareToken || user?.id ? apiUrl : null,
     fetcher
   );
 
@@ -114,6 +117,9 @@ export function CanvasProvider({ children, projectId, canvasId }: CanvasProvider
     appStateToSave: Partial<AppState>,
     filesToSave: BinaryFiles
   ) => {
+    // Don't auto-save in public mode
+    if (shareToken) return;
+    
     // Clear existing timeout
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
@@ -141,7 +147,7 @@ export function CanvasProvider({ children, projectId, canvasId }: CanvasProvider
     appStateToSave: Partial<AppState>,
     filesToSave: BinaryFiles
   ) => {
-    if (!user?.id) return;
+    if (!user?.id || shareToken) return; // Don't save in public mode
 
     try {
       setSaving(true);

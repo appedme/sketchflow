@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getShare, getPublicProject } from '@/lib/actions/sharing';
+import { getShare, getPublicProject } from '@/lib/actions/public-sharing';
 import { PublicProjectWorkspace } from '@/components/project/PublicProjectWorkspace';
 import { PublicDocumentViewer } from '@/components/project/PublicDocumentViewer';
 import { PublicCanvasViewer } from '@/components/project/PublicCanvasViewer';

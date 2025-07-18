@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Eye, Menu, X } from 'lucide-react';
-import { DocumentationPanel } from './DocumentationPanel';
+import { PublicDocumentationPanel } from './PublicDocumentationPanel';
 import { PlateDocumentEditor } from './PlateDocumentEditor';
 import dynamic from 'next/dynamic';
 import { Loading } from '@/components/loading';
@@ -52,6 +52,7 @@ export function PublicProjectWorkspace({
           documentId={currentItemId}
           projectId={project.id}
           isReadOnly={true}
+          shareToken={shareToken}
         />
       );
     } else if (currentView === 'canvas' && currentItemId) {
@@ -61,6 +62,7 @@ export function PublicProjectWorkspace({
           projectId={project.id}
           projectName={project.name}
           isReadOnly={true}
+          shareToken={shareToken}
         />
       );
     } else {
@@ -70,6 +72,7 @@ export function PublicProjectWorkspace({
           projectId={project.id}
           projectName={project.name}
           isReadOnly={true}
+          shareToken={shareToken}
         />
       );
     }
@@ -80,9 +83,9 @@ export function PublicProjectWorkspace({
       {/* Sidebar */}
       {showSidebar && (
         <div className="w-80 border-r bg-card flex-shrink-0">
-          <DocumentationPanel
-            projectId={project.id}
-            projectName={project.name}
+          <PublicDocumentationPanel
+            project={project}
+            shareToken={shareToken}
             className="h-full"
           />
         </div>

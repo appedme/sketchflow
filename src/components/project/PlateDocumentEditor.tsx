@@ -42,6 +42,7 @@ interface PlateDocumentEditorProps {
   projectName?: string;
   isReadOnly?: boolean;
   className?: string;
+  shareToken?: string; // For public access
 }
 
 interface DocumentData {
@@ -82,6 +83,7 @@ export function PlateDocumentEditor({
   projectName,
   isReadOnly = false,
   className,
+  shareToken,
 }: PlateDocumentEditorProps) {
   const [document, setDocument] = useState<DocumentData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -109,7 +111,12 @@ export function PlateDocumentEditor({
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/documents/${documentId}`);
+      // Use public API if shareToken is provided (for shared content)
+      const apiUrl = shareToken 
+        ? `/api/public/documents/${documentId}?shareToken=${shareToken}`
+        : `/api/documents/${documentId}`;
+      
+      const response = await fetch(apiUrl);
       if (!response.ok) {
         throw new Error('Failed to load document');
       }
@@ -133,7 +140,7 @@ export function PlateDocumentEditor({
 
   // Save document changes
   const saveDocument = useCallback(async (title?: string, content?: any[]) => {
-    if (!document || isSaving) return;
+    if (!document || isSaving || shareToken) return; // Don't save if using shareToken (public mode)
 
     try {
       setIsSaving(true);
@@ -183,7 +190,7 @@ export function PlateDocumentEditor({
 
   // Auto-save on content changes
   useEffect(() => {
-    if (!document || isReadOnly) return;
+    if (!document || isReadOnly || shareToken) return; // Don't auto-save in public mode
 
     if (!editor) return;
 
@@ -198,7 +205,7 @@ export function PlateDocumentEditor({
 
   // Auto-save on title changes
   useEffect(() => {
-    if (!document || isReadOnly || !localTitle.trim()) return;
+    if (!document || isReadOnly || shareToken || !localTitle.trim()) return; // Don't auto-save in public mode
 
     if (localTitle !== document.title) {
       setHasUnsavedChanges(true);
