@@ -182,11 +182,11 @@ export async function getProjects(userId: string) {
   }
 }
 
-export async function getProject(projectId: string, userId: string) {
+export async function getProject(projectId: string, userId?: string) {
   try {
     const db = getDb();
 
-    // Get project with user's collaboration status
+    // Get project with user's collaboration status (if user is provided)
     const project = await db
       .select({
         project: projects,
@@ -194,10 +194,10 @@ export async function getProject(projectId: string, userId: string) {
       })
       .from(projects)
       .leftJoin(projectCollaborators,
-        and(
+        userId ? and(
           eq(projects.id, projectCollaborators.projectId),
           eq(projectCollaborators.userId, userId)
-        )
+        ) : undefined
       )
       .where(eq(projects.id, projectId))
       .limit(1);
@@ -206,10 +206,21 @@ export async function getProject(projectId: string, userId: string) {
       return null;
     }
 
-    // Check if user has access (owner, collaborator, or public project)
     const userRole = project[0].userRole;
     const projectData = project[0].project;
 
+    // If no user provided, only return public projects
+    if (!userId) {
+      if (projectData.visibility !== 'public') {
+        return null;
+      }
+      return {
+        ...projectData,
+        userRole: 'viewer',
+      };
+    }
+
+    // Check if user has access (owner, collaborator, or public project)
     if (!userRole && projectData.visibility !== 'public') {
       return null; // No access
     }

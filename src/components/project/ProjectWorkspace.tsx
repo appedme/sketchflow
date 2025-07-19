@@ -6,7 +6,7 @@ import { ProjectWorkspaceLoading } from './ProjectWorkspaceLoading';
 import { DocumentPanel } from './DocumentPanel';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { PanelLeftOpen, PanelLeftClose, FileText, Share, Save, ArrowLeft, SplitSquareHorizontal } from 'lucide-react';
+import { PanelLeftOpen, PanelLeftClose, FileText, Share, Save, ArrowLeft, SplitSquareHorizontal, Copy, Eye, Lock, Globe } from 'lucide-react';
 import { DocumentationPanel } from './DocumentationPanel';
 import { ShareDialog } from './ShareDialog';
 import { SplitViewWorkspace } from './SplitViewWorkspace';
@@ -25,12 +25,18 @@ interface ProjectWorkspaceProps {
   projectId: string;
   projectName: string;
   isReadOnly?: boolean;
+  isPublicView?: boolean;
+  project?: any;
+  currentUser?: any;
 }
 
 export function ProjectWorkspace({
   projectId,
   projectName,
-  isReadOnly = false
+  isReadOnly = false,
+  isPublicView = false,
+  project,
+  currentUser
 }: ProjectWorkspaceProps) {
   const [showDocumentPanel, setShowDocumentPanel] = useState(false);
   const [splitViewMode, setSplitViewMode] = useState(false);
@@ -44,19 +50,54 @@ export function ProjectWorkspace({
   } | null>(null);
   const [saving, setSaving] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isCloning, setIsCloning] = useState(false);
 
-  // Detect mobile screen size
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024); // lg breakpoint
-    };
+  // Clone project function
+  const handleCloneProject = async () => {
+    if (!currentUser) {
+      // Redirect to sign in if not authenticated
+      window.location.href = '/sign-in';
+      return;
+    }
 
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+    setIsCloning(true);
+    try {
+      const response = await fetch(`/api/projects/${projectId}/clone`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
+      if (!response.ok) {
+        throw new Error('Failed to clone project');
+      }
+
+      const result = await response.json();
+      // Redirect to the new cloned project
+      window.location.href = `/project/${result.projectId}`;
+    } catch (error) {
+      console.error('Error cloning project:', error);
+      alert('Failed to clone project. Please try again.');
+    } finally {
+      setIsCloning(false);
+    }
+  };
+
+  // Copy current URL to clipboard
+  const handleCopyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      // You could add a toast notification here
+    } catch (error) {
+      console.error('Failed to copy URL:', error);
+    }
+  };
+
+  // Handle save function
   const handleSave = async () => {
+    if (isReadOnly) return;
+    
     setSaving(true);
     try {
       // Trigger save for the current canvas
@@ -70,6 +111,17 @@ export function ProjectWorkspace({
       setSaving(false);
     }
   };
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024); // lg breakpoint
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Handle split view mode
   if (splitViewMode && splitViewItem) {
@@ -173,17 +225,65 @@ export function ProjectWorkspace({
           <h1 className="font-medium text-sm truncate">{projectName}</h1>
         </div>
         <div className="flex items-center gap-2">
-          <ShareDialog projectId={projectId} projectName={projectName} />
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleSave}
-            disabled={saving}
-            className="gap-2"
-          >
-            <Save className="w-4 h-4" />
-            {saving ? 'Saving...' : 'Save'}
-          </Button>
+          {isPublicView ? (
+            <>
+              {/* Public view controls */}
+              <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs">
+                {project?.visibility === 'public' ? <Globe className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                {project?.visibility === 'public' ? 'Public' : 'View Only'}
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleCopyUrl}
+                className="gap-2"
+              >
+                <Copy className="w-4 h-4" />
+                Copy Link
+              </Button>
+              {currentUser && (
+                <Button
+                  size="sm"
+                  variant="default"
+                  onClick={handleCloneProject}
+                  disabled={isCloning}
+                  className="gap-2"
+                >
+                  <Copy className="w-4 h-4" />
+                  {isCloning ? 'Cloning...' : 'Clone Project'}
+                </Button>
+              )}
+              {!currentUser && (
+                <Button
+                  size="sm"
+                  variant="default"
+                  onClick={() => window.location.href = '/sign-in'}
+                  className="gap-2"
+                >
+                  Sign In to Clone
+                </Button>
+              )}
+            </>
+          ) : (
+            <>
+              {/* Edit mode controls */}
+              <ShareDialog 
+                projectId={projectId} 
+                projectName={projectName} 
+                projectVisibility={project?.visibility}
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleSave}
+                disabled={saving}
+                className="gap-2"
+              >
+                <Save className="w-4 h-4" />
+                {saving ? 'Saving...' : 'Save'}
+              </Button>
+            </>
+          )}
         </div>
       </div>
 

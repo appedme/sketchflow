@@ -40,6 +40,7 @@ interface ShareDialogProps {
   itemId?: string;
   isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
+  projectVisibility?: string;
 }
 
 export function ShareDialog({
@@ -48,7 +49,8 @@ export function ShareDialog({
   itemType = 'project',
   itemId,
   isOpen: externalIsOpen,
-  onOpenChange: externalOnOpenChange
+  onOpenChange: externalOnOpenChange,
+  projectVisibility = 'private'
 }: ShareDialogProps) {
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   
@@ -56,7 +58,7 @@ export function ShareDialog({
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
   const setIsOpen = externalOnOpenChange || setInternalIsOpen;
   const [copied, setCopied] = useState<string | null>(null);
-  const [isPublic, setIsPublic] = useState(true); // Default to public
+  const [isPublic, setIsPublic] = useState(projectVisibility === 'public');
   const [embedSize, setEmbedSize] = useState("medium");
   const [showToolbar, setShowToolbar] = useState(true);
   const [allowEdit, setAllowEdit] = useState(false);
@@ -274,6 +276,15 @@ export function ShareDialog({
 
               <div className="space-y-3">
                 <Label htmlFor="share-url">Share URL</Label>
+                {!isPublic && (
+                  <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded border border-amber-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Lock className="w-4 h-4" />
+                      <span className="font-medium">Project is Private</span>
+                    </div>
+                    <p>This project is currently private. Enable "Make project publicly accessible" above to share it with others.</p>
+                  </div>
+                )}
                 {error && (
                   <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
                     {error}
