@@ -207,12 +207,12 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
         return (
             <>
                 <ProjectLoadingOverlay isLoading={isLoading} />
-                <Card className="group hover:shadow-lg transition-all duration-300 bg-white border-slate-200 hover:border-slate-300">
+                <Card className="group hover:shadow-lg transition-all duration-300 bg-card border-border hover:border-muted-foreground/20">
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4 flex-1 min-w-0">
                                 <div className="flex-shrink-0">
-                                    <div className="w-12 h-12 rounded-xl bg-slate-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                                    <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg shadow-lg">
                                         {project.name.charAt(0).toUpperCase()}
                                     </div>
                                 </div>
@@ -221,7 +221,7 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                     <div className="flex items-center gap-2 mb-2">
                                         <Link
                                             href={`/project/${project.id}`}
-                                            className="font-semibold text-slate-900 hover:text-blue-600 transition-colors truncate text-lg group-hover:text-blue-600"
+                                            className="font-semibold text-foreground hover:text-primary transition-colors truncate text-lg group-hover:text-primary"
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 setIsLoading(true);

@@ -3,6 +3,7 @@ import { StackProvider } from "@stackframe/stack";
 import { stackClientApp } from "@/lib/stack";
 import { Nunito } from 'next/font/google'
 import { PWAInstallPrompt } from '@/components/PWAInstallPrompt'
+import { ThemeProvider } from "@/components/theme-provider"
 import "./globals.css";
 
 const nunito = Nunito({
@@ -99,10 +100,17 @@ export default function RootLayout({
       <body
         className={`${nunito.variable} antialiased`}
       >
-        <StackProvider app={stackClientApp}>
-          {children}
-          <PWAInstallPrompt />
-        </StackProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <StackProvider app={stackClientApp}>
+            {children}
+            <PWAInstallPrompt />
+          </StackProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

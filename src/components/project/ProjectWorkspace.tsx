@@ -153,9 +153,9 @@ export function ProjectWorkspace({
       );
     } else {
       return (
-        <div className="h-screen flex flex-col bg-gray-50">
+        <div className="h-screen flex flex-col bg-background">
           {/* Full Screen Header for Canvas */}
-          <div className="h-12 bg-white border-b border-gray-200 flex items-center justify-between px-4">
+          <div className="h-12 bg-background border-b border-border flex items-center justify-between px-4">
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
@@ -166,8 +166,8 @@ export function ProjectWorkspace({
                 <ArrowLeft className="w-4 h-4" />
                 Back
               </Button>
-              <div className="h-6 w-px bg-gray-300" />
-              <h1 className="font-semibold text-lg text-gray-900">Canvas - Full Screen</h1>
+              <div className="h-6 w-px bg-border" />
+              <h1 className="font-semibold text-lg text-foreground">Canvas - Full Screen</h1>
             </div>
             <div className="flex items-center gap-2">
               <Button

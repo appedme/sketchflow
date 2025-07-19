@@ -12,6 +12,7 @@ import { useUser, useStackApp } from "@stackframe/stack";
 import Link from "next/link";
 import { Menu, X, Sparkles, Zap, Users, BookOpen, ArrowRight, User, Settings, LogOut, LayoutDashboard, Palette, Code, Building, GraduationCap, Calendar, Search, PenTool } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const features = [
   {
@@ -186,6 +187,8 @@ export function Navigation() {
 
           {/* Auth Section */}
           <div className="flex items-center gap-3">
+            <ThemeToggle />
+            
             {user ? (
               <div className="flex items-center gap-3">
                 <Link href="/dashboard" className="hidden sm:block" >
@@ -328,21 +331,27 @@ export function Navigation() {
                       </Link>
                     </div>
 
-                    {!user && (
-                      <div className="flex flex-col gap-3 pt-4 border-t">
-                        <Link href="/sign-in" onClick={() => setIsMobileMenuOpen(false)} >
-                          <Button variant="outline" className="w-full">
-                            Sign In
-                          </Button>
-                        </Link>
-                        <Link href="/join" onClick={() => setIsMobileMenuOpen(false)} >
-                          <Button className="w-full gap-2">
-                            Get Started
-                            <ArrowRight className="w-4 h-4" />
-                          </Button>
-                        </Link>
+                    <div className="flex flex-col gap-3 pt-4 border-t">
+                      <div className="flex justify-center">
+                        <ThemeToggle />
                       </div>
-                    )}
+                      
+                      {!user && (
+                        <>
+                          <Link href="/sign-in" onClick={() => setIsMobileMenuOpen(false)} >
+                            <Button variant="outline" className="w-full">
+                              Sign In
+                            </Button>
+                          </Link>
+                          <Link href="/join" onClick={() => setIsMobileMenuOpen(false)} >
+                            <Button className="w-full gap-2">
+                              Get Started
+                              <ArrowRight className="w-4 h-4" />
+                            </Button>
+                          </Link>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </SheetContent>
               </Sheet>

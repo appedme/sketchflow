@@ -108,10 +108,10 @@ function ExcalidrawCanvasContent({
   // Render loading state
   if (isLoading) {
     return (
-      <div className="h-full flex items-center justify-center bg-gray-50">
+      <div className="h-full flex items-center justify-center bg-background">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading canvas...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading canvas...</p>
         </div>
       </div>
     );
@@ -268,7 +268,7 @@ function ExcalidrawCanvasContent({
 
       {/* Read-only indicator */}
       {(isReadOnly || shareToken) && (
-        <div className="absolute top-4 right-4 bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-medium">
+        <div className="absolute top-4 right-4 bg-muted text-muted-foreground px-3 py-1 rounded-full text-sm font-medium">
           {shareToken ? 'Public View' : 'Read Only'}
         </div>
       )}
