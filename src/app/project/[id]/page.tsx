@@ -35,8 +35,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         />
       );
     } else {
-      // If project is private, redirect to sign in
-      redirect('/sign-in');
+      // If project is private, redirect to sign in with return URL
+      redirect(`/sign-in?redirect=${encodeURIComponent(`/project/${id}`)}`);
     }
   }
 

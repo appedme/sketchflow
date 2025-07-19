@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { UserButton, useUser } from '@stackframe/stack';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -66,6 +66,7 @@ type FilterBy = 'all' | 'favorites' | 'recent' | 'shared';
 export default function DashboardPage() {
   const user = useUser();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // State
   const [searchQuery, setSearchQuery] = useState('');
@@ -83,6 +84,15 @@ export default function DashboardPage() {
       router.push('/sign-in');
     }
   }, [user, router]);
+
+  // Handle redirect parameter after sign-in
+  useEffect(() => {
+    const redirect = searchParams.get('redirect');
+    if (redirect && user) {
+      // Redirect to the intended destination
+      router.replace(redirect);
+    }
+  }, [searchParams, router, user]);
 
   // Fetch projects
   const { data: projects = [], isLoading: projectsLoading, error, mutate: refreshProjects } = useApi<Project[]>(

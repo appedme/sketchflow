@@ -9,6 +9,16 @@ const protectedRoutes = [
 
 export default async function middleware(request: NextRequest) {
   const user = await stackServerApp.getUser();
+  
+  // Handle redirect after sign-in
+  if (request.nextUrl.pathname === "/dashboard" && user) {
+    const redirectParam = request.nextUrl.searchParams.get("redirect");
+    if (redirectParam) {
+      // Clear the redirect param and redirect to the intended destination
+      return NextResponse.redirect(new URL(redirectParam, request.url));
+    }
+  }
+  
   const isProtectedRoute = protectedRoutes.some(route =>
     request.nextUrl.pathname.startsWith(route)
   );

@@ -55,8 +55,8 @@ export function ProjectWorkspace({
   // Clone project function
   const handleCloneProject = async () => {
     if (!currentUser) {
-      // Redirect to sign in if not authenticated
-      window.location.href = '/sign-in';
+      // Redirect to sign in with return URL if not authenticated
+      window.location.href = `/sign-in?redirect=${encodeURIComponent(window.location.pathname)}`;
       return;
     }
 
@@ -257,7 +257,7 @@ export function ProjectWorkspace({
                 <Button
                   size="sm"
                   variant="default"
-                  onClick={() => window.location.href = '/sign-in'}
+                  onClick={() => window.location.href = `/sign-in?redirect=${encodeURIComponent(window.location.pathname)}`}
                   className="gap-2"
                 >
                   Sign In to Clone

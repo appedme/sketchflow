@@ -588,12 +588,12 @@ export function DocumentationPanel({
   return (
     <>
       <PanelContent />
-      <ShareDialog 
+      {/* <ShareDialog 
         projectId={projectId} 
         projectName={projectName}
         isOpen={shareDialogOpen}
         onOpenChange={setShareDialogOpen}
-      />
+      /> */}
     </>
   );
 }
