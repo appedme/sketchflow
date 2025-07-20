@@ -33,6 +33,7 @@ import { PexelsSidebar } from '@/components/canvas/PexelsSidebar';
 import { PexelsService, PexelsPhoto } from '@/lib/services/pexels';
 import Image from "next/image";
 import { FileText, PencilRuler as CanvasIcon, Smile, Camera } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
 interface ExcalidrawCanvasProps {
   projectId: string;
@@ -62,6 +63,8 @@ function ExcalidrawCanvasContent({
   const [isPexelsSidebarOpen, setIsPexelsSidebarOpen] = useState(false);
   const pexelsService = useMemo(() => PexelsService.getInstance(), []);
 
+  const { theme } = useTheme();
+  
   const {
     elements,
     appState,
@@ -134,7 +137,7 @@ function ExcalidrawCanvasContent({
         viewModeEnabled={isReadOnly || !!shareToken}
         zenModeEnabled={false}
         gridModeEnabled={false}
-        theme="light"
+        theme={theme === 'dark' ? 'dark' : 'light'}
         name={projectName}
         UIOptions={{
           canvasActions: {

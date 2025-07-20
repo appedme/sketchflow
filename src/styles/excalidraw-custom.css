@@ -1,5 +1,37 @@
 /* Custom Excalidraw Styles for SketchFlow */
 
+/* Dark mode support for Excalidraw */
+.dark .excalidraw .App-canvas {
+  background: hsl(var(--background)) !important;
+}
+
+.dark .excalidraw .Island {
+  background: hsl(var(--card)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark .excalidraw .App-menu {
+  background: hsl(var(--card)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark .excalidraw .App-toolbar {
+  background: hsl(var(--card)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+}
+
+.dark .excalidraw button {
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark .excalidraw .sidebar {
+  background: hsl(var(--card)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
 /* Move toolbar to the right side */
 /* .excalidraw .App-toolbar {
   position: fixed !important;

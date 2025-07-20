@@ -26,11 +26,15 @@ import {
   Settings,
   FolderOpen,
   ArrowLeft,
-  Home
+  Home,
+  Moon,
+  Sun,
+  ExternalLink
 } from 'lucide-react';
 import { mutate } from 'swr';
 import { cn } from '@/lib/utils';
 import { useApi } from '@/hooks/useApi';
+import { useTheme } from 'next-themes';
 
 interface Document {
   id: string;
@@ -57,6 +61,7 @@ export function DocumentationPanel({
   className,
   isMobile = false
 }: DocumentationPanelProps) {
+  const { theme, setTheme } = useTheme();
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -558,6 +563,59 @@ export function DocumentationPanel({
           )}
         </div>
       </ScrollArea>
+
+      {/* Bottom Controls */}
+      <div className="p-3 border-t bg-muted/30 space-y-2">
+        {/* Theme Toggle */}
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-medium text-muted-foreground">Theme</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="h-7 w-7 p-0"
+          >
+            {theme === 'dark' ? (
+              <Sun className="h-4 w-4" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={shareProject}
+            className="flex-1 gap-2 h-8"
+          >
+            <Share className="h-3 w-3" />
+            Share
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportProject}
+            className="flex-1 gap-2 h-8"
+          >
+            <Download className="h-3 w-3" />
+            Export
+          </Button>
+        </div>
+
+        {/* Project Link */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push(`/project/${projectId}`)}
+          className="w-full gap-2 h-8 text-xs"
+        >
+          <ExternalLink className="h-3 w-3" />
+          Open Project View
+        </Button>
+      </div>
     </div>
   );
 
@@ -588,12 +646,12 @@ export function DocumentationPanel({
   return (
     <>
       <PanelContent />
-      {/* <ShareDialog 
+      <ShareDialog 
         projectId={projectId} 
         projectName={projectName}
         isOpen={shareDialogOpen}
         onOpenChange={setShareDialogOpen}
-      /> */}
+      />
     </>
   );
 }

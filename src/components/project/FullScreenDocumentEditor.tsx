@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, PanelLeftOpen, SplitSquareHorizontal, FileText, Maximize, Minimize } from 'lucide-react';
-import { PlateDocumentEditor } from './PlateDocumentEditor';
+import { LazyPlateEditor } from '@/components/optimized/LazyPlateEditor';
 import { DocumentationPanel } from './DocumentationPanel';
 
 interface FullScreenDocumentEditorProps {
@@ -154,7 +154,7 @@ export function FullScreenDocumentEditor({
 
         {/* Document Editor */}
         <div className="flex-1 overflow-hidden">
-          <PlateDocumentEditor
+          <LazyPlateEditor
             documentId={documentId}
             projectId={projectId}
             projectName={projectName}

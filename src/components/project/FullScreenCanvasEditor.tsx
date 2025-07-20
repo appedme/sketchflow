@@ -7,14 +7,8 @@ import { PanelLeftOpen, SplitSquareHorizontal, Save } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { DocumentationPanel } from './DocumentationPanel';
 
-// Dynamically import Excalidraw to avoid SSR issues
-const ExcalidrawCanvas = dynamic(
-  () => import('./ExcalidrawCanvas').then(mod => mod.ExcalidrawCanvas),
-  { 
-    ssr: false,
-    loading: () => <div className="h-full w-full flex items-center justify-center">Loading canvas...</div>
-  }
-);
+// Use optimized lazy loading for better performance
+import { LazyExcalidrawCanvas } from '@/components/optimized/LazyExcalidrawCanvas';
 
 interface FullScreenCanvasEditorProps {
   projectId: string;
@@ -99,7 +93,7 @@ export function FullScreenCanvasEditor({
         
         {/* Full Screen Canvas Content */}
         <div className="flex-1">
-          <ExcalidrawCanvas
+          <LazyExcalidrawCanvas
             projectId={projectId}
             canvasId={canvasId}
             projectName={projectName}

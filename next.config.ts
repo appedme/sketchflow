@@ -10,10 +10,56 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   serverExternalPackages: ['@libsql/client', '@libsql/hrana-client', '@libsql/isomorphic-ws'],
-  webpack: (config, { isServer }) => {
+  
+  // Performance optimizations
+  experimental: {
+    optimizePackageImports: ['@excalidraw/excalidraw', 'platejs', '@platejs/core'],
+    turbo: {
+      rules: {
+        '*.svg': {
+          loaders: ['@svgr/webpack'],
+          as: '*.js',
+        },
+      },
+    },
+  },
+  
+  webpack: (config, { isServer, dev }) => {
     if (isServer) {
       config.externals.push('@libsql/client', '@libsql/hrana-client', '@libsql/isomorphic-ws');
     }
+    
+    // Optimize bundle splitting for heavy libraries
+    if (!isServer && !dev) {
+      config.optimization.splitChunks = {
+        ...config.optimization.splitChunks,
+        cacheGroups: {
+          ...config.optimization.splitChunks?.cacheGroups,
+          excalidraw: {
+            name: 'excalidraw',
+            test: /[\\/]node_modules[\\/]@excalidraw[\\/]/,
+            chunks: 'all',
+            priority: 30,
+            reuseExistingChunk: true,
+          },
+          plate: {
+            name: 'plate-editor',
+            test: /[\\/]node_modules[\\/](@platejs|platejs)[\\/]/,
+            chunks: 'all',
+            priority: 25,
+            reuseExistingChunk: true,
+          },
+          radix: {
+            name: 'radix-ui',
+            test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
+            chunks: 'all',
+            priority: 20,
+            reuseExistingChunk: true,
+          },
+        },
+      };
+    }
+    
     return config;
   },
   images: {

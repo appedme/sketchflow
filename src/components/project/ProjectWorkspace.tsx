@@ -12,14 +12,10 @@ import { ShareDialog } from './ShareDialog';
 import { SplitViewWorkspace } from './SplitViewWorkspace';
 import { FullScreenDocumentEditor } from './FullScreenDocumentEditor';
 
-// Dynamically import Excalidraw to avoid SSR issues
-const ExcalidrawCanvas = dynamic(
-  () => import('./ExcalidrawCanvas').then(mod => mod.ExcalidrawCanvas),
-  {
-    ssr: false,
-    loading: () => <ProjectWorkspaceLoading />
-  }
-);
+// Use optimized lazy loading for better performance
+import { LazyExcalidrawCanvas } from '@/components/optimized/LazyExcalidrawCanvas';
+import { LazyPlateEditor } from '@/components/optimized/LazyPlateEditor';
+import { useComponentPreloader } from '@/components/optimized/PreloadManager';
 
 interface ProjectWorkspaceProps {
   projectId: string;
@@ -289,7 +285,7 @@ export function ProjectWorkspace({
 
       {/* Main Content Area */}
       <div className="flex-1 relative overflow-hidden">
-        <ExcalidrawCanvas
+        <LazyExcalidrawCanvas
           projectId={projectId}
           projectName={projectName}
           isReadOnly={isReadOnly}
