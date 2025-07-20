@@ -7,7 +7,7 @@ interface ProjectLoadingOverlayProps {
 }
 
 export function ProjectLoadingOverlay({ isLoading }: ProjectLoadingOverlayProps) {
-    if (!isLoading) return null;
+    if (1) return null;
 
     return (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center">

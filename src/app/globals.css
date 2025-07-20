@@ -56,6 +56,25 @@
   --shadow-2xl: 0px 1px 3px 0px hsl(0 0% 0% / 0.43);
   --tracking-normal: 0.025em;
   --spacing: 0.25rem;
+  
+  /* Project Card Variables */
+  --project-card-bg: var(--card);
+  --project-card-border: var(--border);
+  --project-card-hover-bg: var(--accent);
+  --project-card-hover-border: var(--ring);
+  --project-card-text: var(--card-foreground);
+  --project-card-text-muted: var(--muted-foreground);
+  --project-card-avatar-bg: var(--primary);
+  --project-card-avatar-text: var(--primary-foreground);
+  --project-card-tag-bg: var(--secondary);
+  --project-card-tag-text: var(--secondary-foreground);
+  --project-card-stats-bg: var(--muted);
+  --project-card-stats-text: var(--muted-foreground);
+  --project-card-shadow: var(--shadow-sm);
+  --project-card-hover-shadow: var(--shadow-md);
+  --project-card-radius: var(--radius);
+  --project-card-spacing: var(--spacing);
+  --project-card-transition: all 0.2s ease-in-out;
 }
 
 .dark {
@@ -78,6 +97,34 @@
   --border: oklch(0.2809 0 0);
   --input: oklch(0.2603 0 0);
   --ring: oklch(0.8003 0.1821 151.7110);
+  
+  /* Dark mode project card overrides */
+  --project-card-bg: var(--card);
+  --project-card-border: var(--border);
+  --project-card-hover-bg: oklch(0.2603 0 0);
+  --project-card-hover-border: var(--primary);
+  --project-card-text: var(--card-foreground);
+  --project-card-text-muted: var(--muted-foreground);
+  --project-card-avatar-bg: var(--primary);
+  --project-card-avatar-text: var(--primary-foreground);
+  --project-card-tag-bg: var(--secondary);
+  --project-card-tag-text: var(--secondary-foreground);
+  --project-card-stats-bg: var(--muted);
+  --project-card-stats-text: var(--muted-foreground);
+  
+  /* Dark mode project card overrides */
+  --project-card-bg: var(--card);
+  --project-card-border: var(--border);
+  --project-card-hover-bg: oklch(0.2603 0 0);
+  --project-card-hover-border: var(--ring);
+  --project-card-text: var(--card-foreground);
+  --project-card-text-muted: var(--muted-foreground);
+  --project-card-avatar-bg: var(--primary);
+  --project-card-avatar-text: var(--primary-foreground);
+  --project-card-tag-bg: var(--secondary);
+  --project-card-tag-text: var(--secondary-foreground);
+  --project-card-stats-bg: var(--muted);
+  --project-card-stats-text: var(--muted-foreground);
   --chart-1: oklch(0.8003 0.1821 151.7110);
   --chart-2: oklch(0.7137 0.1434 254.6240);
   --chart-3: oklch(0.7090 0.1592 293.5412);

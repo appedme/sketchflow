@@ -228,16 +228,16 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen  ">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900">
+              <h1 className="text-3xl font-bold efrewgrwg">
                 Welcome back, {user?.displayName?.split(' ')[0] || 'there'}
               </h1>
-              <p className="text-slate-600 mt-1">
+              <p className="fgergwe mt-1">
                 Manage your projects and bring your ideas to life
               </p>
             </div>
@@ -256,57 +256,57 @@ export default function DashboardPage() {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <Card className="bg-white border-slate-200">
+            <Card className="fewfe border-ewfewf">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-slate-100 rounded-lg">
-                    <Folder className="w-4 h-4 text-slate-600" />
+                  <div className="p-2 frwger rounded-lg">
+                    <Folder className="w-4 h-4 fgergwe" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
-                    <p className="text-sm text-slate-600">Total Projects</p>
+                    <p className="text-2xl font-bold efrewgrwg">{stats.total}</p>
+                    <p className="text-sm fgergwe">Total Projects</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white border-slate-200">
+            <Card className="fewfe border-ewfewf">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-slate-100 rounded-lg">
-                    <Star className="w-4 h-4 text-slate-600" />
+                  <div className="p-2 frwger rounded-lg">
+                    <Star className="w-4 h-4 fgergwe" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-slate-900">{stats.favorites}</p>
-                    <p className="text-sm text-slate-600">Favorites</p>
+                    <p className="text-2xl font-bold efrewgrwg">{stats.favorites}</p>
+                    <p className="text-sm fgergwe">Favorites</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white border-slate-200">
+            <Card className="fewfe border-ewfewf">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-slate-100 rounded-lg">
-                    <TrendingUp className="w-4 h-4 text-slate-600" />
+                  <div className="p-2 frwger rounded-lg">
+                    <TrendingUp className="w-4 h-4 fgergwe" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-slate-900">{stats.recent}</p>
-                    <p className="text-sm text-slate-600">Recent</p>
+                    <p className="text-2xl font-bold efrewgrwg">{stats.recent}</p>
+                    <p className="text-sm fgergwe">Recent</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white border-slate-200">
+            <Card className="fewfe border-ewfewf">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-slate-100 rounded-lg">
-                    <Users className="w-4 h-4 text-slate-600" />
+                  <div className="p-2 frwger rounded-lg">
+                    <Users className="w-4 h-4 fgergwe" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-slate-900">{stats.shared}</p>
-                    <p className="text-sm text-slate-600">Shared</p>
+                    <p className="text-2xl font-bold efrewgrwg">{stats.shared}</p>
+                    <p className="text-sm fgergwe">Shared</p>
                   </div>
                 </div>
               </CardContent>
@@ -315,7 +315,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Filters and Controls */}
-        <Card className="mb-6 bg-white border-slate-200">
+        <Card className="mb-6 fewfe border-ewfewf">
           <CardContent className="p-6">
             <div className="flex flex-col lg:flex-row gap-4">
               {/* Search */}
@@ -331,7 +331,7 @@ export default function DashboardPage() {
 
               {/* Quick Filters */}
               <Tabs value={filterBy} onValueChange={(value) => setFilterBy(value as FilterBy)} className="w-auto">
-                <TabsList className="bg-slate-100">
+                <TabsList className="frwger">
                   <TabsTrigger value="all" className="gap-2">
                     <Folder className="w-4 h-4" />
                     All
@@ -401,7 +401,7 @@ export default function DashboardPage() {
               </DropdownMenu>
 
               {/* View Mode */}
-              <div className="flex bg-slate-100 rounded-lg p-1">
+              <div className="flex frwger rounded-lg p-1">
                 <Button
                   variant={viewMode === 'grid' ? 'default' : 'ghost'}
                   size="sm"
@@ -423,17 +423,17 @@ export default function DashboardPage() {
 
             {/* Tags Filter */}
             {allTags.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-slate-200">
+              <div className="mt-4 pt-4 border-t border-ewfewf">
                 <div className="flex items-center gap-2 mb-2">
-                  <Tag className="w-4 h-4 text-slate-600" />
-                  <span className="text-sm font-medium text-slate-700">Filter by tags:</span>
+                  <Tag className="w-4 h-4 fgergwe" />
+                  <span className="text-sm font-medium fewrgrewgr">Filter by tags:</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {allTags.map(tag => (
                     <Badge
                       key={tag}
                       variant={selectedTags.includes(tag) ? "default" : "outline"}
-                      className="cursor-pointer hover:bg-slate-100"
+                      className="cursor-pointer hover:frwger"
                       onClick={() => {
                         setSelectedTags(prev =>
                           prev.includes(tag)
@@ -450,7 +450,7 @@ export default function DashboardPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => setSelectedTags([])}
-                      className="h-6 px-2 text-slate-500 hover:text-slate-700"
+                      className="h-6 px-2 text-slate-500 hover:fewrgrewgr"
                     >
                       Clear all
                     </Button>
@@ -468,14 +468,14 @@ export default function DashboardPage() {
             viewMode === 'grid' ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"
           )}>
             {Array.from({ length: 6 }).map((_, i) => (
-              <Card key={i} className="animate-pulse bg-white/60 backdrop-blur-sm">
+              <Card key={i} className="animate-pulse fewfe/60 backdrop-blur-sm">
                 <CardContent className="p-6">
                   <div className="space-y-3">
-                    <div className="h-4 bg-slate-200 rounded w-3/4" />
-                    <div className="h-3 bg-slate-200 rounded w-1/2" />
+                    <div className="h-4 bg-ewfewf rounded w-3/4" />
+                    <div className="h-3 bg-ewfewf rounded w-1/2" />
                     <div className="flex gap-2">
-                      <div className="h-6 bg-slate-200 rounded w-16" />
-                      <div className="h-6 bg-slate-200 rounded w-20" />
+                      <div className="h-6 bg-ewfewf rounded w-16" />
+                      <div className="h-6 bg-ewfewf rounded w-20" />
                     </div>
                   </div>
                 </CardContent>
@@ -483,9 +483,9 @@ export default function DashboardPage() {
             ))}
           </div>
         ) : error ? (
-          <Card className="bg-white/80 backdrop-blur-sm">
+          <Card className="fewfe/80 backdrop-blur-sm">
             <CardContent className="p-12 text-center">
-              <p className="text-slate-600 mb-4">Failed to load projects</p>
+              <p className="fgergwe mb-4">Failed to load projects</p>
               <Button variant="outline" onClick={() => window.location.reload()}>
                 Try again
               </Button>
@@ -506,15 +506,15 @@ export default function DashboardPage() {
             ))}
           </div>
         ) : (
-          <Card className="bg-white">
+          <Card className="fewfe">
             <CardContent className="p-12 text-center">
               {searchQuery || selectedTags.length > 0 || selectedCategory !== 'all' ? (
                 <>
-                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 frwger rounded-full flex items-center justify-center mx-auto mb-4">
                     <Search className="w-8 h-8 text-slate-400" />
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2">No projects found</h3>
-                  <p className="text-slate-600 mb-4">
+                  <h3 className="text-lg font-semibold efrewgrwg mb-2">No projects found</h3>
+                  <p className="fgergwe mb-4">
                     Try adjusting your search or filters to find what you're looking for.
                   </p>
                   <Button
@@ -531,11 +531,11 @@ export default function DashboardPage() {
                 </>
               ) : (
                 <>
-                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Sparkles className="w-8 h-8 text-slate-600" />
+                  <div className="w-16 h-16 frwger rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Sparkles className="w-8 h-8 fgergwe" />
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Ready to create something amazing?</h3>
-                  <p className="text-slate-600 mb-6">
+                  <h3 className="text-lg font-semibold efrewgrwg mb-2">Ready to create something amazing?</h3>
+                  <p className="fgergwe mb-6">
                     Start your first project and bring your ideas to life with our powerful tools.
                   </p>
                   <Button
