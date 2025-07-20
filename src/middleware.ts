@@ -4,7 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 const protectedRoutes = [
   '/dashboard',
   '/profile',
-  '/project',
+  // Note: /project routes are handled individually in the page component
+  // to allow public project viewing
 ];
 
 export default async function middleware(request: NextRequest) {
