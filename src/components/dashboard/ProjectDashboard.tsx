@@ -4,11 +4,12 @@ import { useProjects } from '@/hooks/useProjects';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Grid, List, Search, Filter } from 'lucide-react';
+import { Search, Filter, FolderOpen } from 'lucide-react';
+import { ModeToggler, ViewMode } from './ModeToggler';
 import { cn } from '@/lib/utils';
 
 export function ProjectDashboard() {
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const [viewMode, setViewMode] = useState<ViewMode>('grid');
     const [search, setSearch] = useState('');
     const [category, setCategory] = useState<string>('');
     const [visibility, setVisibility] = useState<string>('');
@@ -50,136 +51,137 @@ export function ProjectDashboard() {
     }
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold">Projects</h1>
-                
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant={viewMode === 'grid' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setViewMode('grid')}
-                    >
-                        <Grid className="w-4 h-4" />
-                    </Button>
-                    <Button
-                        variant={viewMode === 'list' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setViewMode('list')}
-                    >
-                        <List className="w-4 h-4" />
-                    </Button>
-                </div>
-            </div>
-
-            {/* Filters */}
-            <div className="flex flex-wrap gap-4 p-4 bg-card rounded-lg border">
-                <div className="flex-1 min-w-64">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Search projects..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="pl-10"
+        <div className="min-h-screen bg-background p-6">
+            <div className="max-w-7xl mx-auto flex flex-col gap-6">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-card p-6 rounded-lg border border-border shadow-sm">
+                    <h1 className="text-2xl font-bold text-foreground">Projects</h1>
+                    
+                    <div className="flex items-center justify-between sm:justify-end gap-3">
+                        <ModeToggler 
+                            viewMode={viewMode} 
+                            onViewModeChange={setViewMode}
                         />
                     </div>
                 </div>
-                
-                <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger className="w-40">
-                        <SelectValue placeholder="Category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="">All Categories</SelectItem>
-                        <SelectItem value="business">Business</SelectItem>
-                        <SelectItem value="design">Design</SelectItem>
-                        <SelectItem value="education">Education</SelectItem>
-                        <SelectItem value="personal">Personal</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                </Select>
 
-                <Select value={visibility} onValueChange={setVisibility}>
-                    <SelectTrigger className="w-32">
-                        <SelectValue placeholder="Visibility" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="">All</SelectItem>
-                        <SelectItem value="private">Private</SelectItem>
-                        <SelectItem value="public">Public</SelectItem>
-                    </SelectContent>
-                </Select>
-
-                <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-36">
-                        <SelectValue placeholder="Sort by" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="updatedAt">Last Updated</SelectItem>
-                        <SelectItem value="createdAt">Created</SelectItem>
-                        <SelectItem value="name">Name</SelectItem>
-                        <SelectItem value="viewCount">Views</SelectItem>
-                    </SelectContent>
-                </Select>
-
-                <Button variant="outline" onClick={handleClearFilters}>
-                    <Filter className="w-4 h-4 mr-2" />
-                    Clear
-                </Button>
-            </div>
-
-            {/* Loading State */}
-            {isLoading && (
-                <div className="flex items-center justify-center h-32">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-            )}
-
-            {/* Projects Grid/List */}
-            {projects && projects.length > 0 ? (
-                <div className={cn(
-                    "gap-6",
-                    viewMode === 'grid' 
-                        ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
-                        : "flex flex-col"
-                )}>
-                    {projects.map((project) => (
-                        <ProjectCard
-                            key={project.id}
-                            project={project}
-                            viewMode={viewMode}
-                            onUpdate={handleRefresh}
-                        />
-                    ))}
-                </div>
-            ) : (
-                !isLoading && (
-                    <div className="flex items-center justify-center h-64">
-                        <div className="text-center">
-                            <p className="text-muted-foreground mb-4">
-                                {search || category || visibility 
-                                    ? 'No projects match your filters' 
-                                    : 'No projects found'
-                                }
-                            </p>
-                            {(search || category || visibility) && (
-                                <Button onClick={handleClearFilters} variant="outline">
-                                    Clear Filters
-                                </Button>
-                            )}
+                {/* Filters */}
+                <div className="bg-card rounded-lg border border-border p-4 shadow-sm">
+                    <div className="flex flex-col sm:flex-row flex-wrap gap-3 items-start sm:items-center">
+                        <div className="flex-1 min-w-64 sm:min-w-80 relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                            <Input
+                                placeholder="Search projects..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="pl-10"
+                            />
                         </div>
-                    </div>
-                )
-            )}
+                        
+                        <Select value={category} onValueChange={setCategory}>
+                            <SelectTrigger className="w-full sm:w-40">
+                                <SelectValue placeholder="Category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="">All Categories</SelectItem>
+                                <SelectItem value="business">Business</SelectItem>
+                                <SelectItem value="design">Design</SelectItem>
+                                <SelectItem value="education">Education</SelectItem>
+                                <SelectItem value="personal">Personal</SelectItem>
+                                <SelectItem value="other">Other</SelectItem>
+                            </SelectContent>
+                        </Select>
 
-            {/* Project Count */}
-            {projects && projects.length > 0 && (
-                <div className="text-center text-sm text-muted-foreground">
-                    Showing {projects.length} project{projects.length !== 1 ? 's' : ''}
+                        <Select value={visibility} onValueChange={setVisibility}>
+                            <SelectTrigger className="w-full sm:w-32">
+                                <SelectValue placeholder="Visibility" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="">All</SelectItem>
+                                <SelectItem value="private">Private</SelectItem>
+                                <SelectItem value="public">Public</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <Select value={sortBy} onValueChange={setSortBy}>
+                            <SelectTrigger className="w-full sm:w-36">
+                                <SelectValue placeholder="Sort by" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="updatedAt">Last Updated</SelectItem>
+                                <SelectItem value="createdAt">Created</SelectItem>
+                                <SelectItem value="name">Name</SelectItem>
+                                <SelectItem value="viewCount">Views</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <Button variant="outline" onClick={handleClearFilters}>
+                            <Filter className="w-4 h-4 mr-2" />
+                            Clear
+                        </Button>
+                    </div>
                 </div>
-            )}
+
+                {/* Loading State */}
+                {isLoading && (
+                    <div className="flex items-center justify-center h-32">
+                        <div className="w-8 h-8 border-2 border-muted border-t-primary rounded-full animate-spin"></div>
+                    </div>
+                )}
+
+                {/* Projects Grid/List */}
+                {projects && projects.length > 0 ? (
+                    <div className={cn(
+                        "gap-6",
+                        viewMode === 'grid' 
+                            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
+                            : "flex flex-col"
+                    )}>
+                        {projects.map((project) => (
+                            <ProjectCard
+                                key={project.id}
+                                project={project}
+                                viewMode={viewMode}
+                                onUpdate={handleRefresh}
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    !isLoading && (
+                        <div className="flex items-center justify-center h-64">
+                            <div className="text-center space-y-4">
+                                <FolderOpen className="w-16 h-16 text-muted-foreground opacity-50 mx-auto" />
+                                <div>
+                                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                                        {search || category || visibility 
+                                            ? 'No projects match your filters' 
+                                            : 'No projects found'
+                                        }
+                                    </h3>
+                                    <p className="text-muted-foreground mb-4">
+                                        {search || category || visibility 
+                                            ? 'Try adjusting your search criteria' 
+                                            : 'Create your first project to get started'
+                                        }
+                                    </p>
+                                    {(search || category || visibility) && (
+                                        <Button onClick={handleClearFilters} variant="outline">
+                                            Clear Filters
+                                        </Button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )
+                )}
+
+                {/* Project Count */}
+                {projects && projects.length > 0 && (
+                    <div className="text-center text-sm text-muted-foreground py-4">
+                        Showing {projects.length} project{projects.length !== 1 ? 's' : ''}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
