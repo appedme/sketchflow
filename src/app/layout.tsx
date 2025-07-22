@@ -7,6 +7,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { PreloadManager } from "@/components/optimized/PreloadManager"
 import { SWRProvider } from "@/components/providers/swr-provider"
 import HydrationErrorBoundary from "@/components/utils/HydrationErrorBoundary"
+import { CacheStatus } from "@/components/files/CacheStatus"
+import { Toaster } from "@/components/ui/toast"
 import "./globals.css";
 
 const nunito = Nunito({
@@ -117,6 +119,8 @@ export default function RootLayout({
                   {children}
                 </PreloadManager>
                 <PWAInstallPrompt />
+                <CacheStatus />
+                <Toaster position="bottom-right" />
               </SWRProvider>
             </StackProvider>
           </ThemeProvider>

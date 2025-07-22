@@ -3,11 +3,16 @@
 import { SWRConfig } from 'swr';
 import { ReactNode } from 'react';
 import HydrationErrorBoundary from '../utils/HydrationErrorBoundary';
+import { CacheProvider } from '@/contexts/CacheContext';
 
 // Create a persistent storage object
 const localStorageProvider = () => {
+    if (typeof window === 'undefined') {
+        return new Map();
+    }
+
     // When initializing, restore from localStorage
-    const map = new Map(
+    const map = new Map<string, any>(
         JSON.parse(localStorage.getItem('app-cache') || '[]')
     );
 
@@ -42,7 +47,9 @@ export function SWRProvider({ children }: SWRProviderProps) {
                     },
                 }}
             >
-                {children}
+                <CacheProvider>
+                    {children}
+                </CacheProvider>
             </SWRConfig>
         </HydrationErrorBoundary>
     );
