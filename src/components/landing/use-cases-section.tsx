@@ -22,7 +22,7 @@ export function UseCasesSection() {
     <section id="use-cases" className="py-20 px-4 bg-muted/50">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-heading font-bold tracking-tight mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 font-bitcount-heading">
             Perfect for Every Use Case
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -40,7 +40,7 @@ export function UseCasesSection() {
                   <div className="mx-auto mb-4 w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                     <Icon className="w-6 h-6 text-primary" />
                   </div>
-                  <CardTitle className="text-lg">{useCase.title}</CardTitle>
+                  <CardTitle className="text-lg font-bitcount">{useCase.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <CardDescription className="text-sm">

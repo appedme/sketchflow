@@ -78,7 +78,7 @@ export function TestimonialsSection() {
   // Auto-rotate testimonials
   useEffect(() => {
     if (!isAutoPlaying) return;
-    
+
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % testimonials.length);
     }, 5000);
@@ -107,10 +107,10 @@ export function TestimonialsSection() {
       <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:50px_50px]" />
       <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl" />
-      
+
       <div className="max-w-7xl mx-auto relative">
         {/* Header */}
-        <motion.div 
+        <motion.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -123,7 +123,7 @@ export function TestimonialsSection() {
               Loved by 10,000+ creators
             </Badge>
           </div>
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold tracking-tight mb-6 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent font-bitcount-heading">
             What Our Users Say
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
@@ -152,7 +152,7 @@ export function TestimonialsSection() {
                           <Quote className="w-8 h-8 text-primary" />
                         </div>
                       </div>
-                      
+
                       {/* Content */}
                       <div className="flex-1 text-center md:text-left">
                         <div className="flex justify-center md:justify-start mb-4">
@@ -160,17 +160,17 @@ export function TestimonialsSection() {
                             <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
                           ))}
                         </div>
-                        
+
                         <blockquote className="text-xl md:text-2xl font-medium leading-relaxed mb-6 text-foreground/90">
                           "{testimonials[currentIndex].content}"
                         </blockquote>
-                        
+
                         <div className="flex flex-col md:flex-row items-center gap-4">
                           <div className="flex items-center gap-4">
                             <Avatar className="w-12 h-12 border-2 border-primary/20">
-                              <AvatarImage 
-                                src={testimonials[currentIndex].avatar} 
-                                alt={testimonials[currentIndex].name} 
+                              <AvatarImage
+                                src={testimonials[currentIndex].avatar}
+                                alt={testimonials[currentIndex].name}
                               />
                               <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                                 {testimonials[currentIndex].name.split(' ').map(n => n[0]).join('')}
@@ -183,7 +183,7 @@ export function TestimonialsSection() {
                               </div>
                             </div>
                           </div>
-                          
+
                           <div className="flex gap-2">
                             <Badge variant="outline" className="bg-primary/5 border-primary/20">
                               {testimonials[currentIndex].highlight}
@@ -210,22 +210,21 @@ export function TestimonialsSection() {
               >
                 <ArrowLeft className="w-4 h-4" />
               </Button>
-              
+
               {/* Dots Indicator */}
               <div className="flex gap-2">
                 {testimonials.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => goToTestimonial(index)}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                      index === currentIndex 
-                        ? 'bg-primary scale-125' 
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentIndex
+                        ? 'bg-primary scale-125'
                         : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
-                    }`}
+                      }`}
                   />
                 ))}
               </div>
-              
+
               <Button
                 variant="outline"
                 size="icon"
@@ -239,7 +238,7 @@ export function TestimonialsSection() {
         </div>
 
         {/* Grid of All Testimonials */}
-        <motion.div 
+        <motion.div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -255,10 +254,9 @@ export function TestimonialsSection() {
               viewport={{ once: true }}
               whileHover={{ y: -5, transition: { duration: 0.2 } }}
             >
-              <Card className={`h-full transition-all duration-300 hover:shadow-lg hover:border-primary/20 cursor-pointer ${
-                index === currentIndex ? 'ring-2 ring-primary/20 bg-primary/5' : 'hover:bg-muted/30'
-              }`}
-              onClick={() => goToTestimonial(index)}
+              <Card className={`h-full transition-all duration-300 hover:shadow-lg hover:border-primary/20 cursor-pointer ${index === currentIndex ? 'ring-2 ring-primary/20 bg-primary/5' : 'hover:bg-muted/30'
+                }`}
+                onClick={() => goToTestimonial(index)}
               >
                 <CardContent className="p-6">
                   <div className="flex justify-between items-start mb-4">
@@ -271,11 +269,11 @@ export function TestimonialsSection() {
                       {testimonial.metrics}
                     </Badge>
                   </div>
-                  
+
                   <p className="text-muted-foreground mb-4 text-sm leading-relaxed line-clamp-3">
                     "{testimonial.content}"
                   </p>
-                  
+
                   <div className="flex items-center gap-3">
                     <Avatar className="w-10 h-10">
                       <AvatarImage src={testimonial.avatar} alt={testimonial.name} />
@@ -297,7 +295,7 @@ export function TestimonialsSection() {
         </motion.div>
 
         {/* Call to Action */}
-        <motion.div 
+        <motion.div
           className="text-center mt-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

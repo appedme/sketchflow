@@ -57,7 +57,7 @@
   --shadow-2xl: 0px 1px 3px 0px hsl(0 0% 0% / 0.43);
   --tracking-normal: 0.025em;
   --spacing: 0.25rem;
-  
+
   /* Project Card Variables */
   --project-card-bg: var(--card);
   --project-card-border: var(--border);
@@ -98,7 +98,7 @@
   --border: oklch(0.2809 0 0);
   --input: oklch(0.2603 0 0);
   --ring: oklch(0.8003 0.1821 151.7110);
-  
+
   /* Dark mode project card overrides */
   --project-card-bg: var(--card);
   --project-card-border: var(--border);
@@ -112,7 +112,7 @@
   --project-card-tag-text: var(--secondary-foreground);
   --project-card-stats-bg: var(--muted);
   --project-card-stats-text: var(--muted-foreground);
-  
+
   /* Dark mode project card overrides */
   --project-card-bg: var(--card);
   --project-card-border: var(--border);
@@ -277,4 +277,10 @@ tional Animations */
 /* Custom font classes */
 .font-bitcount {
   font-family: 'Bitcount Prop Single', monospace;
+}
+
+.font-bitcount-heading {
+  font-family: 'Bitcount Prop Single', monospace;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }

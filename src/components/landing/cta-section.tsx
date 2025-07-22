@@ -6,7 +6,7 @@ export function CTASection() {
   return (
     <section className="py-20 px-4 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground">
       <div className="max-w-4xl mx-auto text-center">
-        <h2 className="text-3xl md:text-5xl font-heading font-bold tracking-tight mb-6">
+        <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 font-bitcount-heading">
           Ready to Transform Your Ideas?
         </h2>
         <p className="text-xl md:text-2xl opacity-90 mb-8 max-w-2xl mx-auto">

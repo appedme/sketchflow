@@ -34,7 +34,7 @@ export function HowItWorksSection() {
     <section className="py-20 px-4">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-heading font-bold tracking-tight mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 font-bitcount-heading">
             How SketchFlow Works
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -45,7 +45,7 @@ export function HowItWorksSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {steps.map((step, index) => {
             const Icon = step.icon;
-            
+
             return (
               <Card key={index} className="text-center relative">
                 <CardHeader>
@@ -55,7 +55,7 @@ export function HowItWorksSection() {
                   <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
                     <Icon className="w-8 h-8 text-primary" />
                   </div>
-                  <CardTitle className="text-xl">{step.title}</CardTitle>
+                  <CardTitle className="text-xl font-bitcount">{step.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <CardDescription className="text-base">

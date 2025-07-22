@@ -50,7 +50,7 @@ export const Loading = ({
             {/* SketchFlow Brand Name */}
             <div className="text-center space-y-3">
                 <h1 className={cn(
-                    "font-heading font-bold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent  ",
+                    "font-bold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent font-bitcount-heading",
                     size === 'sm' ? 'text-xl' : size === 'md' ? 'text-3xl' : 'text-4xl'
                 )}>
                     SketchFlow
