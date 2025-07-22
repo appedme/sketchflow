@@ -2,6 +2,7 @@
 
 import { SWRConfig } from 'swr';
 import { ReactNode } from 'react';
+import HydrationErrorBoundary from '../utils/HydrationErrorBoundary';
 
 // Create a persistent storage object
 const localStorageProvider = () => {
@@ -25,18 +26,24 @@ interface SWRProviderProps {
 
 export function SWRProvider({ children }: SWRProviderProps) {
     return (
-        <SWRConfig
-            value={{
-                provider: typeof window !== 'undefined' ? localStorageProvider : undefined,
-                revalidateOnFocus: false,
-                revalidateOnReconnect: true,
-                dedupingInterval: 5000,
-                keepPreviousData: true,
-                revalidateIfStale: true,
-                loadingTimeout: 0,
-            }}
-        >
-            {children}
-        </SWRConfig>
+        <HydrationErrorBoundary>
+            <SWRConfig
+                value={{
+                    provider: typeof window !== 'undefined' ? localStorageProvider : undefined,
+                    revalidateOnFocus: false,
+                    revalidateOnReconnect: true,
+                    dedupingInterval: 5000,
+                    keepPreviousData: true,
+                    revalidateIfStale: true,
+                    loadingTimeout: 0,
+                    onError: (error) => {
+                        // Log errors but prevent them from crashing the app
+                        console.error('SWR Error:', error);
+                    },
+                }}
+            >
+                {children}
+            </SWRConfig>
+        </HydrationErrorBoundary>
     );
 }

@@ -6,6 +6,7 @@ import { PWAInstallPrompt } from '@/components/PWAInstallPrompt'
 import { ThemeProvider } from "@/components/theme-provider"
 import { PreloadManager } from "@/components/optimized/PreloadManager"
 import { SWRProvider } from "@/components/providers/swr-provider"
+import HydrationErrorBoundary from "@/components/utils/HydrationErrorBoundary"
 import "./globals.css";
 
 const nunito = Nunito({
@@ -74,8 +75,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <head>
+    <html lang="en" suppressHydrationWarning>
+      <head suppressHydrationWarning>
         {/* PWA Meta Tags */}
         <meta name="application-name" content="SketchFlow" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -100,23 +101,26 @@ export default function RootLayout({
         <link rel="preload" href="/logo.svg" as="image" type="image/svg+xml" />
       </head>
       <body
+        suppressHydrationWarning
         className={`${nunito.variable} antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <StackProvider app={stackClientApp}>
-            <SWRProvider>
-              <PreloadManager>
-                {children}
-              </PreloadManager>
-              <PWAInstallPrompt />
-            </SWRProvider>
-          </StackProvider>
-        </ThemeProvider>
+        <HydrationErrorBoundary>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <StackProvider app={stackClientApp}>
+              <SWRProvider>
+                <PreloadManager>
+                  {children}
+                </PreloadManager>
+                <PWAInstallPrompt />
+              </SWRProvider>
+            </StackProvider>
+          </ThemeProvider>
+        </HydrationErrorBoundary>
       </body>
     </html>
   );
