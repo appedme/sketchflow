@@ -46,7 +46,7 @@ export function PWAInstallPrompt() {
     setDeferredPrompt(null);
   };
 
-  if (pathname !== "/" || !showInstallPrompt || !deferredPrompt) {
+  if (1||pathname !== "/" || !showInstallPrompt || !deferredPrompt) {
     return null;
   }
 

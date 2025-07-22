@@ -1,3 +1,4 @@
+'use client';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LANDING_CONTENT } from "@/constants/landing";
@@ -6,6 +7,7 @@ import { Announcement } from "./announcement";
 import { HyperText } from "../magicui/hyper-text";
 import { InteractiveHoverButton } from "../magicui/interactive-hover-button";
 import { Playfair_Display } from 'next/font/google';
+import { useState, useEffect, useRef } from 'react';
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -21,19 +23,42 @@ const bitcountPropSingle = {
 
 export function HeroSection() {
   const { hero } = LANDING_CONTENT;
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  
+  const videos = [
+    "/bg1.mp4",
+    "/bg2.mp4"
+  ];
+
+  const handleVideoEnd = () => {
+    setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % videos.length);
+  };
+
+  // Force video to play on component mount
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.play().catch(console.error);
+    }
+  }, [currentVideoIndex]);
 
   return (
     <section className="relative flex flex-col items-center justify-center min-h-screen px-4 py-20 text-center overflow-hidden">
-      {/* Background Video */}
+      {/* Background Video Playlist */}
       <div className="absolute inset-0 w-full h-full">
         <video
+          ref={videoRef}
+          key={currentVideoIndex}
           autoPlay
           muted
-          loop
           playsInline
+          preload="auto"
           className="w-full h-full object-cover"
+          onEnded={handleVideoEnd}
+          onLoadedData={() => videoRef.current?.play()}
         >
-          <source src="https://cdn.jsdelivr.net/gh/free-whiteboard-online/Free-Erasorio-Alternative-for-Collaborative-Design@df7c8923118db6f1983c5589d2fd0670c358fd76/uploads/2025-07-22T08-48-32-053Z-a9m4v2qj1.png" type="video/mp4" />
+          <source src={videos[currentVideoIndex]} type="video/mp4" />
+          Your browser does not support the video tag.
         </video>
         {/* Dark overlay for better text readability */}
         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
