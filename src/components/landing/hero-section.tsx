@@ -31,6 +31,10 @@ export function HeroSection() {
     "/bg2.mp4"
   ];
 
+    // "https://cdn.jsdelivr.net/gh/free-whiteboard-online/Free-Erasorio-Alternative-for-Collaborative-Design@4bf1732dd171958526714c0e772ccfbd301e53d3/uploads/2025-07-22T09-05-38-977Z-6pihbnj2j.mp4",
+    // "https://cdn.jsdelivr.net/gh/free-whiteboard-online/Free-Erasorio-Alternative-for-Collaborative-Design@df7c8923118db6f1983c5589d2fd0670c358fd76/uploads/2025-07-22T08-48-32-053Z-a9m4v2qj1.mp4"
+
+
   const handleVideoEnd = () => {
     setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % videos.length);
   };
