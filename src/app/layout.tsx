@@ -9,6 +9,9 @@ import { SWRProvider } from "@/components/providers/swr-provider"
 import HydrationErrorBoundary from "@/components/utils/HydrationErrorBoundary"
 import { CacheStatus } from "@/components/files/CacheStatus"
 import { Toaster } from "@/components/ui/toast"
+import { LoadingProvider } from "@/components/ui/loading-bar"
+import { FileOperationProvider } from "@/components/files/FileStatusIndicator"
+import { FileOperationsStatus } from "@/components/files/FileOperationsStatus"
 import "./globals.css";
 
 const nunito = Nunito({
@@ -113,16 +116,21 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <StackProvider app={stackClientApp}>
-              <SWRProvider>
-                <PreloadManager>
-                  {children}
-                </PreloadManager>
-                <PWAInstallPrompt />
-                <CacheStatus />
-                <Toaster position="bottom-right" />
-              </SWRProvider>
-            </StackProvider>
+            <LoadingProvider>
+              <FileOperationProvider>
+                <StackProvider app={stackClientApp}>
+                  <SWRProvider>
+                    <PreloadManager>
+                      {children}
+                    </PreloadManager>
+                    <PWAInstallPrompt />
+                    <CacheStatus />
+                    <FileOperationsStatus />
+                    <Toaster position="bottom-right" />
+                  </SWRProvider>
+                </StackProvider>
+              </FileOperationProvider>
+            </LoadingProvider>
           </ThemeProvider>
         </HydrationErrorBoundary>
       </body>

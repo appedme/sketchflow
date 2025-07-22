@@ -2,11 +2,13 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 import { markFileDirty, notifyFileSaved, updateFileCache } from '@/lib/fileCache';
+import { useFileOperations } from '@/components/files/FileStatusIndicator';
 
 interface UseCanvasSyncOptions {
     filePath: string;
     onContentChange?: (content: string) => void;
     debounceMs?: number;
+    autoSave?: boolean;
 }
 
 /**
@@ -18,33 +20,54 @@ interface UseCanvasSyncOptions {
 export function useCanvasSync({
     filePath,
     onContentChange,
-    debounceMs = 500
+    debounceMs = 500,
+    autoSave = true
 }: UseCanvasSyncOptions) {
     const lastSavedContent = useRef<string | null>(null);
     const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+    const contentRef = useRef<string | null>(null);
+    const { startOperation, completeOperation } = useFileOperations();
+    const operationIdRef = useRef<string | null>(null);
 
     // Track when the canvas is modified
     const handleCanvasChange = useCallback((content: string) => {
+        // Store the latest content
+        contentRef.current = content;
+
+        // Mark the file as dirty immediately
+        markFileDirty(filePath);
+
         // Clear any existing debounce timer
         if (debounceTimer.current) {
             clearTimeout(debounceTimer.current);
         }
 
-        // Mark the file as dirty immediately
-        markFileDirty(filePath);
+        if (autoSave) {
+            // Debounce the actual save operation
+            debounceTimer.current = setTimeout(() => {
+                // Create a unique operation ID
+                const opId = `autosave-${filePath}-${Date.now()}`;
+                operationIdRef.current = opId;
 
-        // Debounce the actual save operation
-        debounceTimer.current = setTimeout(() => {
-            // Save the content to cache
-            updateFileCache(filePath, content);
-            lastSavedContent.current = content;
+                // Start the operation
+                startOperation(opId, 'saving', filePath, 'Auto-saving...');
 
-            // Notify listeners if needed
-            if (onContentChange) {
-                onContentChange(content);
-            }
-        }, debounceMs);
-    }, [filePath, onContentChange, debounceMs]);
+                // Save the content to cache
+                updateFileCache(filePath, content);
+                lastSavedContent.current = content;
+
+                // Notify listeners if needed
+                if (onContentChange) {
+                    onContentChange(content);
+                }
+
+                // Complete the operation
+                setTimeout(() => {
+                    completeOperation(opId, true, 'Auto-saved');
+                }, 500);
+            }, debounceMs);
+        }
+    }, [filePath, onContentChange, debounceMs, autoSave, startOperation, completeOperation]);
 
     // Save the canvas content
     const saveCanvas = useCallback((content: string) => {
@@ -54,15 +77,28 @@ export function useCanvasSync({
             debounceTimer.current = null;
         }
 
+        // Create a unique operation ID
+        const opId = `save-${filePath}-${Date.now()}`;
+        operationIdRef.current = opId;
+
+        // Start the operation
+        startOperation(opId, 'saving', filePath, 'Saving...');
+
         // Save the content and notify that it's been saved
         notifyFileSaved(filePath, content);
         lastSavedContent.current = content;
+        contentRef.current = content;
 
         // Notify listeners if needed
         if (onContentChange) {
             onContentChange(content);
         }
-    }, [filePath, onContentChange]);
+
+        // Complete the operation
+        setTimeout(() => {
+            completeOperation(opId, true, 'Saved successfully');
+        }, 800);
+    }, [filePath, onContentChange, startOperation, completeOperation]);
 
     // Clean up on unmount
     useEffect(() => {
@@ -70,8 +106,13 @@ export function useCanvasSync({
             if (debounceTimer.current) {
                 clearTimeout(debounceTimer.current);
             }
+
+            // Auto-save on unmount if there are unsaved changes
+            if (contentRef.current !== null && contentRef.current !== lastSavedContent.current) {
+                notifyFileSaved(filePath, contentRef.current);
+            }
         };
-    }, []);
+    }, [filePath]);
 
     // Listen for file selection events
     useEffect(() => {
@@ -79,8 +120,22 @@ export function useCanvasSync({
             const { path } = event.detail;
 
             // If another file is selected and we have unsaved changes, save them
-            if (path !== filePath && lastSavedContent.current !== null) {
-                saveCanvas(lastSavedContent.current);
+            if (path !== filePath && contentRef.current !== null && contentRef.current !== lastSavedContent.current) {
+                // Create a unique operation ID
+                const opId = `autosave-${filePath}-${Date.now()}`;
+                operationIdRef.current = opId;
+
+                // Start the operation
+                startOperation(opId, 'saving', filePath, 'Auto-saving before switching...');
+
+                // Save the content
+                notifyFileSaved(filePath, contentRef.current);
+                lastSavedContent.current = contentRef.current;
+
+                // Complete the operation
+                setTimeout(() => {
+                    completeOperation(opId, true, 'Auto-saved');
+                }, 500);
             }
         };
 
@@ -89,10 +144,13 @@ export function useCanvasSync({
         return () => {
             window.removeEventListener('file:selected' as any, handleFileSelected as EventListener);
         };
-    }, [filePath, saveCanvas]);
+    }, [filePath, startOperation, completeOperation]);
 
     return {
         handleCanvasChange,
-        saveCanvas
+        saveCanvas,
+        currentContent: contentRef.current,
+        lastSavedContent: lastSavedContent.current,
+        isDirty: contentRef.current !== lastSavedContent.current
     };
 }
