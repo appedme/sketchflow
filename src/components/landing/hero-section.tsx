@@ -10,15 +10,31 @@ export function HeroSection() {
   const { hero } = LANDING_CONTENT;
 
   return (
-    <section className="flex flex-col items-center justify-center min-h-screen px-4 py-20 text-center">
-      <div className="max-w-4xl mx-auto space-y-10">
+    <section className="relative flex flex-col items-center justify-center min-h-screen px-4 py-20 text-center overflow-hidden">
+      {/* Background Video */}
+      <div className="absolute inset-0 w-full h-full">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="w-full h-full object-cover"
+        >
+          <source src="https://cdn.jsdelivr.net/gh/free-whiteboard-online/Free-Erasorio-Alternative-for-Collaborative-Design@df7c8923118db6f1983c5589d2fd0670c358fd76/uploads/2025-07-22T08-48-32-053Z-a9m4v2qj1.png" type="video/mp4" />
+        </video>
+        {/* Dark overlay for better text readability */}
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 max-w-4xl mx-auto space-y-10">
         {/* Announcement Badge */}
         <div className="flex justify-center">
-        <Announcement text={hero.announcement} />
+          <Announcement text={hero.announcement} />
         </div>
 
         {/* Brand and Hero Content */}
-        <div className="space-y-6">
+        <div className="space-y-6 text-white">
           <div className="flex items-center justify-center gap-3">
             <h1 className="text-5xl md:text-7xl font-heading font-bold tracking-tight hero-text">
               <HyperText>SketchFlow</HyperText>

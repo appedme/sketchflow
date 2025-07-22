@@ -7,6 +7,7 @@ import {
   UseCasesSection,
   TestimonialsSection,
   IntegrationSection,
+  FutureFeaturesSection,
   CTASection,
   Footer 
 } from "@/components/landing";
@@ -22,6 +23,7 @@ export default function LandingPage() {
         <HowItWorksSection />
         <UseCasesSection />
         <TestimonialsSection />
+        <FutureFeaturesSection />
         <IntegrationSection />
         <CTASection />
       </main>

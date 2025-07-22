@@ -4,7 +4,7 @@ export const LANDING_CONTENT = {
     badge: "BETA",
     title: "Sketch. Document. Collaborate.",
     subtitle: "All in one place",
-    description: "Transform your ideas into visual stories with powerful diagramming and seamless documentation.",
+    description: " "||"Transform your ideas into visual stories with powerful diagramming and seamless documentation. Community sharing, commenting, and blog publishing features coming soon.",
     announcement: "Welcome to Sketchflow 👋",
     cta: {
       primary: "Start Creating",
@@ -20,8 +20,8 @@ export const LANDING_CONTENT = {
       icon: "FileText"
     },
     {
-      title: "Embed Anywhere (Coming Soon)",
-      description: "Future feature: Embed projects anywhere with custom options and advanced sharing capabilities",
+      title: "Advanced Sharing (Coming Soon)",
+      description: "Future features: Community sharing, real-time commenting, collaborative editing, and blog publishing capabilities",
       icon: "Share"
     }
   ],

@@ -8,5 +8,6 @@ export { UseCasesSection } from "./use-cases-section";
 export { TestimonialsSection } from "./testimonials-section";
 export { PricingPreviewSection } from "./pricing-preview-section";
 export { IntegrationSection } from "./integration-section";
+export { FutureFeaturesSection } from "./future-features-section";
 export { CTASection } from "./cta-section";
 export { Footer } from "./footer";
