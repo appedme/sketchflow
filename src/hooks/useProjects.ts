@@ -1,4 +1,5 @@
 import { useApi, useMutation } from '@/hooks/useApi';
+import { useCachedApi } from '@/hooks/useCachedApi';
 import { mutate } from 'swr';
 
 export interface Project {
@@ -27,7 +28,7 @@ export interface UpdateProjectData {
     status?: string;
 }
 
-// Hook for fetching projects
+// Hook for fetching projects with persistent caching
 export function useProjects(filters?: {
     category?: string;
     visibility?: string;
@@ -45,16 +46,16 @@ export function useProjects(filters?: {
 
     const url = `/api/projects${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
-    return useApi<Project[]>(url, {
+    return useCachedApi<Project[]>(url, {
         revalidateOnFocus: false,
         revalidateOnReconnect: true,
         dedupingInterval: 30000, // Cache for 30 seconds
     });
 }
 
-// Hook for fetching a single project
+// Hook for fetching a single project with persistent caching
 export function useProject(projectId: string | null) {
-    return useApi<Project>(
+    return useCachedApi<Project>(
         projectId ? `/api/projects/${projectId}` : null,
         {
             revalidateOnFocus: false,

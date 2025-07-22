@@ -5,6 +5,7 @@ import { Nunito } from 'next/font/google'
 import { PWAInstallPrompt } from '@/components/PWAInstallPrompt'
 import { ThemeProvider } from "@/components/theme-provider"
 import { PreloadManager } from "@/components/optimized/PreloadManager"
+import { SWRProvider } from "@/components/providers/swr-provider"
 import "./globals.css";
 
 const nunito = Nunito({
@@ -108,10 +109,12 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <StackProvider app={stackClientApp}>
-            <PreloadManager>
-              {children}
-            </PreloadManager>
-            <PWAInstallPrompt />
+            <SWRProvider>
+              <PreloadManager>
+                {children}
+              </PreloadManager>
+              <PWAInstallPrompt />
+            </SWRProvider>
           </StackProvider>
         </ThemeProvider>
       </body>

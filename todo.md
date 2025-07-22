@@ -33,3 +33,6 @@ use react catch function
 use bitcountPropSingle font on headings and loading sketchflow text
 
 create a repo cdn viewer toll show all github repo files with copy jsdelivr cdn with/without commit 
+
+add mode toggle
+r to dashboard dark mode toggler onclick

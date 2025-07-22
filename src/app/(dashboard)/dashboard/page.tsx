@@ -40,6 +40,7 @@ import {
 import { ProjectCard } from '@/components/dashboard/ProjectCard';
 import { ProjectFilters } from '@/components/dashboard/ProjectFilters';
 import { useApi } from '@/hooks/useApi';
+import { useCachedApi } from '@/hooks/useCachedApi';
 import { cn } from '@/lib/utils';
 import { Loading } from '@/components/loading';
 
@@ -94,8 +95,8 @@ export default function DashboardPage() {
     }
   }, [searchParams, router, user]);
 
-  // Fetch projects
-  const { data: projects = [], isLoading: projectsLoading, error, mutate: refreshProjects } = useApi<Project[]>(
+  // Fetch projects with caching
+  const { data: projects = [], isLoading: projectsLoading, error, mutate: refreshProjects } = useCachedApi<Project[]>(
     user ? '/api/projects' : null
   );
 
