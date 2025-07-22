@@ -54,7 +54,7 @@ export function DocumentPanel({ projectId }: DocumentPanelProps) {
     }
   }, [selectedDoc]);
 
-  // Auto-save document changes
+  // Auto-save document changes with SWR
   useEffect(() => {
     if (!selectedDoc || !user?.id) return;
     if (debouncedTitle === selectedDoc.title && debouncedContent === selectedDoc.contentText) return;
@@ -73,8 +73,9 @@ export function DocumentPanel({ projectId }: DocumentPanelProps) {
 
         if (!response.ok) throw new Error('Failed to save');
 
-        // Update the cache
+        // Update the SWR cache for both the document list and the specific document
         mutate(`/api/projects/${projectId}/documents`);
+        mutate(`/api/documents/${selectedDoc.id}`);
 
       } catch (error) {
         console.error('Failed to save document:', error);
@@ -103,7 +104,7 @@ export function DocumentPanel({ projectId }: DocumentPanelProps) {
 
       const newDoc = await response.json();
 
-      // Update the cache
+      // Update the SWR cache
       mutate(`/api/projects/${projectId}/documents`);
 
       // Select the new document

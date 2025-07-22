@@ -36,15 +36,15 @@ export function useProjects(filters?: {
     sortOrder?: 'asc' | 'desc';
 }) {
     const queryParams = new URLSearchParams();
-    
+
     if (filters?.category) queryParams.append('category', filters.category);
     if (filters?.visibility) queryParams.append('visibility', filters.visibility);
     if (filters?.search) queryParams.append('search', filters.search);
     if (filters?.sortBy) queryParams.append('sortBy', filters.sortBy);
     if (filters?.sortOrder) queryParams.append('sortOrder', filters.sortOrder);
-    
+
     const url = `/api/projects${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-    
+
     return useApi<Project[]>(url, {
         revalidateOnFocus: false,
         revalidateOnReconnect: true,
@@ -73,23 +73,23 @@ export function useUpdateProject() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             });
-            
+
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 const message = (errorData as any)?.message || 'Failed to update project';
                 throw new Error(message);
             }
-            
+
             return response.json();
         },
         {
             onSuccess: (updatedProject) => {
                 // Update the projects list cache
                 mutate('/api/projects');
-                
-                // Update the specific project cache
+
+                // Update the specific project cache with the new data
                 mutate(`/api/projects/${updatedProject.id}`, updatedProject, false);
-                
+
                 // Update any filtered project lists that might contain this project
                 mutate(
                     (key) => typeof key === 'string' && key.startsWith('/api/projects?'),
@@ -111,13 +111,13 @@ export function useDeleteProject() {
             const response = await fetch(`/api/projects/${projectId}`, {
                 method: 'DELETE',
             });
-            
+
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 const message = (errorData as any)?.message || 'Failed to delete project';
                 throw new Error(message);
             }
-            
+
             const result = await response.json();
             return { success: true, projectId };
         },
@@ -125,10 +125,10 @@ export function useDeleteProject() {
             onSuccess: (data) => {
                 // Remove from projects list cache
                 mutate('/api/projects');
-                
-                // Remove the specific project cache
-                mutate(`/api/projects/${data.projectId}`, undefined, false);
-                
+
+                // Remove the specific project from cache
+                mutate(`/api/projects/${data.projectId}`, null, false);
+
                 // Update any filtered project lists
                 mutate(
                     (key) => typeof key === 'string' && key.startsWith('/api/projects?'),
@@ -151,20 +151,23 @@ export function useDuplicateProject() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
             });
-            
+
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 const message = (errorData as any)?.message || 'Failed to duplicate project';
                 throw new Error(message);
             }
-            
+
             return response.json();
         },
         {
-            onSuccess: () => {
+            onSuccess: (newProject) => {
                 // Revalidate projects list to show the new duplicate
                 mutate('/api/projects');
-                
+
+                // Add the new project to cache
+                mutate(`/api/projects/${newProject.id}`, newProject, false);
+
                 // Update any filtered project lists
                 mutate(
                     (key) => typeof key === 'string' && key.startsWith('/api/projects?'),
@@ -188,18 +191,27 @@ export function useToggleFavorite() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ isFavorite }),
             });
-            
+
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 const message = (errorData as any)?.message || 'Failed to update favorite status';
                 throw new Error(message);
             }
-            
+
             return response.json();
         },
         {
+            // Add optimistic update for better UX
+            optimisticUpdate: ({ projectId, isFavorite }) => {
+                // Optimistically update the project in cache
+                mutate(
+                    `/api/projects/${projectId}`,
+                    (currentData) => currentData ? { ...currentData, isFavorite } : null,
+                    false
+                );
+            },
             onSuccess: (updatedProject) => {
-                // Update caches
+                // Update caches with server response
                 mutate('/api/projects');
                 mutate(`/api/projects/${updatedProject.id}`, updatedProject, false);
                 mutate(

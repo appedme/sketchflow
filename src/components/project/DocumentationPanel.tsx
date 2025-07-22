@@ -107,6 +107,7 @@ export function DocumentationPanel({
       });
       if (!response.ok) throw new Error('Failed to create document');
       const newDoc = await response.json() as { id: string };
+      // Update SWR cache
       mutate(`/api/projects/${projectId}/documents`);
       router.push(`/project/${projectId}/document/${newDoc.id}`);
     } catch (error) {
@@ -123,6 +124,7 @@ export function DocumentationPanel({
       });
       if (!response.ok) throw new Error('Failed to create canvas');
       const newCanvas = await response.json() as { id: string };
+      // Update SWR cache
       mutate(`/api/projects/${projectId}/canvases`);
       router.push(`/project/${projectId}/canvas/${newCanvas.id}`);
     } catch (error) {
@@ -148,8 +150,17 @@ export function DocumentationPanel({
 
       if (!response.ok) throw new Error('Failed to rename');
 
+      // Update SWR cache for both document and canvas lists
       mutate(`/api/projects/${projectId}/documents`);
       mutate(`/api/projects/${projectId}/canvases`);
+
+      // Also update the specific item cache if it exists
+      if (type === 'document') {
+        mutate(`/api/documents/${id}`);
+      } else {
+        mutate(`/api/canvas/${id}`);
+      }
+
       setEditingId(null);
       setEditingTitle('');
     } catch (error) {
@@ -175,9 +186,16 @@ export function DocumentationPanel({
 
       if (!response.ok) throw new Error(`Failed to delete ${type}`);
 
-      // Refresh the lists
+      // Refresh the lists in SWR cache
       mutate(`/api/projects/${projectId}/documents`);
       mutate(`/api/projects/${projectId}/canvases`);
+
+      // Remove the specific item from cache
+      if (type === 'document') {
+        mutate(`/api/documents/${id}`, null, false);
+      } else {
+        mutate(`/api/canvas/${id}`, null, false);
+      }
     } catch (error) {
       console.error(`Failed to delete ${type}:`, error);
       alert(`Failed to delete ${type}. Please try again.`);
@@ -192,7 +210,7 @@ export function DocumentationPanel({
     try {
       const response = await fetch(`/api/projects/${projectId}/export`);
       if (!response.ok) throw new Error('Failed to export project');
-      
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -633,8 +651,8 @@ export function DocumentationPanel({
             <PanelContent />
           </SheetContent>
         </Sheet>
-        <ShareDialog 
-          projectId={projectId} 
+        <ShareDialog
+          projectId={projectId}
           projectName={projectName}
           isOpen={shareDialogOpen}
           onOpenChange={setShareDialogOpen}
@@ -646,8 +664,8 @@ export function DocumentationPanel({
   return (
     <>
       <PanelContent />
-      <ShareDialog 
-        projectId={projectId} 
+      <ShareDialog
+        projectId={projectId}
         projectName={projectName}
         isOpen={shareDialogOpen}
         onOpenChange={setShareDialogOpen}

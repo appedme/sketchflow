@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { Suspense, useState, useEffect } from 'react';
+import { mutate } from 'swr';
 import { ProjectWorkspaceLoading } from './ProjectWorkspaceLoading';
 import { DocumentPanel } from './DocumentPanel';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,7 @@ import { FullScreenDocumentEditor } from './FullScreenDocumentEditor';
 import { LazyExcalidrawCanvas } from '@/components/optimized/LazyExcalidrawCanvas';
 import { LazyPlateEditor } from '@/components/optimized/LazyPlateEditor';
 import { useComponentPreloader } from '@/components/optimized/PreloadManager';
+import { ExcalidrawCanvas } from './ExcalidrawCanvas';
 
 interface ProjectWorkspaceProps {
   projectId: string;
@@ -48,7 +50,7 @@ export function ProjectWorkspace({
   const [isMobile, setIsMobile] = useState(false);
   const [isCloning, setIsCloning] = useState(false);
 
-  // Clone project function
+  // Clone project function using SWR
   const handleCloneProject = async () => {
     if (!currentUser) {
       // Redirect to sign in with return URL if not authenticated
@@ -70,6 +72,10 @@ export function ProjectWorkspace({
       }
 
       const result = await response.json();
+
+      // Update SWR cache for projects list if needed
+      mutate('/api/projects');
+
       // Redirect to the new cloned project
       window.location.href = `/project/${result.projectId}`;
     } catch (error) {
@@ -93,12 +99,15 @@ export function ProjectWorkspace({
   // Handle save function
   const handleSave = async () => {
     if (isReadOnly) return;
-    
+
     setSaving(true);
     try {
       // Trigger save for the current canvas
       const event = new CustomEvent('excalidraw-save');
       window.dispatchEvent(event);
+
+      // Update project last activity timestamp in SWR cache
+      mutate(`/api/projects/${projectId}`);
 
       // Show feedback
       setTimeout(() => setSaving(false), 1000);
@@ -263,9 +272,9 @@ export function ProjectWorkspace({
           ) : (
             <>
               {/* Edit mode controls */}
-              <ShareDialog 
-                projectId={projectId} 
-                projectName={projectName} 
+              <ShareDialog
+                projectId={projectId}
+                projectName={projectName}
                 projectVisibility={project?.visibility}
               />
               <Button
