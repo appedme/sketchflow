@@ -14,6 +14,11 @@ const playfair = Playfair_Display({
   display: 'swap',
 });
 
+// Import Bitcount Prop Single font
+const bitcountPropSingle = {
+  className: 'font-bitcount',
+};
+
 export function HeroSection() {
   const { hero } = LANDING_CONTENT;
 
@@ -53,7 +58,7 @@ export function HeroSection() {
           </div>
 
           <div className="space-y-3">
-            <h2 className="text-3xl md:text-4xl font-heading font-bold tracking-tight hero-text">
+            <h2 className={`text-3xl md:text-4xl font-bold tracking-tight hero-text ${bitcountPropSingle.className}`}>
               {hero.title}
             </h2>
             <h3 className={`text-xl md:text-2xl font-medium text-muted-foreground italic ${playfair.className}`}>

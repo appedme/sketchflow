@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Bitcount+Prop+Single:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @plugin "tailwind-scrollbar-hide";
@@ -271,4 +272,9 @@ tional Animations */
   opacity: 0;
   transform: translateX(-100%);
   transition: all var(--duration-normal) var(--ease-in);
+}
+
+/* Custom font classes */
+.font-bitcount {
+  font-family: 'Bitcount Prop Single', monospace;
 }
