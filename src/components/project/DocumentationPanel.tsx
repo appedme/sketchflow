@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -22,10 +23,8 @@ import {
   Trash2,
   Share,
   Download,
-  Upload,
   Settings,
   FolderOpen,
-  ArrowLeft,
   Home,
   Moon,
   Sun,
@@ -329,29 +328,7 @@ export function DocumentationPanel({
         </div>
       </div>
 
-      {/* Project Actions */}
-      <div className="p-2 border-b bg-muted/20">
-        <div className="grid grid-cols-2 gap-1">
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-8 text-xs justify-center gap-1.5"
-            onClick={shareProject}
-          >
-            <Share className="h-3.5 w-3.5" />
-            Share
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-8 text-xs justify-center gap-1.5"
-            onClick={exportProject}
-          >
-            <Download className="h-3.5 w-3.5" />
-            Export
-          </Button>
-        </div>
-      </div>
+      {/* No Project Actions - Removed duplicate buttons */}
 
       {/* Content */}
       <ScrollArea className="flex-1">
@@ -407,15 +384,16 @@ export function DocumentationPanel({
                             "h-4 w-4 flex-shrink-0",
                             currentFileId === doc.id ? "text-primary" : "text-blue-500"
                           )} />
-                          <button
-                            onClick={() => handleFileClick(doc.id, 'document')}
+                          <Link
+                            href={`/project/${projectId}/document/${doc.id}`}
                             className={cn(
                               "text-sm truncate flex-1 text-left transition-colors",
                               currentFileId === doc.id && "text-primary font-medium"
                             )}
+                            prefetch={true}
                           >
                             {doc.title}
-                          </button>
+                          </Link>
                         </>
                       )}
                       <DropdownMenu>
@@ -502,15 +480,16 @@ export function DocumentationPanel({
                             "h-4 w-4 flex-shrink-0",
                             currentFileId === canvas.id ? "text-primary" : "text-purple-500"
                           )} />
-                          <button
-                            onClick={() => handleFileClick(canvas.id, 'canvas')}
+                          <Link
+                            href={`/project/${projectId}/canvas/${canvas.id}`}
                             className={cn(
                               "text-sm truncate flex-1 text-left transition-colors",
                               currentFileId === canvas.id && "text-primary font-medium"
                             )}
+                            prefetch={true}
                           >
                             {canvas.title}
-                          </button>
+                          </Link>
                         </>
                       )}
                       <DropdownMenu>
@@ -624,15 +603,16 @@ export function DocumentationPanel({
         </div>
 
         {/* Project Link */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => router.push(`/project/${projectId}`)}
-          className="w-full gap-2 h-8 text-xs"
-        >
-          <ExternalLink className="h-3 w-3" />
-          Open Project View
-        </Button>
+        <Link href={`/project/${projectId}`} prefetch={true} className="w-full">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full gap-2 h-8 text-xs"
+          >
+            <ExternalLink className="h-3 w-3" />
+            Open Project View
+          </Button>
+        </Link>
       </div>
     </div>
   );
