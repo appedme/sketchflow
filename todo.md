@@ -29,3 +29,7 @@ https://www.pexels.com/api/= 563492ad6f917000010000015e64d156cc71428b9584ede1c5c
 
 
 use react catch function
+
+use bitcountPropSingle font on headings and loading sketchflow text
+
+create a repo cdn viewer toll show all github repo files with copy jsdelivr cdn with/without commit 
