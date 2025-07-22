@@ -5,6 +5,14 @@ import Link from "next/link";
 import { Announcement } from "./announcement";
 import { HyperText } from "../magicui/hyper-text";
 import { InteractiveHoverButton } from "../magicui/interactive-hover-button";
+import { Playfair_Display } from 'next/font/google';
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  style: ['normal', 'italic'],
+  display: 'swap',
+});
 
 export function HeroSection() {
   const { hero } = LANDING_CONTENT;
@@ -48,7 +56,7 @@ export function HeroSection() {
             <h2 className="text-3xl md:text-4xl font-heading font-bold tracking-tight hero-text">
               {hero.title}
             </h2>
-            <h3 className="text-xl md:text-2xl font-medium text-muted-foreground">
+            <h3 className={`text-xl md:text-2xl font-medium text-muted-foreground italic ${playfair.className}`}>
               {hero.subtitle}
             </h3>
           </div>
