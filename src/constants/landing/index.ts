@@ -20,8 +20,8 @@ export const LANDING_CONTENT = {
       icon: "FileText"
     },
     {
-      title: "Embed Anywhere",
-      description: "Embed projects anywhere with custom options",
+      title: "Embed Anywhere (Coming Soon)",
+      description: "Future feature: Embed projects anywhere with custom options and advanced sharing capabilities",
       icon: "Share"
     }
   ],

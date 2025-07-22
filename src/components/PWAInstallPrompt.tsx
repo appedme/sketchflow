@@ -51,10 +51,10 @@ export function PWAInstallPrompt() {
   }
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50">
+    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm bg-background  border border- rounded-lg shadow-lg p-4 z-50">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <h3 className="font-semibold text-sm text-gray-900 mb-1">
+          <h3 className="font-semibold text-sm  mb-1">
             Install SketchFlow
           </h3>
           <p className="text-xs text-gray-600 mb-3">
