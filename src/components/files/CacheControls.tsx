@@ -2,6 +2,9 @@
 
 import React from 'react';
 import { useCacheContext } from '@/contexts/CacheContext';
+import { useFileOperations } from './FileStatusIndicator';
+import { useLoading } from '@/components/ui/loading-bar';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Loader2, Save, RefreshCw, Trash2, Database, FileRefresh } from 'lucide-react';
 import {
@@ -15,22 +18,34 @@ import { toast } from 'sonner';
 
 export function CacheControls() {
     const { saveAllCaches, revalidateAllCaches, clearAndRevalidateAll, isLoading } = useCacheContext();
+    const { startOperation, completeOperation } = useFileOperations();
+    const { startLoading, completeLoading } = useLoading();
     const [isFileCacheClearing, setIsFileCacheClearing] = React.useState(false);
     const [isDatabaseRevalidating, setIsDatabaseRevalidating] = React.useState(false);
 
     // Handle clearing file cache
-    const handleClearFileCache = React.useCallback(() => {
+    const handleClearFileCache = React.useCallback(async () => {
+        const operationId = `clear-file-cache-${Date.now()}`;
         setIsFileCacheClearing(true);
+        
         try {
+            startOperation(operationId, 'deleting', 'File cache', 'Clearing file cache...');
+            startLoading('Clearing file cache...', 'warning');
+            
             clearFileCache();
+            
+            completeOperation(operationId, true, 'File cache cleared');
+            completeLoading(true, 'File cache cleared successfully');
             toast.success('File cache cleared successfully');
         } catch (error) {
+            completeOperation(operationId, false, 'Failed to clear file cache');
+            completeLoading(false, 'Failed to clear file cache');
             toast.error('Failed to clear file cache');
             console.error('Error clearing file cache:', error);
         } finally {
             setTimeout(() => setIsFileCacheClearing(false), 500);
         }
-    }, []);
+    }, [startOperation, completeOperation, startLoading, completeLoading]);
 
     // Handle database revalidation
     const handleDatabaseRevalidate = React.useCallback(() => {

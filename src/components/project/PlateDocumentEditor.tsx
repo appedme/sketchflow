@@ -35,6 +35,8 @@ import { useDebounce } from '@/hooks/use-debounce';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { uploadImageToFreeImage } from '@/lib/imageUpload';
+import { useFileOperations } from '@/components/files/FileStatusIndicator';
+import { useLoading } from '@/components/ui/loading-bar';
 
 interface PlateDocumentEditorProps {
   documentId: string;
@@ -95,6 +97,10 @@ export function PlateDocumentEditor({
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
+  // File operations and loading hooks
+  const { startOperation, completeOperation } = useFileOperations();
+  const { startLoading, completeLoading } = useLoading();
+
   // Initialize editor with document content
   const editor = usePlateEditor({
     plugins: EditorKit,
@@ -110,6 +116,9 @@ export function PlateDocumentEditor({
     try {
       setIsLoading(true);
       setError(null);
+      
+      // Start loading indicator
+      startLoading('Loading document...', 'default');
 
       // Use public API if shareToken is provided (for shared content)
       const apiUrl = shareToken 
@@ -133,18 +142,25 @@ export function PlateDocumentEditor({
     } catch (err) {
       console.error('Error loading document:', err);
       setError(err instanceof Error ? err.message : 'Failed to load document');
+      completeLoading(false, 'Failed to load document');
     } finally {
       setIsLoading(false);
+      completeLoading(true, 'Document loaded successfully');
     }
-  }, [documentId, editor]);
+  }, [documentId, editor, startLoading, completeLoading]);
 
   // Save document changes
   const saveDocument = useCallback(async (title?: string, content?: any[]) => {
     if (!document || isSaving || shareToken) return; // Don't save if using shareToken (public mode)
 
+    const operationId = `save-doc-${documentId}-${Date.now()}`;
+    
     try {
       setIsSaving(true);
       setError(null);
+      
+      // Start file operation
+      startOperation(operationId, 'saving', `Document: ${document.title}`, 'Saving document...');
 
       const updateData: any = {};
 
@@ -179,14 +195,20 @@ export function PlateDocumentEditor({
       setDocument(updatedDoc);
       setLastSaved(new Date());
       setHasUnsavedChanges(false);
+      
+      // Complete operation successfully
+      completeOperation(operationId, true, 'Document saved successfully');
 
     } catch (err) {
       console.error('Error saving document:', err);
       setError(err instanceof Error ? err.message : 'Failed to save document');
+      
+      // Complete operation with error
+      completeOperation(operationId, false, 'Failed to save document');
     } finally {
       setIsSaving(false);
     }
-  }, [document, documentId, isSaving]);
+  }, [document, documentId, isSaving, startOperation, completeOperation]);
 
   // Auto-save on content changes
   useEffect(() => {
@@ -242,9 +264,14 @@ export function PlateDocumentEditor({
       return;
     }
 
+    const uploadId = `upload-img-${Date.now()}`;
+    
     try {
       setIsUploadingImage(true);
       setError(null);
+      
+      // Start upload operation
+      startOperation(uploadId, 'uploading', file.name, 'Uploading image...');
 
       const result = await uploadImageToFreeImage(file);
 
@@ -267,12 +294,17 @@ export function PlateDocumentEditor({
         }]);
 
         setHasUnsavedChanges(true);
+        
+        // Complete upload successfully
+        completeOperation(uploadId, true, 'Image uploaded successfully');
       } else {
         setError(result.error || 'Failed to upload image');
+        completeOperation(uploadId, false, 'Failed to upload image');
       }
     } catch (err) {
       console.error('Image upload error:', err);
       setError('Failed to upload image');
+      completeOperation(uploadId, false, 'Failed to upload image');
     } finally {
       setIsUploadingImage(false);
       // Reset the input
