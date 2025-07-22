@@ -1,16 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
 import { LANDING_CONTENT } from "@/constants/landing";
 import { useUser, useStackApp } from "@stackframe/stack";
 import Link from "next/link";
-import { Menu, X, Sparkles, Zap, Users, BookOpen, ArrowRight, User, Settings, LogOut, LayoutDashboard, Palette, Code, Building, GraduationCap, Calendar, Search, PenTool } from "lucide-react";
+import { Menu, X, Sparkles, Zap, Users, BookOpen, ArrowRight, User, Settings, LogOut, LayoutDashboard, Palette, Code, Building, GraduationCap, Calendar, Search, PenTool, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -50,12 +51,194 @@ const useCases = [
   { title: "Content Planning", icon: PenTool, href: "#use-cases" }
 ];
 
-export function Navigation() {
-  const { navigation } = LANDING_CONTENT;
+// User Avatar Component with Suspense
+function UserAvatar() {
   const user = useUser();
   const stackApp = useStackApp();
-  const [isScrolled, setIsScrolled] = useState(false);
+
+  const getUserInitials = () => {
+    if (user?.displayName) {
+      return user.displayName.split(' ').map(n => n[0]).join('').toUpperCase();
+    }
+    if (user?.primaryEmail) {
+      return user.primaryEmail.charAt(0).toUpperCase();
+    }
+    return "U";
+  };
+
+  if (!user) {
+    return (
+      <div className="flex items-center gap-3">
+        <Link href="/sign-in" className="hidden sm:block">
+          <Button variant="ghost" size="sm">
+            Sign In
+          </Button>
+        </Link>
+        <Link href="/join">
+          <Button size="sm" className="gap-2">
+            Get Started
+            <ArrowRight className="w-4 h-4" />
+          </Button>
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-3">
+      <Link href="/dashboard" className="hidden sm:block">
+        <Button variant="outline" size="sm" className="gap-2">
+          <LayoutDashboard className="w-4 h-4" />
+          Dashboard
+        </Button>
+      </Link>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm" className="relative h-8 w-8 rounded-full">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={user?.profileImageUrl || ""} alt={user?.displayName || ""} />
+              <AvatarFallback>{getUserInitials()}</AvatarFallback>
+            </Avatar>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56" align="end" forceMount>
+          <div className="flex items-center justify-start gap-2 p-2">
+            <div className="flex flex-col space-y-1 leading-none">
+              {user?.displayName && (
+                <p className="font-medium">{user.displayName}</p>
+              )}
+              {user?.primaryEmail && (
+                <p className="w-[200px] truncate text-sm text-muted-foreground">
+                  {user.primaryEmail}
+                </p>
+              )}
+            </div>
+          </div>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard" className="flex items-center gap-2">
+              <LayoutDashboard className="h-4 w-4" />
+              Dashboard
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/settings" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Settings
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="flex items-center gap-2 cursor-pointer"
+            onClick={() => stackApp.signOut()}
+          >
+            <LogOut className="h-4 w-4" />
+            Sign out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+}
+
+// Loading skeleton for user avatar
+function UserAvatarSkeleton() {
+  return (
+    <div className="flex items-center gap-3">
+      <Skeleton className="h-8 w-20 rounded-md hidden sm:block" />
+      <Skeleton className="h-8 w-8 rounded-full" />
+    </div>
+  );
+}
+
+// Mobile user menu component
+function MobileUserMenu({ onClose }: { onClose: () => void }) {
+  const user = useUser();
+  const stackApp = useStackApp();
+
+  if (!user) {
+    return (
+      <>
+        <Link href="/sign-in" onClick={onClose}>
+          <Button variant="outline" className="w-full">
+            Sign In
+          </Button>
+        </Link>
+        <Link href="/join" onClick={onClose}>
+          <Button className="w-full gap-2">
+            Get Started
+            <ArrowRight className="w-4 h-4" />
+          </Button>
+        </Link>
+      </>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+        <Avatar className="h-10 w-10">
+          <AvatarImage src={user.profileImageUrl || ""} alt={user.displayName || ""} />
+          <AvatarFallback>
+            {user.displayName?.charAt(0)?.toUpperCase() || user.primaryEmail?.charAt(0)?.toUpperCase() || "U"}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col">
+          <span className="font-medium text-sm">{user.displayName || "User"}</span>
+          <span className="text-xs text-muted-foreground truncate">
+            {user.primaryEmail}
+          </span>
+        </div>
+      </div>
+      
+      <div className="space-y-2">
+        <Link href="/dashboard" onClick={onClose}>
+          <Button variant="ghost" className="w-full justify-start gap-2">
+            <LayoutDashboard className="w-4 h-4" />
+            Dashboard
+          </Button>
+        </Link>
+        <Link href="/settings" onClick={onClose}>
+          <Button variant="ghost" className="w-full justify-start gap-2">
+            <Settings className="w-4 h-4" />
+            Settings
+          </Button>
+        </Link>
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start gap-2 text-destructive hover:text-destructive"
+          onClick={() => {
+            stackApp.signOut();
+            onClose();
+          }}
+        >
+          <LogOut className="w-4 h-4" />
+          Sign Out
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// Mobile user menu skeleton
+function MobileUserMenuSkeleton() {
+  return (
+    <div className="space-y-3">
+      <Skeleton className="h-16 w-full rounded-lg" />
+      <div className="space-y-2">
+        <Skeleton className="h-10 w-full rounded-md" />
+        <Skeleton className="h-10 w-full rounded-md" />
+        <Skeleton className="h-10 w-full rounded-md" />
+      </div>
+    </div>
+  );
+}
+
+export function Navigation() {
+  const { navigation } = LANDING_CONTENT;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -189,79 +372,11 @@ export function Navigation() {
           <div className="flex items-center gap-3">
             <ThemeToggle />
             
-            {user ? (
-              <div className="flex items-center gap-3">
-                <Link href="/dashboard" className="hidden sm:block" >
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <LayoutDashboard className="w-4 h-4" />
-                    Dashboard
-                  </Button>
-                </Link>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="relative h-8 w-8 rounded-full">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={user?.profileImageUrl || ""} alt={user?.displayName || ""} />
-                        <AvatarFallback>{getUserInitials()}</AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end" forceMount>
-                    <div className="flex items-center justify-start gap-2 p-2">
-                      <div className="flex flex-col space-y-1 leading-none">
-                        {user?.displayName && (
-                          <p className="font-medium">{user.displayName}</p>
-                        )}
-                        {user?.primaryEmail && (
-                          <p className="w-[200px] truncate text-sm text-muted-foreground">
-                            {user.primaryEmail}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/dashboard" className="flex items-center gap-2">
-                        <LayoutDashboard className="h-4 w-4" />
-                        Dashboard
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/settings" className="flex items-center gap-2">
-                        <Settings className="h-4 w-4" />
-                        Settings
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      className="flex items-center gap-2 cursor-pointer"
-                      onClick={() => (stackApp as any).signOut()}
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Sign out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            ) : (
-              <div className="flex items-center gap-3">
-                <Link href="/sign-in" className="hidden sm:block" >
-                  <Button variant="ghost" size="sm">
-                    Sign In
-                  </Button>
-                </Link>
-                <Link href="/join" >
-                  <Button size="sm" className="gap-2">
-                    Get Started
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </Link>
-              </div>
-            )}
-
-            {/* Mobile Menu */}
-            <div className="lg:hidden">
+            <Suspense fallback={<UserAvatarSkeleton />}>
+              <UserAvatar />
+            </Suspense>
+          {/* Mobile Menu */}
+          <div className="lg:hidden">
               <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="sm" className="p-2">
@@ -336,21 +451,9 @@ export function Navigation() {
                         <ThemeToggle />
                       </div>
                       
-                      {!user && (
-                        <>
-                          <Link href="/sign-in" onClick={() => setIsMobileMenuOpen(false)} >
-                            <Button variant="outline" className="w-full">
-                              Sign In
-                            </Button>
-                          </Link>
-                          <Link href="/join" onClick={() => setIsMobileMenuOpen(false)} >
-                            <Button className="w-full gap-2">
-                              Get Started
-                              <ArrowRight className="w-4 h-4" />
-                            </Button>
-                          </Link>
-                        </>
-                      )}
+                      <Suspense fallback={<MobileUserMenuSkeleton />}>
+                        <MobileUserMenu onClose={() => setIsMobileMenuOpen(false)} />
+                      </Suspense>
                     </div>
                   </div>
                 </SheetContent>

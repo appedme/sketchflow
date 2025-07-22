@@ -6,15 +6,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Check, 
-  X, 
-  Star, 
-  Zap, 
-  Crown, 
-  Rocket, 
-  Users, 
-  Building, 
+import {
+  Check,
+  X,
+  Star,
+  Zap,
+  Crown,
+  Rocket,
+  Users,
+  Building,
   Sparkles,
   ArrowRight,
   Shield,
@@ -230,9 +230,9 @@ export default function PricingPage() {
         <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:50px_50px]" />
         <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl" />
-        
+
         <div className="max-w-7xl mx-auto relative">
-          <motion.div 
+          <motion.div
             className="text-center mb-16"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -244,14 +244,19 @@ export default function PricingPage() {
                 🎉 Early Bird Pricing - Save up to 50%
               </Badge>
             </div>
-            
+
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-heading font-bold tracking-tight mb-6 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
               Simple, Transparent Pricing
             </h1>
-            
+
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-8">
-              Choose the perfect plan for your needs. Start free, upgrade when you're ready. 
+              Choose the perfect plan for your needs. Start free, upgrade when you're ready.
               All plans include our core features with no hidden fees.
+              <br />
+              <strong className="font-semibold text-primary">
+                <span className="font-bold">Public Preview:</span> All features are <span className="font-bold">free</span> during our launch period!
+              </strong>
+
             </p>
 
             {/* Billing Toggle */}
@@ -278,7 +283,7 @@ export default function PricingPage() {
             {pricingPlans.map((plan, index) => {
               const IconComponent = plan.icon;
               const savings = getSavings(plan);
-              
+
               return (
                 <motion.div
                   key={plan.id}
@@ -295,16 +300,16 @@ export default function PricingPage() {
                       </Badge>
                     </div>
                   )}
-                  
+
                   <Card className={cn(
                     "relative h-full transition-all duration-300 hover:shadow-2xl hover:scale-105 border-2",
-                    plan.popular 
-                      ? "border-primary/50 bg-gradient-to-br from-primary/5 to-blue-500/5 shadow-xl" 
+                    plan.popular
+                      ? "border-primary/50 bg-gradient-to-br from-primary/5 to-blue-500/5 shadow-xl"
                       : "border-border hover:border-primary/30",
                     selectedPlan === plan.id && "ring-2 ring-primary/20"
                   )}
-                  onClick={() => setSelectedPlan(plan.id)}
-                >
+                    onClick={() => setSelectedPlan(plan.id)}
+                  >
                     <CardHeader className="text-center pb-4">
                       <div className="mx-auto mb-4">
                         <div className={cn(
@@ -314,10 +319,10 @@ export default function PricingPage() {
                           <IconComponent className="w-8 h-8 text-white" />
                         </div>
                       </div>
-                      
+
                       <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
                       <CardDescription className="text-sm">{plan.description}</CardDescription>
-                      
+
                       <div className="mt-4">
                         <div className="flex items-baseline justify-center gap-2">
                           <span className="text-4xl font-bold">
@@ -329,7 +334,7 @@ export default function PricingPage() {
                             </span>
                           )}
                         </div>
-                        
+
                         {savings && (
                           <div className="mt-2">
                             <span className="text-sm text-muted-foreground line-through">
@@ -342,9 +347,9 @@ export default function PricingPage() {
                         )}
                       </div>
                     </CardHeader>
-                    
+
                     <CardContent className="pt-0">
-                      <Button 
+                      <Button
                         className={cn(
                           "w-full mb-6",
                           plan.popular && "bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90"
@@ -355,7 +360,7 @@ export default function PricingPage() {
                         {plan.cta}
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
-                      
+
                       {/* Plan Limits */}
                       <div className="grid grid-cols-2 gap-2 mb-6 p-3 bg-muted/30 rounded-lg">
                         <div className="text-center">
@@ -375,7 +380,7 @@ export default function PricingPage() {
                           <div className="text-xs text-muted-foreground">Exports</div>
                         </div>
                       </div>
-                      
+
                       {/* Features List */}
                       <ul className="space-y-3">
                         {plan.features.map((feature, featureIndex) => (
@@ -406,7 +411,7 @@ export default function PricingPage() {
           </div>
 
           {/* Trust Indicators */}
-          <motion.div 
+          <motion.div
             className="text-center mb-16"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -437,7 +442,7 @@ export default function PricingPage() {
       {/* Feature Comparison */}
       <section className="py-20 px-4 bg-muted/30">
         <div className="max-w-7xl mx-auto">
-          <motion.div 
+          <motion.div
             className="text-center mb-16"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -488,7 +493,7 @@ export default function PricingPage() {
       {/* Testimonials */}
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
-          <motion.div 
+          <motion.div
             className="text-center mb-16"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -513,8 +518,8 @@ export default function PricingPage() {
                 <Card className="h-full">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-4 mb-4">
-                      <img 
-                        src={testimonial.avatar} 
+                      <img
+                        src={testimonial.avatar}
                         alt={testimonial.name}
                         className="w-12 h-12 rounded-full"
                       />
@@ -542,7 +547,7 @@ export default function PricingPage() {
       {/* FAQ */}
       <section className="py-20 px-4 bg-muted/30">
         <div className="max-w-4xl mx-auto">
-          <motion.div 
+          <motion.div
             className="text-center mb-16"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
