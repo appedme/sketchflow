@@ -1,13 +1,9 @@
 "use client";
 
-import dynamic from 'next/dynamic';
-import { Suspense, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { mutate } from 'swr';
-import { ProjectWorkspaceLoading } from './ProjectWorkspaceLoading';
-import { DocumentPanel } from './DocumentPanel';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { PanelLeftOpen, PanelLeftClose, FileText, Share, Save, ArrowLeft, SplitSquareHorizontal, Copy, Eye, Lock, Globe } from 'lucide-react';
+import { Save, Copy, Eye, Globe } from 'lucide-react';
 import { DocumentationPanel } from './DocumentationPanel';
 import { ShareDialog } from './ShareDialog';
 import { SplitViewWorkspace } from './SplitViewWorkspace';
@@ -15,9 +11,6 @@ import { FullScreenDocumentEditor } from './FullScreenDocumentEditor';
 
 // Use optimized lazy loading for better performance
 import { LazyExcalidrawCanvas } from '@/components/optimized/LazyExcalidrawCanvas';
-import { LazyPlateEditor } from '@/components/optimized/LazyPlateEditor';
-import { useComponentPreloader } from '@/components/optimized/PreloadManager';
-import { ExcalidrawCanvas } from './ExcalidrawCanvas';
 
 interface ProjectWorkspaceProps {
   projectId: string;
@@ -36,7 +29,6 @@ export function ProjectWorkspace({
   project,
   currentUser
 }: ProjectWorkspaceProps) {
-  const [showDocumentPanel, setShowDocumentPanel] = useState(false);
   const [splitViewMode, setSplitViewMode] = useState(false);
   const [splitViewItem, setSplitViewItem] = useState<{
     id: string;
@@ -205,28 +197,17 @@ export function ProjectWorkspace({
   }
 
   return (
-    <div className="h-screen flex flex-col bg-background">
+    <div className="h-full flex flex-col bg-background">
       {/* Clean Top Bar */}
       <div className="h-12 border-b flex items-center justify-between px-4">
         <div className="flex items-center gap-3">
-          {isMobile ? (
+          {isMobile && (
             <DocumentationPanel
               projectId={projectId}
               projectName={projectName}
               isMobile={true}
             />
-          ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowDocumentPanel(!showDocumentPanel)}
-              className="gap-2"
-            >
-              {showDocumentPanel ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
-              Files
-            </Button>
           )}
-          <div className="h-4 w-px bg-border" />
           <h1 className="font-medium text-sm truncate">{projectName}</h1>
         </div>
         <div className="flex items-center gap-2">
@@ -299,16 +280,6 @@ export function ProjectWorkspace({
           projectName={projectName}
           isReadOnly={isReadOnly}
         />
-
-        {/* Desktop Documentation Panel */}
-        {!isMobile && showDocumentPanel && (
-          <div className="absolute left-0 top-0 w-80 h-full bg-background border-r z-20">
-            <DocumentationPanel
-              projectId={projectId}
-              projectName={projectName}
-            />
-          </div>
-        )}
       </div>
     </div>
   );
