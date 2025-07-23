@@ -1,6 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Code, Building, GraduationCap, Calendar, Palette, Search, PenTool, User, Image, FileImage, Kanban, Network, Paintbrush } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Code, Building, GraduationCap, Calendar, Palette, Search, PenTool, User, Image, FileImage, Kanban, Network, Paintbrush, ExternalLink } from "lucide-react";
 import { LANDING_CONTENT } from "@/constants/landing";
+import Link from "next/link";
 
 import { BorderBeam } from "../magicui/border-beam";
 
@@ -56,6 +58,22 @@ export function UseCasesSection() {
               </Card>
             );
           })}
+        </div>
+
+        <div className="text-center mt-12">
+          <Link 
+            href="https://sketchflow.space/project/yH1XpeBmbzD8pXONwoMaF" 
+            target="_blank" 
+            rel="noopener noreferrer"
+          >
+            <Button size="lg" className="gap-2 font-bitcount">
+              Explore Sketchflow Usecases
+              <ExternalLink className="w-4 h-4" />
+            </Button>
+          </Link>
+          <p className="text-sm text-muted-foreground mt-2">
+            See real examples and templates for every use case
+          </p>
         </div>
       </div>
     </section>

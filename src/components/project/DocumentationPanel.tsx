@@ -910,26 +910,7 @@ export function DocumentationPanel({
                 </Button>
               </div>
 
-              {/* Project Info */}
-              <div className="p-3 bg-muted/50 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-xs font-medium text-muted-foreground">PROJECT</h4>
-                  <Badge variant="secondary" className="text-xs">
-                    {totalFiles} files
-                  </Badge>
-                </div>
-                <p className="text-sm font-medium truncate mb-2">{projectName}</p>
-                <Link href={`/project/${projectId}`} prefetch={true} className="w-full">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full gap-2 h-7 text-xs"
-                  >
-                    <ExternalLink className="h-3 w-3" />
-                    Open Project View
-                  </Button>
-                </Link>
-              </div>
+              
 
               {/* Feedback Thread */}
               <div className="pt-2">
