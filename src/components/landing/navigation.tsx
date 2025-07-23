@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
@@ -55,6 +56,12 @@ const useCases = [
 function UserAvatar() {
   const user = useUser();
   const stackApp = useStackApp();
+  const router = useRouter();
+
+  const handleSignIn = () => {
+    const currentUrl = window.location.pathname + window.location.search;
+    router.push(`/handler/sign-in?after_auth_return_to=${encodeURIComponent(currentUrl)}`);
+  };
 
   const getUserInitials = () => {
     if (user?.displayName) {
@@ -69,11 +76,9 @@ function UserAvatar() {
   if (!user) {
     return (
       <div className="flex items-center gap-3">
-        <Link href="/sign-in" className="hidden sm:block">
-          <Button variant="ghost" size="sm">
-            Sign In
-          </Button>
-        </Link>
+        <Button variant="ghost" size="sm" onClick={handleSignIn}>
+          Sign In
+        </Button>
         <Link href="/join">
           <Button size="sm" className="gap-2">
             Get Started
@@ -131,7 +136,7 @@ function UserAvatar() {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="flex items-center gap-2 cursor-pointer"
-            onClick={() => stackApp.signOut()}
+            onClick={() => user?.signOut()}
           >
             <LogOut className="h-4 w-4" />
             Sign out
@@ -156,15 +161,20 @@ function UserAvatarSkeleton() {
 function MobileUserMenu({ onClose }: { onClose: () => void }) {
   const user = useUser();
   const stackApp = useStackApp();
+  const router = useRouter();
+
+  const handleSignIn = () => {
+    const currentUrl = window.location.pathname + window.location.search;
+    router.push(`/handler/sign-in?after_auth_return_to=${encodeURIComponent(currentUrl)}`);
+    onClose();
+  };
 
   if (!user) {
     return (
       <>
-        <Link href="/sign-in" onClick={onClose}>
-          <Button variant="outline" className="w-full">
-            Sign In
-          </Button>
-        </Link>
+        <Button variant="outline" className="w-full" onClick={handleSignIn}>
+          Sign In
+        </Button>
         <Link href="/join" onClick={onClose}>
           <Button className="w-full gap-2">
             Get Started
@@ -209,7 +219,7 @@ function MobileUserMenu({ onClose }: { onClose: () => void }) {
           variant="ghost" 
           className="w-full justify-start gap-2 text-destructive hover:text-destructive"
           onClick={() => {
-            stackApp.signOut();
+            user?.signOut();
             onClose();
           }}
         >
@@ -237,8 +247,15 @@ function MobileUserMenuSkeleton() {
 
 export function Navigation() {
   const { navigation } = LANDING_CONTENT;
+  const router = useRouter();
+  const user = useUser();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+
+  const handleSignIn = () => {
+    const currentUrl = window.location.pathname + window.location.search;
+    router.push(`/handler/sign-in?after_auth_return_to=${encodeURIComponent(currentUrl)}`);
+  };
 
   useEffect(() => {
     const handleScroll = () => {

@@ -101,7 +101,7 @@ export default function ProjectSettingsPage() {
     // Redirect if not authenticated
     useEffect(() => {
         if (user === null) {
-            router.push('/sign-in');
+            router.push('/handler/sign-in?after_auth_return_to=' + encodeURIComponent(window.location.pathname));
         }
     }, [user, router]);
 

@@ -85,7 +85,7 @@ export default function AdminPanel() {
   // Check if user is admin
   useEffect(() => {
     if (user === null) {
-      router.push('/sign-in');
+      router.push('/handler/sign-in?after_auth_return_to=' + encodeURIComponent('/admin'));
       return;
     }
     

@@ -323,12 +323,12 @@ export function DocumentationPanel({
     if (user) {
       router.push('/dashboard?create=true');
     } else {
-      router.push('/sign-in?redirect=' + encodeURIComponent('/dashboard?create=true'));
+      router.push('/handler/sign-in?after_auth_return_to=' + encodeURIComponent('/dashboard?create=true'));
     }
   };
 
   const signIn = () => {
-    router.push('/sign-in?redirect=' + encodeURIComponent(window.location.pathname));
+    router.push('/handler/sign-in?after_auth_return_to=' + encodeURIComponent(window.location.pathname + window.location.search));
   };
 
   const saveAll = async () => {

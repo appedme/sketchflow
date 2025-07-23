@@ -8,3 +8,7 @@ add embed feature easy simple and working
 fast optimistic data showing in canvas and document while navigating between files using docs panel
 
 
+count views for each file in the docs panel and the project page
+
+
+
