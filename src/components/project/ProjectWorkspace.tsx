@@ -3,14 +3,20 @@
 import { useState, useEffect } from 'react';
 import { mutate } from 'swr';
 import { Button } from '@/components/ui/button';
-import { Save, Copy, Eye, Globe } from 'lucide-react';
+import { Save, Copy, Eye, Globe, ArrowLeft, SplitSquareHorizontal } from 'lucide-react';
 import { DocumentationPanel } from './DocumentationPanel';
 import { ShareDialog } from './ShareDialog';
 import { SplitViewWorkspace } from './SplitViewWorkspace';
 import { FullScreenDocumentEditor } from './FullScreenDocumentEditor';
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 
 // Use optimized lazy loading for better performance
 import { LazyExcalidrawCanvas } from '@/components/optimized/LazyExcalidrawCanvas';
+import { ExcalidrawCanvas } from './ExcalidrawCanvas';
 
 interface ProjectWorkspaceProps {
   projectId: string;
@@ -63,7 +69,7 @@ export function ProjectWorkspace({
         throw new Error('Failed to clone project');
       }
 
-      const result = await response.json();
+      const result = await response.json() as { projectId: string };
 
       // Update SWR cache for projects list if needed
       mutate('/api/projects');
@@ -273,13 +279,42 @@ export function ProjectWorkspace({
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 relative overflow-hidden">
-        <LazyExcalidrawCanvas
-          projectId={projectId}
-          projectName={projectName}
-          isReadOnly={isReadOnly}
-        />
+      {/* Main Content Area with Resizable Panels */}
+      <div className="flex-1 overflow-hidden">
+        <ResizablePanelGroup direction="horizontal" className="h-full">
+          {/* Documentation Panel - Only show on desktop */}
+          {/* {!isMobile && (
+            <>
+              <ResizablePanel
+                defaultSize={20}
+                minSize={15}
+                maxSize={40}
+                className="bg-background border-r"
+              >
+                <DocumentationPanel
+                  projectId={projectId}
+                  projectName={projectName}
+                  isMobile={false}
+                />
+              </ResizablePanel>
+
+              <ResizableHandle withHandle />
+            </>
+          )} */}
+
+          {/* Main Canvas Area */}
+          <ResizablePanel
+            defaultSize={isMobile ? 100 : 80}
+            minSize={60}
+            className="relative overflow-hidden"
+          >
+            <LazyExcalidrawCanvas
+              projectId={projectId}
+              projectName={projectName}
+              isReadOnly={isReadOnly}
+            />
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
     </div>
   );

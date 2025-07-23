@@ -8,6 +8,11 @@ import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, PanelLeftOpen, SplitSquareHorizontal, FileText, Maximize, Minimize } from 'lucide-react';
 import { LazyPlateEditor } from '@/components/optimized/LazyPlateEditor';
 import { DocumentationPanel } from './DocumentationPanel';
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 
 interface FullScreenDocumentEditorProps {
   projectId: string;
@@ -65,17 +70,92 @@ export function FullScreenDocumentEditor({
 
   return (
     <div className="h-full flex flex-col bg-background">
-      {/* Main Content Area */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Document Editor */}
-        <div className="flex-1 overflow-hidden">
-          <LazyPlateEditor
-            documentId={documentId}
-            projectId={projectId}
-            projectName={projectName}
-            className="h-full"
-          />
+      {/* Header */}
+      <div className="h-12 bg-background border-b border-border flex items-center justify-between px-4 flex-shrink-0">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push(`/project/${projectId}`)}
+            className="gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </Button>
+          <Separator orientation="vertical" className="h-6" />
+          <div className="flex items-center gap-2">
+            <FileText className="w-4 h-4 text-primary" />
+            <h1 className="font-semibold text-lg text-foreground">Document Editor</h1>
+          </div>
         </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowDocumentPanel(!showDocumentPanel)}
+            className="gap-2"
+          >
+            <PanelLeftOpen className="w-4 h-4" />
+            {showDocumentPanel ? 'Hide' : 'Show'} Files
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push(`/project/${projectId}/split?left=${documentId}&leftType=document`)}
+            className="gap-2"
+          >
+            <SplitSquareHorizontal className="w-4 h-4" />
+            Split View
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleFullScreen}
+            className="gap-2"
+          >
+            {isFullScreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+            {isFullScreen ? 'Exit' : 'Full Screen'}
+          </Button>
+        </div>
+      </div>
+
+      {/* Main Content Area with Resizable Panels */}
+      <div className="flex-1 overflow-hidden">
+        <ResizablePanelGroup direction="horizontal" className="h-full">
+          {/* Documentation Panel - Only show when toggled and not mobile */}
+          {showDocumentPanel && !isMobile && (
+            <>
+              <ResizablePanel
+                defaultSize={25}
+                minSize={15}
+                maxSize={50}
+                className="bg-background border-r"
+              >
+                <DocumentationPanel
+                  projectId={projectId}
+                  projectName={projectName}
+                  isMobile={false}
+                />
+              </ResizablePanel>
+
+              <ResizableHandle withHandle />
+            </>
+          )}
+
+          {/* Document Editor */}
+          <ResizablePanel
+            defaultSize={showDocumentPanel && !isMobile ? 75 : 100}
+            minSize={50}
+            className="overflow-hidden"
+          >
+            <LazyPlateEditor
+              documentId={documentId}
+              projectId={projectId}
+              projectName={projectName}
+              className="h-full"
+            />
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
     </div>
   );

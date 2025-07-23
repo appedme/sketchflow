@@ -1,11 +1,17 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { PanelLeftOpen, SplitSquareHorizontal, Save } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { PanelLeftOpen, SplitSquareHorizontal, Save, ArrowLeft, Maximize, Minimize, PencilRuler } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { DocumentationPanel } from './DocumentationPanel';
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 
 // Use optimized lazy loading for better performance
 import { LazyExcalidrawCanvas } from '@/components/optimized/LazyExcalidrawCanvas';
@@ -24,6 +30,46 @@ export function FullScreenCanvasEditor({
   const router = useRouter();
   const [showDocumentPanel, setShowDocumentPanel] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024); // lg breakpoint
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Full screen functionality
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => {
+        setIsFullScreen(true);
+      }).catch((err) => {
+        console.error('Error attempting to enable full-screen mode:', err);
+      });
+    } else {
+      document.exitFullscreen().then(() => {
+        setIsFullScreen(false);
+      }).catch((err) => {
+        console.error('Error attempting to exit full-screen mode:', err);
+      });
+    }
+  };
+
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleFullScreenChange = () => {
+      setIsFullScreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullScreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullScreenChange);
+  }, []);
 
   const handleSave = async () => {
     setSaving(true);
@@ -42,17 +88,102 @@ export function FullScreenCanvasEditor({
 
   return (
     <div className="h-full flex flex-col bg-background">
-      {/* Main Content Area */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Full Screen Canvas Content */}
-        <div className="flex-1">
-          <LazyExcalidrawCanvas
-            projectId={projectId}
-            canvasId={canvasId}
-            projectName={projectName}
-            isReadOnly={false}
-          />
+      {/* Header */}
+      <div className="h-12 bg-background border-b border-border flex items-center justify-between px-4 flex-shrink-0">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push(`/project/${projectId}`)}
+            className="gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </Button>
+          <Separator orientation="vertical" className="h-6" />
+          <div className="flex items-center gap-2">
+            <PencilRuler className="w-4 h-4 text-primary" />
+            <h1 className="font-semibold text-lg text-foreground">Canvas Editor</h1>
+          </div>
         </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowDocumentPanel(!showDocumentPanel)}
+            className="gap-2"
+          >
+            <PanelLeftOpen className="w-4 h-4" />
+            {showDocumentPanel ? 'Hide' : 'Show'} Files
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push(`/project/${projectId}/split?left=${canvasId}&leftType=canvas`)}
+            className="gap-2"
+          >
+            <SplitSquareHorizontal className="w-4 h-4" />
+            Split View
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSave}
+            disabled={saving}
+            className="gap-2"
+          >
+            <Save className="w-4 h-4" />
+            {saving ? 'Saving...' : 'Save'}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleFullScreen}
+            className="gap-2"
+          >
+            {isFullScreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+            {isFullScreen ? 'Exit' : 'Full Screen'}
+          </Button>
+        </div>
+      </div>
+
+      {/* Main Content Area with Resizable Panels */}
+      <div className="flex-1 overflow-hidden">
+        <ResizablePanelGroup direction="horizontal" className="h-full">
+          {/* Documentation Panel - Only show when toggled and not mobile */}
+          {showDocumentPanel && !isMobile && (
+            <>
+              <ResizablePanel
+                defaultSize={25}
+                minSize={15}
+                maxSize={50}
+                className="bg-background border-r"
+              >
+                <DocumentationPanel
+                  projectId={projectId}
+                  projectName={projectName}
+                  isMobile={false}
+                />
+              </ResizablePanel>
+
+              <ResizableHandle withHandle />
+            </>
+          )}
+
+          {/* Canvas Editor */}
+          <ResizablePanel
+            defaultSize={showDocumentPanel && !isMobile ? 75 : 100}
+            minSize={50}
+            className="overflow-hidden"
+          >
+            <LazyExcalidrawCanvas
+              projectId={projectId}
+              canvasId={canvasId}
+              projectName={projectName}
+              isReadOnly={false}
+            />
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
     </div>
   );
