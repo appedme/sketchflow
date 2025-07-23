@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useUser } from '@stackframe/stack';
@@ -95,6 +95,26 @@ export function DocumentationPanel({
   const [isSavingAll, setIsSavingAll] = useState(false);
   const [isRevalidating, setIsRevalidating] = useState(false);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+  
+  // Optimistic updates state
+  const [optimisticItems, setOptimisticItems] = useState<{
+    documents: Document[];
+    canvases: Canvas[];
+  }>({ documents: [], canvases: [] });
+  const [isCreatingDocument, setIsCreatingDocument] = useState(false);
+  const [isCreatingCanvas, setIsCreatingCanvas] = useState(false);
+
+  // Clear optimistic states when project changes
+  useEffect(() => {
+    resetOptimisticState();
+  }, [projectId]);
+
+  const resetOptimisticState = () => {
+    setOptimisticItems({ documents: [], canvases: [] });
+    setLoadingFileId(null);
+    setIsCreatingDocument(false);
+    setIsCreatingCanvas(false);
+  };
 
   // Get current file ID from URL
   const getCurrentFileId = () => {
@@ -118,8 +138,12 @@ export function DocumentationPanel({
 
   const isLoading = docsLoading || canvasLoading;
 
+  // Merge optimistic items with real data
+  const allDocuments = [...documents, ...optimisticItems.documents];
+  const allCanvases = [...canvases, ...optimisticItems.canvases];
+
   // Filter and sort items
-  const filteredDocs = documents
+  const filteredDocs = allDocuments
     .filter(doc => doc.title.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => {
       if (sortBy === 'name') {
@@ -128,7 +152,7 @@ export function DocumentationPanel({
       return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
     });
 
-  const filteredCanvases = canvases
+  const filteredCanvases = allCanvases
     .filter(canvas => canvas.title.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => {
       if (sortBy === 'name') {
@@ -144,36 +168,114 @@ export function DocumentationPanel({
   const totalFiles = displayDocs.length + displayCanvases.length;
 
   const createNewDocument = async () => {
+    if (isCreatingDocument) return;
+    
+    setIsCreatingDocument(true);
+    
+    // Generate optimistic document
+    const optimisticId = `temp-doc-${Date.now()}`;
+    const optimisticDoc: Document = {
+      id: optimisticId,
+      title: 'New Document',
+      updatedAt: new Date().toISOString()
+    };
+
+    // Add optimistic document immediately
+    setOptimisticItems(prev => ({
+      ...prev,
+      documents: [optimisticDoc, ...prev.documents]
+    }));
+
     try {
       const response = await fetch(`/api/projects/${projectId}/documents`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: 'New Document', contentText: '' }),
       });
+      
       if (!response.ok) throw new Error('Failed to create document');
+      
       const newDoc = await response.json() as { id: string };
+      
+      // Remove optimistic item and refresh data
+      setOptimisticItems(prev => ({
+        ...prev,
+        documents: prev.documents.filter(doc => doc.id !== optimisticId)
+      }));
+      
       // Update SWR cache
       mutate(`/api/projects/${projectId}/documents`);
+      
+      // Navigate to new document
       router.push(`/project/${projectId}/document/${newDoc.id}`);
     } catch (error) {
       console.error('Failed to create document:', error);
+      
+      // Remove optimistic item on error
+      setOptimisticItems(prev => ({
+        ...prev,
+        documents: prev.documents.filter(doc => doc.id !== optimisticId)
+      }));
+      
+      alert('Failed to create document. Please try again.');
+    } finally {
+      setIsCreatingDocument(false);
     }
   };
 
   const createNewCanvas = async () => {
+    if (isCreatingCanvas) return;
+    
+    setIsCreatingCanvas(true);
+    
+    // Generate optimistic canvas
+    const optimisticId = `temp-canvas-${Date.now()}`;
+    const optimisticCanvas: Canvas = {
+      id: optimisticId,
+      title: 'New Canvas',
+      updatedAt: new Date().toISOString()
+    };
+
+    // Add optimistic canvas immediately
+    setOptimisticItems(prev => ({
+      ...prev,
+      canvases: [optimisticCanvas, ...prev.canvases]
+    }));
+
     try {
       const response = await fetch(`/api/projects/${projectId}/canvases`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: 'New Canvas', elements: [] }),
       });
+      
       if (!response.ok) throw new Error('Failed to create canvas');
+      
       const newCanvas = await response.json() as { id: string };
+      
+      // Remove optimistic item and refresh data
+      setOptimisticItems(prev => ({
+        ...prev,
+        canvases: prev.canvases.filter(canvas => canvas.id !== optimisticId)
+      }));
+      
       // Update SWR cache
       mutate(`/api/projects/${projectId}/canvases`);
+      
+      // Navigate to new canvas
       router.push(`/project/${projectId}/canvas/${newCanvas.id}`);
     } catch (error) {
       console.error('Failed to create canvas:', error);
+      
+      // Remove optimistic item on error
+      setOptimisticItems(prev => ({
+        ...prev,
+        canvases: prev.canvases.filter(canvas => canvas.id !== optimisticId)
+      }));
+      
+      alert('Failed to create canvas. Please try again.');
+    } finally {
+      setIsCreatingCanvas(false);
     }
   };
 
@@ -185,12 +287,18 @@ export function DocumentationPanel({
   const saveRename = async (id: string, type: 'document' | 'canvas') => {
     if (!editingTitle.trim()) return;
 
+    const newTitle = editingTitle.trim();
+    
+    // Clear editing state immediately
+    setEditingId(null);
+    setEditingTitle('');
+
     try {
       const endpoint = type === 'document' ? `/api/documents/${id}` : `/api/canvas/${id}`;
       const response = await fetch(endpoint, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: editingTitle.trim() }),
+        body: JSON.stringify({ title: newTitle }),
       });
 
       if (!response.ok) throw new Error('Failed to rename');
@@ -205,17 +313,34 @@ export function DocumentationPanel({
       } else {
         mutate(`/api/canvas/${id}`);
       }
-
-      setEditingId(null);
-      setEditingTitle('');
     } catch (error) {
       console.error('Failed to rename:', error);
+      alert('Failed to rename. Please try again.');
+      
+      // Restore editing state on error
+      setEditingId(id);
+      setEditingTitle(newTitle);
     }
   };
 
   const cancelRename = () => {
     setEditingId(null);
     setEditingTitle('');
+  };
+
+  const handleFileClick = (id: string, type: 'document' | 'canvas') => {
+    // Don't navigate to temporary items
+    if (id.startsWith('temp-')) return;
+    
+    // Show loading state immediately
+    setLoadingFileId(id);
+    
+    // Navigate to the file
+    const path = `/project/${projectId}/${type}/${id}`;
+    router.push(path);
+    
+    // Clear loading state after a short delay (the page will change anyway)
+    setTimeout(() => setLoadingFileId(null), 1000);
   };
 
   const deleteItem = async (id: string, type: 'document' | 'canvas', title: string) => {
@@ -429,13 +554,29 @@ export function DocumentationPanel({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem onClick={createNewDocument} className="gap-2">
-                    <FileText className="h-4 w-4 text-blue-500" />
-                    New Document
+                  <DropdownMenuItem 
+                    onClick={createNewDocument} 
+                    className="gap-2"
+                    disabled={isCreatingDocument}
+                  >
+                    {isCreatingDocument ? (
+                      <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
+                    ) : (
+                      <FileText className="h-4 w-4 text-blue-500" />
+                    )}
+                    {isCreatingDocument ? 'Creating Document...' : 'New Document'}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={createNewCanvas} className="gap-2">
-                    <CanvasIcon className="h-4 w-4 text-purple-500" />
-                    New Canvas
+                  <DropdownMenuItem 
+                    onClick={createNewCanvas} 
+                    className="gap-2"
+                    disabled={isCreatingCanvas}
+                  >
+                    {isCreatingCanvas ? (
+                      <Loader2 className="h-4 w-4 text-purple-500 animate-spin" />
+                    ) : (
+                      <CanvasIcon className="h-4 w-4 text-purple-500" />
+                    )}
+                    {isCreatingCanvas ? 'Creating Canvas...' : 'New Canvas'}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -649,17 +790,21 @@ export function DocumentationPanel({
                                   "flex-1",
                                   viewMode === 'grid' ? 'flex flex-col gap-1' : 'flex items-center gap-2'
                                 )}>
-                                  <Link
-                                    href={`/project/${projectId}/document/${doc.id}`}
+                                  <button
+                                    onClick={() => handleFileClick(doc.id, 'document')}
                                     className={cn(
-                                      "text-sm truncate text-left transition-colors",
+                                      "text-sm truncate text-left transition-colors hover:text-primary",
                                       currentFileId === doc.id && "text-primary font-medium",
-                                      viewMode === 'grid' ? 'font-medium' : 'flex-1'
+                                      viewMode === 'grid' ? 'font-medium' : 'flex-1',
+                                      doc.id.startsWith('temp-') && "opacity-60 cursor-not-allowed"
                                     )}
-                                    prefetch={true}
+                                    disabled={doc.id.startsWith('temp-')}
                                   >
                                     {doc.title}
-                                  </Link>
+                                    {doc.id.startsWith('temp-') && (
+                                      <Badge variant="secondary" className="ml-2 text-xs">New</Badge>
+                                    )}
+                                  </button>
                                   {viewMode === 'grid' && (
                                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                       <Clock className="h-3 w-3" />
@@ -681,13 +826,18 @@ export function DocumentationPanel({
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => startRename(doc.id, doc.title)} className="gap-2">
+                                  <DropdownMenuItem 
+                                    onClick={() => startRename(doc.id, doc.title)} 
+                                    className="gap-2"
+                                    disabled={doc.id.startsWith('temp-')}
+                                  >
                                     <Edit2 className="h-4 w-4" />
                                     Rename
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
-                                    onClick={() => router.push(`/project/${projectId}/document/${doc.id}`)}
+                                    onClick={() => handleFileClick(doc.id, 'document')}
                                     className="gap-2"
+                                    disabled={doc.id.startsWith('temp-')}
                                   >
                                     <Maximize className="h-4 w-4" />
                                     Full Screen
@@ -695,6 +845,7 @@ export function DocumentationPanel({
                                   <DropdownMenuItem
                                     onClick={() => router.push(`/project/${projectId}/split?left=${doc.id}&leftType=document`)}
                                     className="gap-2"
+                                    disabled={doc.id.startsWith('temp-')}
                                   >
                                     <SplitSquareHorizontal className="h-4 w-4" />
                                     Split View
@@ -703,6 +854,7 @@ export function DocumentationPanel({
                                   <DropdownMenuItem
                                     onClick={() => deleteItem(doc.id, 'document', doc.title)}
                                     className="gap-2 text-red-600 focus:text-red-600"
+                                    disabled={doc.id.startsWith('temp-')}
                                   >
                                     <Trash2 className="h-4 w-4" />
                                     Delete
@@ -760,17 +912,21 @@ export function DocumentationPanel({
                                   "flex-1",
                                   viewMode === 'grid' ? 'flex flex-col gap-1' : 'flex items-center gap-2'
                                 )}>
-                                  <Link
-                                    href={`/project/${projectId}/canvas/${canvas.id}`}
+                                  <button
+                                    onClick={() => handleFileClick(canvas.id, 'canvas')}
                                     className={cn(
-                                      "text-sm truncate text-left transition-colors",
+                                      "text-sm truncate text-left transition-colors hover:text-primary",
                                       currentFileId === canvas.id && "text-primary font-medium",
-                                      viewMode === 'grid' ? 'font-medium' : 'flex-1'
+                                      viewMode === 'grid' ? 'font-medium' : 'flex-1',
+                                      canvas.id.startsWith('temp-') && "opacity-60 cursor-not-allowed"
                                     )}
-                                    prefetch={true}
+                                    disabled={canvas.id.startsWith('temp-')}
                                   >
                                     {canvas.title}
-                                  </Link>
+                                    {canvas.id.startsWith('temp-') && (
+                                      <Badge variant="secondary" className="ml-2 text-xs">New</Badge>
+                                    )}
+                                  </button>
                                   {viewMode === 'grid' && (
                                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                       <Clock className="h-3 w-3" />
@@ -792,13 +948,18 @@ export function DocumentationPanel({
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => startRename(canvas.id, canvas.title)} className="gap-2">
+                                  <DropdownMenuItem 
+                                    onClick={() => startRename(canvas.id, canvas.title)} 
+                                    className="gap-2"
+                                    disabled={canvas.id.startsWith('temp-')}
+                                  >
                                     <Edit2 className="h-4 w-4" />
                                     Rename
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
-                                    onClick={() => router.push(`/project/${projectId}/canvas/${canvas.id}`)}
+                                    onClick={() => handleFileClick(canvas.id, 'canvas')}
                                     className="gap-2"
+                                    disabled={canvas.id.startsWith('temp-')}
                                   >
                                     <Maximize className="h-4 w-4" />
                                     Full Screen
@@ -806,6 +967,7 @@ export function DocumentationPanel({
                                   <DropdownMenuItem
                                     onClick={() => router.push(`/project/${projectId}/split?left=${canvas.id}&leftType=canvas`)}
                                     className="gap-2"
+                                    disabled={canvas.id.startsWith('temp-')}
                                   >
                                     <SplitSquareHorizontal className="h-4 w-4" />
                                     Split View
@@ -814,6 +976,7 @@ export function DocumentationPanel({
                                   <DropdownMenuItem
                                     onClick={() => deleteItem(canvas.id, 'canvas', canvas.title)}
                                     className="gap-2 text-red-600 focus:text-red-600"
+                                    disabled={canvas.id.startsWith('temp-')}
                                   >
                                     <Trash2 className="h-4 w-4" />
                                     Delete
@@ -834,13 +997,32 @@ export function DocumentationPanel({
                         </p>
                         {!searchTerm && user && (
                           <div className="space-y-2">
-                            <Button size="sm" onClick={createNewDocument} className="w-full">
-                              <FileText className="h-4 w-4 mr-2" />
-                              New Document
+                            <Button 
+                              size="sm" 
+                              onClick={createNewDocument} 
+                              className="w-full"
+                              disabled={isCreatingDocument}
+                            >
+                              {isCreatingDocument ? (
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              ) : (
+                                <FileText className="h-4 w-4 mr-2" />
+                              )}
+                              {isCreatingDocument ? 'Creating...' : 'New Document'}
                             </Button>
-                            <Button size="sm" variant="outline" onClick={createNewCanvas} className="w-full">
-                              <CanvasIcon className="h-4 w-4 mr-2" />
-                              New Canvas
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={createNewCanvas} 
+                              className="w-full"
+                              disabled={isCreatingCanvas}
+                            >
+                              {isCreatingCanvas ? (
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              ) : (
+                                <CanvasIcon className="h-4 w-4 mr-2" />
+                              )}
+                              {isCreatingCanvas ? 'Creating...' : 'New Canvas'}
                             </Button>
                           </div>
                         )}
