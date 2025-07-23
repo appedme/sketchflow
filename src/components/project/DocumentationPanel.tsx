@@ -41,7 +41,9 @@ import {
   SortAsc,
   Grid3X3,
   List,
-  CheckCircle2
+  CheckCircle2,
+  Save,
+  RefreshCw
 } from 'lucide-react';
 import { FeedbackThread } from '@/components/ui/feedback-thread';
 import { mutate } from 'swr';
@@ -85,6 +87,8 @@ export function DocumentationPanel({
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [sortBy, setSortBy] = useState<'name' | 'updated'>('updated');
   const [filterType, setFilterType] = useState<'all' | 'documents' | 'canvases'>('all');
+  const [isSavingAll, setIsSavingAll] = useState(false);
+  const [isRevalidating, setIsRevalidating] = useState(false);
 
   // Get current file ID from URL
   const getCurrentFileId = () => {
@@ -300,6 +304,56 @@ export function DocumentationPanel({
     router.push('/dashboard');
   };
 
+  const saveAll = async () => {
+    setIsSavingAll(true);
+    try {
+      // Trigger save for all open editors
+      const saveEvent = new CustomEvent('excalidraw-save-all');
+      window.dispatchEvent(saveEvent);
+
+      // Also trigger save for any document editors
+      const docSaveEvent = new CustomEvent('document-save-all');
+      window.dispatchEvent(docSaveEvent);
+
+      // Update project timestamp
+      await fetch(`/api/projects/${projectId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lastActivity: new Date().toISOString() }),
+      });
+
+      // Show success feedback
+      setTimeout(() => setIsSavingAll(false), 1000);
+    } catch (error) {
+      console.error('Save all failed:', error);
+      setIsSavingAll(false);
+    }
+  };
+
+  const revalidateAll = async () => {
+    setIsRevalidating(true);
+    try {
+      // Revalidate all SWR caches for this project
+      await mutate(`/api/projects/${projectId}/documents`);
+      await mutate(`/api/projects/${projectId}/canvases`);
+      await mutate(`/api/projects/${projectId}`);
+
+      // Revalidate individual document and canvas caches
+      documents.forEach(doc => {
+        mutate(`/api/documents/${doc.id}`);
+      });
+      canvases.forEach(canvas => {
+        mutate(`/api/canvas/${canvas.id}`);
+      });
+
+      // Show success feedback
+      setTimeout(() => setIsRevalidating(false), 1000);
+    } catch (error) {
+      console.error('Revalidate all failed:', error);
+      setIsRevalidating(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -364,6 +418,33 @@ export function DocumentationPanel({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem
+                  onClick={saveAll}
+                  className="gap-2"
+                  disabled={isSavingAll}
+                >
+                  {isSavingAll ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
+                  {isSavingAll ? 'Saving All...' : 'Save All'}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={revalidateAll}
+                  className="gap-2"
+                  disabled={isRevalidating}
+                >
+                  {isRevalidating ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4" />
+                  )}
+                  {isRevalidating ? 'Refreshing...' : 'Refresh All'}
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
                 <DropdownMenuItem onClick={shareProject} className="gap-2">
                   <Share className="h-4 w-4" />
                   Share Project
@@ -759,7 +840,39 @@ export function DocumentationPanel({
                 </Button>
               </div>
 
-              {/* Action Buttons */}
+              {/* Quick Action Buttons */}
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={saveAll}
+                  className="gap-2 h-8"
+                  disabled={isSavingAll}
+                >
+                  {isSavingAll ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <Save className="h-3 w-3" />
+                  )}
+                  {isSavingAll ? 'Saving...' : 'Save All'}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={revalidateAll}
+                  className="gap-2 h-8"
+                  disabled={isRevalidating}
+                >
+                  {isRevalidating ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-3 w-3" />
+                  )}
+                  {isRevalidating ? 'Refresh' : 'Refresh'}
+                </Button>
+              </div>
+
+              {/* Share & Export Buttons */}
               <div className="flex gap-2">
                 <Button
                   variant="outline"
@@ -782,7 +895,7 @@ export function DocumentationPanel({
                   ) : (
                     <Download className="h-3 w-3" />
                   )}
-                  {isExporting ? 'Exporting...' : 'Export'}
+                  {isExporting ? 'Export...' : 'Export'}
                 </Button>
               </div>
 
