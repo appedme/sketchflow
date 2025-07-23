@@ -30,6 +30,7 @@ import {
   Sun,
   ExternalLink
 } from 'lucide-react';
+import { FeedbackThread } from '@/components/ui/feedback-thread';
 import { mutate } from 'swr';
 import { cn } from '@/lib/utils';
 import { useApi } from '@/hooks/useApi';
@@ -613,6 +614,16 @@ export function DocumentationPanel({
             Open Project View
           </Button>
         </Link>
+
+        {/* Feedback Thread */}
+        <div className="pt-2">
+          <FeedbackThread
+            title="💡 Share Your Ideas"
+            description="Help us improve SketchFlow with your feedback:"
+            variant="compact"
+            className="bg-muted/50 border-border"
+          />
+        </div>
       </div>
     </div>
   );

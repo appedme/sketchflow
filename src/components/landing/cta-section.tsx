@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { FeedbackThread } from "@/components/ui/feedback-thread";
 
 export function CTASection() {
   return (
@@ -30,6 +31,15 @@ export function CTASection() {
         <p className="text-sm opacity-75 mt-6">
           No credit card required • Free forever plan available
         </p>
+
+        <div className="mt-8 max-w-2xl mx-auto">
+          <FeedbackThread
+            title="💬 Help Shape SketchFlow's Future"
+            description="Your feedback drives our development! Join the conversation and share your ideas:"
+            variant="compact"
+            className="bg-white/10 border-white/20 backdrop-blur-sm"
+          />
+        </div>
       </div>
     </section>
   );

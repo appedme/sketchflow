@@ -1,4 +1,5 @@
 import { Separator } from "@/components/ui/separator";
+import { FeedbackThread } from "@/components/ui/feedback-thread";
 
 export function Footer() {
   return (
@@ -36,12 +37,21 @@ export function Footer() {
 
         <Separator className="mb-6" />
 
+        {/* Feedback Thread */}
+        <div className="mb-8">
+          <FeedbackThread
+            title="💬 Join the Feedback Thread"
+            description="We're building with your ideas! Reply here:"
+            variant="compact"
+          />
+        </div>
+
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
           <p>&copy; 2025 SketchFlow. All rights reserved.</p>
           <div className="flex gap-6">
-            <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
-            <a href="#" className="hover:text-foreground transition-colors">Terms</a>
-            <a href="#" className="hover:text-foreground transition-colors">Cookies</a>
+            <a href="/privacy" className="hover:text-foreground transition-colors">Privacy</a>
+            <a href="/terms" className="hover:text-foreground transition-colors">Terms</a>
+            <a href="/cookies" className="hover:text-foreground transition-colors">Cookies</a>
           </div>
         </div>
       </div>
