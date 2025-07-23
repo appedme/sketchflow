@@ -1,0 +1,18 @@
+name = "sketchflow"
+main = "./.open-next/cloudflare-worker/index.js"
+compatibility_date = "2023-10-30"
+compatibility_flags = ["nodejs_compat"]
+
+# Increase resource limits
+workers_dev = true
+usage_model = "bundled"
+
+[build]
+command = "npm run build"
+
+[site]
+bucket = "./.open-next/assets"
+
+# Increase memory limit
+[limits]
+memory_limit = "1024"

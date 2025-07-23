@@ -1,7 +1,6 @@
 "use client";
 
 import React, { createContext, useContext, ReactNode } from 'react';
-import useSWR, { mutate } from 'swr';
 import { useUser } from '@stackframe/stack';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useState, useEffect } from 'react';
@@ -28,18 +27,10 @@ interface DocumentContextType {
   setTitle: (title: string) => void;
   setContent: (content: string) => void;
   saveDocument: () => Promise<void>;
-  mutateDocument: () => void;
+  reloadDocument: () => Promise<void>;
 }
 
 const DocumentContext = createContext<DocumentContextType | undefined>(undefined);
-
-const fetcher = async (url: string) => {
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error('Failed to fetch');
-  }
-  return res.json();
-};
 
 interface DocumentProviderProps {
   children: ReactNode;
@@ -48,26 +39,46 @@ interface DocumentProviderProps {
 
 export function DocumentProvider({ children, documentId }: DocumentProviderProps) {
   const user = useUser();
+  const [document, setDocument] = useState<Document | null>(null);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [saving, setSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<any>(null);
 
   // Debounce title and content for auto-save
   const debouncedTitle = useDebounce(title, 1000);
   const debouncedContent = useDebounce(content, 2000);
 
-  const { data: document, error, mutate: mutateDocument } = useSWR(
-    user?.id && documentId ? `/api/documents/${documentId}` : null,
-    fetcher
-  );
+  // Load document data directly without caching
+  const loadDocumentData = useCallback(async () => {
+    if (!user?.id) return;
+    
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await fetch(`/api/documents/${documentId}`);
+      if (!response.ok) {
+        throw new Error('Failed to load document');
+      }
 
-  // Initialize local state when document loads
-  useEffect(() => {
-    if (document) {
-      setTitle((document as any)?.title || '');
-      setContent((document as any)?.contentText || '');
+      const documentData = await response.json();
+      setDocument(documentData);
+      setTitle(documentData?.title || '');
+      setContent(documentData?.contentText || '');
+    } catch (err) {
+      console.error('Failed to load document:', err);
+      setError(err);
+    } finally {
+      setIsLoading(false);
     }
-  }, [document]);
+  }, [user?.id, documentId]);
+
+  // Load document on mount and when dependencies change
+  useEffect(() => {
+    loadDocumentData();
+  }, [loadDocumentData]);
 
   // Manual save function
   const saveDocument = async () => {
@@ -92,9 +103,7 @@ export function DocumentProvider({ children, documentId }: DocumentProviderProps
       }
 
       const updatedDoc = await response.json();
-
-      // Update the cache with the response
-      mutate(`/api/documents/${documentId}`, updatedDoc, false);
+      setDocument(updatedDoc);
 
     } catch (error) {
       console.error('Failed to save document:', error);
@@ -128,13 +137,13 @@ export function DocumentProvider({ children, documentId }: DocumentProviderProps
           throw new Error('Failed to save document');
         }
 
-        // Update the cache optimistically
-        mutate(`/api/documents/${documentId}`, {
-          ...(document as any),
+        // Update local state
+        setDocument(prev => prev ? {
+          ...prev,
           title: debouncedTitle,
           contentText: debouncedContent,
           updatedAt: new Date().toISOString(),
-        }, false);
+        } : null);
 
       } catch (error) {
         console.error('Failed to auto-save document:', error);
@@ -144,14 +153,12 @@ export function DocumentProvider({ children, documentId }: DocumentProviderProps
     };
 
     autoSave();
-  }, [debouncedTitle, debouncedContent, document, documentId, user?.id, mutateDocument]);
-
-  const isLoading = !document && !error;
+  }, [debouncedTitle, debouncedContent, document, documentId, user?.id]);
 
   return (
     <DocumentContext.Provider
       value={{
-        document: (document as any) || null,
+        document: document || null,
         isLoading,
         error,
         title,
@@ -160,7 +167,7 @@ export function DocumentProvider({ children, documentId }: DocumentProviderProps
         setTitle,
         setContent,
         saveDocument,
-        mutateDocument,
+        reloadDocument: loadDocumentData,
       }}
     >
       {children}

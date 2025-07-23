@@ -1,7 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, ReactNode } from 'react';
-import useSWR from 'swr';
+import React, { createContext, useContext, ReactNode, useState, useEffect, useCallback } from 'react';
 import { useUser } from '@stackframe/stack';
 
 interface Project {
@@ -50,20 +49,12 @@ interface ProjectContextType {
   canvases: Canvas[];
   isLoading: boolean;
   error: any;
-  mutateProject: () => void;
-  mutateDocuments: () => void;
-  mutateCanvases: () => void;
+  reloadProject: () => Promise<void>;
+  reloadDocuments: () => Promise<void>;
+  reloadCanvases: () => Promise<void>;
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
-
-const fetcher = async (url: string) => {
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error('Failed to fetch');
-  }
-  return res.json();
-};
 
 interface ProjectProviderProps {
   children: ReactNode;
@@ -72,36 +63,89 @@ interface ProjectProviderProps {
 
 export function ProjectProvider({ children, projectId }: ProjectProviderProps) {
   const user = useUser();
+  const [project, setProject] = useState<Project | null>(null);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [canvases, setCanvases] = useState<Canvas[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<any>(null);
 
-  const { data: project, error: projectError, mutate: mutateProject } = useSWR(
-    user?.id && projectId ? `/api/projects/${projectId}` : null,
-    fetcher
-  );
+  // Load project data directly without caching
+  const loadProjectData = useCallback(async () => {
+    if (!user?.id) return;
+    
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await fetch(`/api/projects/${projectId}`);
+      if (!response.ok) {
+        throw new Error('Failed to load project');
+      }
 
-  const { data: documents = [], error: documentsError, mutate: mutateDocuments } = useSWR(
-    user?.id && projectId ? `/api/projects/${projectId}/documents` : null,
-    fetcher
-  );
+      const projectData = await response.json();
+      setProject(projectData);
+    } catch (err) {
+      console.error('Failed to load project:', err);
+      setError(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user?.id, projectId]);
 
-  const { data: canvases = [], error: canvasesError, mutate: mutateCanvases } = useSWR(
-    user?.id && projectId ? `/api/projects/${projectId}/canvases` : null,
-    fetcher
-  );
+  // Load documents data directly without caching
+  const loadDocumentsData = useCallback(async () => {
+    if (!user?.id) return;
+    
+    try {
+      const response = await fetch(`/api/projects/${projectId}/documents`);
+      if (!response.ok) {
+        throw new Error('Failed to load documents');
+      }
 
-  const isLoading = !project && !projectError;
-  const error = projectError || documentsError || canvasesError;
+      const documentsData = await response.json();
+      setDocuments(documentsData);
+    } catch (err) {
+      console.error('Failed to load documents:', err);
+      setError(err);
+    }
+  }, [user?.id, projectId]);
+
+  // Load canvases data directly without caching
+  const loadCanvasesData = useCallback(async () => {
+    if (!user?.id) return;
+    
+    try {
+      const response = await fetch(`/api/projects/${projectId}/canvases`);
+      if (!response.ok) {
+        throw new Error('Failed to load canvases');
+      }
+
+      const canvasesData = await response.json();
+      setCanvases(canvasesData);
+    } catch (err) {
+      console.error('Failed to load canvases:', err);
+      setError(err);
+    }
+  }, [user?.id, projectId]);
+
+  // Load all data on mount and when dependencies change
+  useEffect(() => {
+    loadProjectData();
+    loadDocumentsData();
+    loadCanvasesData();
+  }, [loadProjectData, loadDocumentsData, loadCanvasesData]);
 
   return (
     <ProjectContext.Provider
       value={{
-        project: (project as any) || null,
-        documents: (documents as any) || [],
-        canvases: (canvases as any) || [],
+        project: project || null,
+        documents: documents || [],
+        canvases: canvases || [],
         isLoading,
         error,
-        mutateProject,
-        mutateDocuments,
-        mutateCanvases,
+        reloadProject: loadProjectData,
+        reloadDocuments: loadDocumentsData,
+        reloadCanvases: loadCanvasesData,
       }}
     >
       {children}

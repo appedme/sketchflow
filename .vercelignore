@@ -1,0 +1,59 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Testing
+coverage
+
+# Production
+build
+dist
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Local environment files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.vscode
+.idea
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Cache directories
+.turbo
+.swc
+
+# Documentation
+docs/
+README.md
+todo.md
+plan.md
+*.md
+
+# Scripts not needed for deployment
+scripts/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs
+*.log
+
+# Temporary files
+tmp/
+temp/

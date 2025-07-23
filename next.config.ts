@@ -21,17 +21,28 @@ const nextConfig: NextConfig = {
   // Performance optimizations
   experimental: {
     optimizePackageImports: ['@excalidraw/excalidraw', 'platejs', '@platejs/core'],
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
+  },
+
+  // Turbopack configuration (moved from experimental.turbo)
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
       },
     },
   },
+  poweredByHeader: false,
+  compress: true,
 
   webpack: (config, { isServer, dev }) => {
+    // Memory optimization for Vercel builds
+    config.optimization = {
+      ...config.optimization,
+      minimize: !dev,
+      minimizer: [...(config.optimization?.minimizer || [])],
+    };
+
     if (isServer) {
       config.externals.push('@libsql/client', '@libsql/hrana-client', '@libsql/isomorphic-ws');
     }
@@ -40,6 +51,7 @@ const nextConfig: NextConfig = {
     if (!isServer && !dev) {
       config.optimization.splitChunks = {
         ...config.optimization.splitChunks,
+        maxSize: 244000, // Reduce chunk size for Vercel
         cacheGroups: {
           ...config.optimization.splitChunks?.cacheGroups,
           excalidraw: {
@@ -48,6 +60,7 @@ const nextConfig: NextConfig = {
             chunks: 'all',
             priority: 30,
             reuseExistingChunk: true,
+            maxSize: 244000,
           },
           plate: {
             name: 'plate-editor',
@@ -55,6 +68,7 @@ const nextConfig: NextConfig = {
             chunks: 'all',
             priority: 25,
             reuseExistingChunk: true,
+            maxSize: 244000,
           },
           radix: {
             name: 'radix-ui',
@@ -62,6 +76,7 @@ const nextConfig: NextConfig = {
             chunks: 'all',
             priority: 20,
             reuseExistingChunk: true,
+            maxSize: 244000,
           },
         },
       };
@@ -105,7 +120,3 @@ export default withPWA({
     },
   ],
 })(nextConfig);
-
-// added by create cloudflare to enable calling `getCloudflareContext()` in `next dev`
-import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare';
-initOpenNextCloudflareForDev();

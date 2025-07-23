@@ -1,7 +1,6 @@
 "use client";
 
 import React, { createContext, useContext, ReactNode, useState, useCallback, useRef, useEffect } from 'react';
-import useSWR, { mutate } from 'swr';
 import { useUser } from '@stackframe/stack';
 import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import type { AppState, BinaryFiles } from "@excalidraw/excalidraw/types";
@@ -31,18 +30,10 @@ interface CanvasContextType {
   updateAppState: (appState: Partial<AppState>) => void;
   updateFiles: (files: BinaryFiles) => void;
   saveCanvas: () => Promise<void>;
-  mutateCanvas: () => void;
+  reloadCanvas: () => Promise<void>;
 }
 
 const CanvasContext = createContext<CanvasContextType | undefined>(undefined);
-
-const fetcher = async (url: string) => {
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error('Failed to fetch');
-  }
-  return res.json();
-};
 
 interface CanvasProviderProps {
   children: ReactNode;
@@ -59,30 +50,38 @@ export function CanvasProvider({ children, projectId, canvasId, shareToken }: Ca
   });
   const [files, setFiles] = useState<BinaryFiles>({});
   const [saving, setSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<any>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastSavedStateRef = useRef<string>('');
 
-  // Determine the correct API endpoint
-  const apiUrl = shareToken && canvasId
-    ? `/api/public/canvases/${canvasId}?shareToken=${shareToken}`
-    : canvasId
-    ? `/api/canvas/${canvasId}/load`
-    : `/api/canvas/project/${projectId}/load`;
+  // Load canvas data directly without caching
+  const loadCanvasData = useCallback(async () => {
+    if (!shareToken && !user?.id) return;
+    
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const apiUrl = shareToken && canvasId
+        ? `/api/public/canvases/${canvasId}?shareToken=${shareToken}`
+        : canvasId
+        ? `/api/canvas/${canvasId}/load`
+        : `/api/canvas/project/${projectId}/load`;
 
-  const { data: canvasData, error, mutate: mutateCanvas } = useSWR(
-    shareToken || user?.id ? apiUrl : null,
-    fetcher
-  );
+      const response = await fetch(apiUrl);
+      if (!response.ok) {
+        throw new Error('Failed to load canvas');
+      }
 
-  // Initialize local state when canvas loads
-  useEffect(() => {
-    if (canvasData) {
-      const newElements = (canvasData as any)?.elements || [];
+      const canvasData = await response.json();
+      
+      const newElements = canvasData?.elements || [];
       const newAppState = {
-        ...(canvasData as any)?.appState,
+        ...canvasData?.appState,
         collaborators: new Map(), // Ensure collaborators is always a Map
       };
-      const newFiles = (canvasData as any)?.files || {};
+      const newFiles = canvasData?.files || {};
 
       setElements(newElements);
       setAppState(newAppState);
@@ -94,8 +93,18 @@ export function CanvasProvider({ children, projectId, canvasId, shareToken }: Ca
         appState: newAppState,
         files: newFiles
       });
+    } catch (err) {
+      console.error('Failed to load canvas:', err);
+      setError(err);
+    } finally {
+      setIsLoading(false);
     }
-  }, [canvasData]);
+  }, [shareToken, user?.id, canvasId, projectId]);
+
+  // Load canvas on mount and when dependencies change
+  useEffect(() => {
+    loadCanvasData();
+  }, [loadCanvasData]);
 
   const updateElements = useCallback((newElements: readonly ExcalidrawElement[]) => {
     setElements(newElements);
@@ -181,17 +190,6 @@ export function CanvasProvider({ children, projectId, canvasId, shareToken }: Ca
         files: filesToSave
       });
 
-      // Update the cache optimistically
-      const cacheKey = canvasId
-        ? `/api/canvas/${canvasId}/load`
-        : `/api/canvas/project/${projectId}/load`;
-
-      mutate(cacheKey, {
-        elements: elementsToSave,
-        appState: appStateToSave,
-        files: filesToSave
-      }, false);
-
     } catch (error) {
       console.error('Failed to save canvas:', error);
     } finally {
@@ -212,12 +210,10 @@ export function CanvasProvider({ children, projectId, canvasId, shareToken }: Ca
     };
   }, []);
 
-  const isLoading = !canvasData && !error;
-
   return (
     <CanvasContext.Provider
       value={{
-        canvas: (canvasData as any) || null,
+        canvas: null, // Remove canvas object since we're not caching
         isLoading,
         error,
         elements,
@@ -228,7 +224,7 @@ export function CanvasProvider({ children, projectId, canvasId, shareToken }: Ca
         updateAppState,
         updateFiles,
         saveCanvas,
-        mutateCanvas,
+        reloadCanvas: loadCanvasData,
       }}
     >
       {children}
