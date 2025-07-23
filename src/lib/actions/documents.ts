@@ -86,24 +86,42 @@ export async function createDocument(projectId: string, title: string, content?:
   }
 }
 
-export async function getDocuments(projectId: string, userId: string) {
+export async function getDocuments(projectId: string, userId?: string) {
   try {
     const db = getDb();
 
-    // Check if user has access to the project
-    const collaboration = await db
-      .select()
-      .from(projectCollaborators)
-      .where(
-        and(
-          eq(projectCollaborators.projectId, projectId),
-          eq(projectCollaborators.userId, userId)
+    // If user is provided, check collaboration access
+    if (userId) {
+      const collaboration = await db
+        .select()
+        .from(projectCollaborators)
+        .where(
+          and(
+            eq(projectCollaborators.projectId, projectId),
+            eq(projectCollaborators.userId, userId)
+          )
         )
-      )
-      .limit(1);
+        .limit(1);
 
-    if (collaboration.length === 0) {
-      // Check if project is public
+      if (collaboration.length === 0) {
+        // Check if project is public
+        const project = await db
+          .select()
+          .from(projects)
+          .where(
+            and(
+              eq(projects.id, projectId),
+              eq(projects.visibility, 'public')
+            )
+          )
+          .limit(1);
+
+        if (project.length === 0) {
+          throw new Error('Access denied');
+        }
+      }
+    } else {
+      // For unauthenticated users, only allow access to public projects
       const project = await db
         .select()
         .from(projects)
@@ -116,7 +134,7 @@ export async function getDocuments(projectId: string, userId: string) {
         .limit(1);
 
       if (project.length === 0) {
-        throw new Error('Access denied');
+        throw new Error('Access denied - project not public');
       }
     }
 
@@ -141,7 +159,7 @@ export async function getDocuments(projectId: string, userId: string) {
   }
 }
 
-export async function getDocument(documentId: string, userId: string) {
+export async function getDocument(documentId: string, userId?: string) {
   try {
     const db = getDb();
 
@@ -165,6 +183,11 @@ export async function getDocument(documentId: string, userId: string) {
 
     // Check access permissions
     if (projectData?.visibility !== 'public') {
+      // Private project - require authentication and collaboration
+      if (!userId) {
+        return null; // No access for unauthenticated users
+      }
+
       const collaboration = await db
         .select()
         .from(projectCollaborators)
@@ -180,6 +203,7 @@ export async function getDocument(documentId: string, userId: string) {
         return null; // No access
       }
     }
+    // Public project - allow access regardless of authentication
 
     return docData;
   } catch (error) {

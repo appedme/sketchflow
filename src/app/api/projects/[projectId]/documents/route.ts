@@ -8,17 +8,24 @@ export async function GET(
 ) {
   try {
     const user = await stackServerApp.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { projectId } = await params;
-    const documents = await getDocuments(projectId, user.id);
+
+    // Allow access for authenticated users or public projects
+    const documents = await getDocuments(projectId, user?.id);
 
     return NextResponse.json(documents);
   } catch (error) {
     console.error('Error fetching documents:', error);
+    
+    // If access denied and no user, return 401, otherwise 403
+    if (error instanceof Error && error.message.includes('Access denied')) {
+      const user = await stackServerApp.getUser();
+      return NextResponse.json(
+        { error: 'Access denied' }, 
+        { status: user ? 403 : 401 }
+      );
+    }
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

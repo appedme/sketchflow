@@ -8,13 +8,10 @@ export async function GET(
 ) {
   try {
     const user = await stackServerApp.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { documentId } = await params;
-    const document = await getDocument(documentId, user.id);
+
+    // Allow access for authenticated users or public projects
+    const document = await getDocument(documentId, user?.id);
 
     if (!document) {
       return NextResponse.json({ error: 'Document not found' }, { status: 404 });

@@ -8,16 +8,19 @@ export async function GET(
 ) {
   try {
     const user = await stackServerApp.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { projectId } = await params;
-    const project = await getProject(projectId, user.id);
+
+    // Try to get project with user ID if authenticated, otherwise allow public access
+    const project = await getProject(projectId, user?.id);
 
     if (!project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    // For public projects, return project data regardless of authentication
+    // For private projects, require authentication
+    if (!user && project.visibility !== 'public') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     return NextResponse.json(project);

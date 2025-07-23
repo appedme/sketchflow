@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useUser } from '@stackframe/stack';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -44,7 +45,9 @@ import {
   List,
   CheckCircle2,
   Save,
-  RefreshCw
+  RefreshCw,
+  UserPlus,
+  LogIn
 } from 'lucide-react';
 import { FeedbackThread } from '@/components/ui/feedback-thread';
 import { mutate } from 'swr';
@@ -79,6 +82,7 @@ export function DocumentationPanel({
 }: DocumentationPanelProps) {
   const { theme, setTheme } = useTheme();
   const router = useRouter();
+  const user = useUser();
   const [searchTerm, setSearchTerm] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
@@ -315,6 +319,18 @@ export function DocumentationPanel({
     router.push('/dashboard');
   };
 
+  const createOwnProject = () => {
+    if (user) {
+      router.push('/dashboard?create=true');
+    } else {
+      router.push('/sign-in?redirect=' + encodeURIComponent('/dashboard?create=true'));
+    }
+  };
+
+  const signIn = () => {
+    router.push('/sign-in?redirect=' + encodeURIComponent(window.location.pathname));
+  };
+
   const saveAll = async () => {
     setIsSavingAll(true);
     try {
@@ -405,85 +421,89 @@ export function DocumentationPanel({
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="sm" variant="ghost" className="h-7 w-7 p-0 hover:bg-primary/10">
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={createNewDocument} className="gap-2">
-                  <FileText className="h-4 w-4 text-blue-500" />
-                  New Document
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={createNewCanvas} className="gap-2">
-                  <CanvasIcon className="h-4 w-4 text-purple-500" />
-                  New Canvas
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="sm" variant="ghost" className="h-7 w-7 p-0 hover:bg-primary/10">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem
-                  onClick={saveAll}
-                  className="gap-2"
-                  disabled={isSavingAll}
-                >
-                  {isSavingAll ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Save className="h-4 w-4" />
-                  )}
-                  {isSavingAll ? 'Saving All...' : 'Save All'}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={revalidateAll}
-                  className="gap-2"
-                  disabled={isRevalidating}
-                >
-                  {isRevalidating ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <RefreshCw className="h-4 w-4" />
-                  )}
-                  {isRevalidating ? 'Refreshing...' : 'Refresh All'}
-                </DropdownMenuItem>
+            {user && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="sm" variant="ghost" className="h-7 w-7 p-0 hover:bg-primary/10">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={createNewDocument} className="gap-2">
+                    <FileText className="h-4 w-4 text-blue-500" />
+                    New Document
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={createNewCanvas} className="gap-2">
+                    <CanvasIcon className="h-4 w-4 text-purple-500" />
+                    New Canvas
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            {user && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="sm" variant="ghost" className="h-7 w-7 p-0 hover:bg-primary/10">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem
+                    onClick={saveAll}
+                    className="gap-2"
+                    disabled={isSavingAll}
+                  >
+                    {isSavingAll ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4" />
+                    )}
+                    {isSavingAll ? 'Saving All...' : 'Save All'}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={revalidateAll}
+                    className="gap-2"
+                    disabled={isRevalidating}
+                  >
+                    {isRevalidating ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4" />
+                    )}
+                    {isRevalidating ? 'Refreshing...' : 'Refresh All'}
+                  </DropdownMenuItem>
 
-                <DropdownMenuSeparator />
+                  <DropdownMenuSeparator />
 
-                <DropdownMenuItem onClick={shareProject} className="gap-2">
-                  <Share className="h-4 w-4" />
-                  Share Project
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={exportProject}
-                  className="gap-2"
-                  disabled={isExporting}
-                >
-                  {isExporting ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Download className="h-4 w-4" />
-                  )}
-                  {isExporting ? 'Exporting...' : 'Export Project'}
-                </DropdownMenuItem>
+                  <DropdownMenuItem onClick={shareProject} className="gap-2">
+                    <Share className="h-4 w-4" />
+                    Share Project
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={exportProject}
+                    className="gap-2"
+                    disabled={isExporting}
+                  >
+                    {isExporting ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Download className="h-4 w-4" />
+                    )}
+                    {isExporting ? 'Exporting...' : 'Export Project'}
+                  </DropdownMenuItem>
 
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push(`/project/${projectId}`)} className="gap-2">
-                  <FolderOpen className="h-4 w-4" />
-                  Open Project
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={openProjectSettings} className="gap-2">
-                  <Settings className="h-4 w-4" />
-                  Project Settings
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => router.push(`/project/${projectId}`)} className="gap-2">
+                    <FolderOpen className="h-4 w-4" />
+                    Open Project
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={openProjectSettings} className="gap-2">
+                    <Settings className="h-4 w-4" />
+                    Project Settings
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
 
@@ -649,45 +669,47 @@ export function DocumentationPanel({
                                 </div>
                               </>
                             )}
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                                >
-                                  <MoreHorizontal className="h-3 w-3" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => startRename(doc.id, doc.title)} className="gap-2">
-                                  <Edit2 className="h-4 w-4" />
-                                  Rename
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => router.push(`/project/${projectId}/document/${doc.id}`)}
-                                  className="gap-2"
-                                >
-                                  <Maximize className="h-4 w-4" />
-                                  Full Screen
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => router.push(`/project/${projectId}/split?left=${doc.id}&leftType=document`)}
-                                  className="gap-2"
-                                >
-                                  <SplitSquareHorizontal className="h-4 w-4" />
-                                  Split View
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  onClick={() => deleteItem(doc.id, 'document', doc.title)}
-                                  className="gap-2 text-red-600 focus:text-red-600"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                            {user && (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    <MoreHorizontal className="h-3 w-3" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => startRename(doc.id, doc.title)} className="gap-2">
+                                    <Edit2 className="h-4 w-4" />
+                                    Rename
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => router.push(`/project/${projectId}/document/${doc.id}`)}
+                                    className="gap-2"
+                                  >
+                                    <Maximize className="h-4 w-4" />
+                                    Full Screen
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => router.push(`/project/${projectId}/split?left=${doc.id}&leftType=document`)}
+                                    className="gap-2"
+                                  >
+                                    <SplitSquareHorizontal className="h-4 w-4" />
+                                    Split View
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    onClick={() => deleteItem(doc.id, 'document', doc.title)}
+                                    className="gap-2 text-red-600 focus:text-red-600"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            )}
                           </>
                         )}
                       </div>
@@ -758,45 +780,47 @@ export function DocumentationPanel({
                                 </div>
                               </>
                             )}
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                                >
-                                  <MoreHorizontal className="h-3 w-3" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => startRename(canvas.id, canvas.title)} className="gap-2">
-                                  <Edit2 className="h-4 w-4" />
-                                  Rename
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => router.push(`/project/${projectId}/canvas/${canvas.id}`)}
-                                  className="gap-2"
-                                >
-                                  <Maximize className="h-4 w-4" />
-                                  Full Screen
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => router.push(`/project/${projectId}/split?left=${canvas.id}&leftType=canvas`)}
-                                  className="gap-2"
-                                >
-                                  <SplitSquareHorizontal className="h-4 w-4" />
-                                  Split View
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  onClick={() => deleteItem(canvas.id, 'canvas', canvas.title)}
-                                  className="gap-2 text-red-600 focus:text-red-600"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                            {user && (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    <MoreHorizontal className="h-3 w-3" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => startRename(canvas.id, canvas.title)} className="gap-2">
+                                    <Edit2 className="h-4 w-4" />
+                                    Rename
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => router.push(`/project/${projectId}/canvas/${canvas.id}`)}
+                                    className="gap-2"
+                                  >
+                                    <Maximize className="h-4 w-4" />
+                                    Full Screen
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => router.push(`/project/${projectId}/split?left=${canvas.id}&leftType=canvas`)}
+                                    className="gap-2"
+                                  >
+                                    <SplitSquareHorizontal className="h-4 w-4" />
+                                    Split View
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    onClick={() => deleteItem(canvas.id, 'canvas', canvas.title)}
+                                    className="gap-2 text-red-600 focus:text-red-600"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            )}
                           </>
                         )}
                       </div>
@@ -808,7 +832,7 @@ export function DocumentationPanel({
                         <p className="text-sm text-muted-foreground mb-3">
                           {searchTerm ? 'No files found' : 'No files yet'}
                         </p>
-                        {!searchTerm && (
+                        {!searchTerm && user && (
                           <div className="space-y-2">
                             <Button size="sm" onClick={createNewDocument} className="w-full">
                               <FileText className="h-4 w-4 mr-2" />
@@ -817,6 +841,17 @@ export function DocumentationPanel({
                             <Button size="sm" variant="outline" onClick={createNewCanvas} className="w-full">
                               <CanvasIcon className="h-4 w-4 mr-2" />
                               New Canvas
+                            </Button>
+                          </div>
+                        )}
+                        {!searchTerm && !user && (
+                          <div className="space-y-2">
+                            <p className="text-xs text-muted-foreground mb-2">
+                              This project appears to be empty
+                            </p>
+                            <Button size="sm" onClick={createOwnProject} className="w-full">
+                              <UserPlus className="h-4 w-4 mr-2" />
+                              Create Your Own Project
                             </Button>
                           </div>
                         )}
@@ -851,63 +886,92 @@ export function DocumentationPanel({
                 </Button>
               </div>
 
-              {/* Quick Action Buttons */}
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={saveAll}
-                  className="gap-2 h-8"
-                  disabled={isSavingAll}
-                >
-                  {isSavingAll ? (
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                  ) : (
-                    <Save className="h-3 w-3" />
-                  )}
-                  {isSavingAll ? 'Saving...' : 'Save All'}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={revalidateAll}
-                  className="gap-2 h-8"
-                  disabled={isRevalidating}
-                >
-                  {isRevalidating ? (
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                  ) : (
-                    <RefreshCw className="h-3 w-3" />
-                  )}
-                  {isRevalidating ? 'Refresh' : 'Refresh'}
-                </Button>
-              </div>
+              {/* Quick Action Buttons - Only show for authenticated users */}
+              {user && (
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={saveAll}
+                    className="gap-2 h-8"
+                    disabled={isSavingAll}
+                  >
+                    {isSavingAll ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Save className="h-3 w-3" />
+                    )}
+                    {isSavingAll ? 'Saving...' : 'Save All'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={revalidateAll}
+                    className="gap-2 h-8"
+                    disabled={isRevalidating}
+                  >
+                    {isRevalidating ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-3 w-3" />
+                    )}
+                    {isRevalidating ? 'Refresh' : 'Refresh'}
+                  </Button>
+                </div>
+              )}
 
-              {/* Share & Export Buttons */}
+              {/* Action Buttons - Different for authenticated vs unauthenticated users */}
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={shareProject}
-                  className="flex-1 gap-2 h-8"
-                >
-                  <Share className="h-3 w-3" />
-                  Share
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={exportProject}
-                  className="flex-1 gap-2 h-8"
-                  disabled={isExporting}
-                >
-                  {isExporting ? (
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                  ) : (
-                    <Download className="h-3 w-3" />
-                  )}
-                  {isExporting ? 'Export...' : 'Export'}
-                </Button>
+                {user ? (
+                  // Authenticated user - show Share & Export
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={shareProject}
+                      className="flex-1 gap-2 h-8"
+                    >
+                      <Share className="h-3 w-3" />
+                      Share
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={exportProject}
+                      className="flex-1 gap-2 h-8"
+                      disabled={isExporting}
+                    >
+                      {isExporting ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Download className="h-3 w-3" />
+                      )}
+                      {isExporting ? 'Export...' : 'Export'}
+                    </Button>
+                  </>
+                ) : (
+                  // Unauthenticated user - show Create Your Own & Sign In
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={createOwnProject}
+                      className="flex-1 gap-2 h-8"
+                    >
+                      <UserPlus className="h-3 w-3" />
+                      Create Your Own
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={signIn}
+                      className="flex-1 gap-2 h-8"
+                    >
+                      <LogIn className="h-3 w-3" />
+                      Sign In
+                    </Button>
+                  </>
+                )}
               </div>
 
               
@@ -916,7 +980,7 @@ export function DocumentationPanel({
               <div className="pt-2">
                 <FeedbackThread
                   title="💡 Share Your Ideas"
-                  description="Help us improve SketchFlow with your feedback:"
+                  description="Help us improve:"
                   variant="compact"
                   className="bg-muted/50 border-border"
                 />

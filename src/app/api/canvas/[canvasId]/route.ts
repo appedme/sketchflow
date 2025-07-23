@@ -8,13 +8,10 @@ export async function GET(
 ) {
   try {
     const user = await stackServerApp.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { canvasId } = await params;
-    const canvas = await getCanvas(canvasId, user.id);
+
+    // Allow access for authenticated users or public projects
+    const canvas = await getCanvas(canvasId, user?.id);
 
     if (!canvas) {
       return NextResponse.json({ error: 'Canvas not found' }, { status: 404 });
