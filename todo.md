@@ -33,3 +33,5 @@ use react catch function
 create a repo cdn viewer toll show all github repo files with copy jsdelivr cdn with/without commit 
 
 add twitter tweets as the what users say section
+
+in usecases add photo gallery and photo gallery with text, kanban, system design, kids drawing

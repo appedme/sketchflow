@@ -48,7 +48,7 @@ export function ShareDialog({
   projectVisibility = 'private'
 }: ShareDialogProps) {
   const [internalIsOpen, setInternalIsOpen] = useState(false);
-  
+
   // Use external state if provided, otherwise use internal state
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
   const setIsOpen = externalOnOpenChange || setInternalIsOpen;
@@ -152,13 +152,6 @@ export function ShareDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
-          <Share className="w-4 h-4" />
-          Share
-        </Button>
-      </DialogTrigger>
-
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -168,111 +161,111 @@ export function ShareDialog({
         </DialogHeader>
 
         <div className="space-y-6 mt-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold">Project Visibility</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Control who can access your project
-                  </p>
-                </div>
-                <Badge variant={isPublic ? "default" : "secondary"} className="gap-1">
-                  {isPublic ? <Globe className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
-                  {isPublic ? "Public" : "Private"}
-                </Badge>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold">Project Visibility</h3>
+                <p className="text-sm text-muted-foreground">
+                  Control who can access your project
+                </p>
               </div>
+              <Badge variant={isPublic ? "default" : "secondary"} className="gap-1">
+                {isPublic ? <Globe className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
+                {isPublic ? "Public" : "Private"}
+              </Badge>
+            </div>
 
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="public-access"
-                  checked={isPublic}
-                  onCheckedChange={handlePublicToggle}
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="public-access"
+                checked={isPublic}
+                onCheckedChange={handlePublicToggle}
+              />
+              <Label htmlFor="public-access">
+                Make project publicly accessible
+              </Label>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-3">
+              <Label htmlFor="share-url">Share URL</Label>
+              {!isPublic && (
+                <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded border border-amber-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Lock className="w-4 h-4" />
+                    <span className="font-medium">Project is Private</span>
+                  </div>
+                  <p>This project is currently private. Enable "Make project publicly accessible" above to share it with others.</p>
+                </div>
+              )}
+              {error && (
+                <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
+                  {error}
+                </div>
+              )}
+              <div className="flex gap-2">
+                <Input
+                  id="share-url"
+                  value={isPublic ? getShareUrl() : "Make project public to generate share link"}
+                  readOnly
+                  className="flex-1"
+                  disabled={!isPublic}
                 />
-                <Label htmlFor="public-access">
-                  Make project publicly accessible
-                </Label>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-3">
-                <Label htmlFor="share-url">Share URL</Label>
-                {!isPublic && (
-                  <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded border border-amber-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Lock className="w-4 h-4" />
-                      <span className="font-medium">Project is Private</span>
-                    </div>
-                    <p>This project is currently private. Enable "Make project publicly accessible" above to share it with others.</p>
-                  </div>
-                )}
-                {error && (
-                  <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
-                    {error}
-                  </div>
-                )}
-                <div className="flex gap-2">
-                  <Input
-                    id="share-url"
-                    value={isPublic ? getShareUrl() : "Make project public to generate share link"}
-                    readOnly
-                    className="flex-1"
-                    disabled={!isPublic}
-                  />
-                  <Button
-                    variant="outline"
-                    onClick={() => copyToClipboard(getShareUrl(), "url")}
-                    className="gap-2"
-                    disabled={!isPublic}
-                  >
-                    {copied === "url" ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                    {copied === "url" ? "Copied!" : "Copy Link"}
-                  </Button>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-3">
-                <h4 className="font-medium">Share on Social Media</h4>
-                <div className="flex gap-2 flex-wrap">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => shareToSocial("twitter")}
-                    className="gap-2"
-                    disabled={!isPublic}
-                  >
-                    <Twitter className="w-4 h-4" />
-                    Twitter
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => shareToSocial("linkedin")}
-                    className="gap-2"
-                    disabled={!isPublic}
-                  >
-                    <Linkedin className="w-4 h-4" />
-                    LinkedIn
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => shareToSocial("email")}
-                    className="gap-2"
-                    disabled={!isPublic}
-                  >
-                    <Mail className="w-4 h-4" />
-                    Email
-                  </Button>
-                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => copyToClipboard(getShareUrl(), "url")}
+                  className="gap-2"
+                  disabled={!isPublic}
+                >
+                  {copied === "url" ? (
+                    <Check className="w-4 h-4" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
+                  {copied === "url" ? "Copied!" : "Copy Link"}
+                </Button>
               </div>
             </div>
+
+            <Separator />
+
+            <div className="space-y-3">
+              <h4 className="font-medium">Share on Social Media</h4>
+              <div className="flex gap-2 flex-wrap">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => shareToSocial("twitter")}
+                  className="gap-2"
+                  disabled={!isPublic}
+                >
+                  <Twitter className="w-4 h-4" />
+                  Twitter
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => shareToSocial("linkedin")}
+                  className="gap-2"
+                  disabled={!isPublic}
+                >
+                  <Linkedin className="w-4 h-4" />
+                  LinkedIn
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => shareToSocial("email")}
+                  className="gap-2"
+                  disabled={!isPublic}
+                >
+                  <Mail className="w-4 h-4" />
+                  Email
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

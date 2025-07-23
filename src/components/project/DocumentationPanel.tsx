@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { ShareDialog } from './ShareDialog';
 import {
   Plus,
@@ -28,7 +30,13 @@ import {
   Home,
   Moon,
   Sun,
-  ExternalLink
+  ExternalLink,
+  Clock,
+  Filter,
+  SortAsc,
+  Grid3X3,
+  List,
+  CheckCircle2
 } from 'lucide-react';
 import { FeedbackThread } from '@/components/ui/feedback-thread';
 import { mutate } from 'swr';
@@ -68,6 +76,10 @@ export function DocumentationPanel({
   const [editingTitle, setEditingTitle] = useState('');
   const [loadingFileId, setLoadingFileId] = useState<string | null>(null);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [sortBy, setSortBy] = useState<'name' | 'updated'>('updated');
+  const [filterType, setFilterType] = useState<'all' | 'documents' | 'canvases'>('all');
 
   // Get current file ID from URL
   const getCurrentFileId = () => {
@@ -90,13 +102,30 @@ export function DocumentationPanel({
 
   const isLoading = docsLoading || canvasLoading;
 
-  // Filter items based on search
-  const filteredDocs = documents.filter(doc =>
-    doc.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  const filteredCanvases = canvases.filter(canvas =>
-    canvas.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter and sort items
+  const filteredDocs = documents
+    .filter(doc => doc.title.toLowerCase().includes(searchTerm.toLowerCase()))
+    .sort((a, b) => {
+      if (sortBy === 'name') {
+        return a.title.localeCompare(b.title);
+      }
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    });
+
+  const filteredCanvases = canvases
+    .filter(canvas => canvas.title.toLowerCase().includes(searchTerm.toLowerCase()))
+    .sort((a, b) => {
+      if (sortBy === 'name') {
+        return a.title.localeCompare(b.title);
+      }
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    });
+
+  // Apply type filter
+  const displayDocs = filterType === 'canvases' ? [] : filteredDocs;
+  const displayCanvases = filterType === 'documents' ? [] : filteredCanvases;
+
+  const totalFiles = displayDocs.length + displayCanvases.length;
 
   const createNewDocument = async () => {
     try {
@@ -207,16 +236,41 @@ export function DocumentationPanel({
   };
 
   const exportProject = async () => {
+    setIsExporting(true);
     try {
+      // First try the project export endpoint
       const response = await fetch(`/api/projects/${projectId}/export`);
-      if (!response.ok) throw new Error('Failed to export project');
+
+      // If that fails, try a fallback approach
+      if (!response.ok) {
+        // Create a simple export with project data
+        const exportData = {
+          projectId,
+          projectName,
+          documents: documents.map(doc => ({ id: doc.id, title: doc.title, updatedAt: doc.updatedAt })),
+          canvases: canvases.map(canvas => ({ id: canvas.id, title: canvas.title, updatedAt: canvas.updatedAt })),
+          exportedAt: new Date().toISOString()
+        };
+
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `${projectName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}-export.json`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        return;
+      }
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.style.display = 'none';
       a.href = url;
-      a.download = `${projectName}-export.json`;
+      a.download = `${projectName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}-export.json`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -224,6 +278,8 @@ export function DocumentationPanel({
     } catch (error) {
       console.error('Error exporting project:', error);
       alert('Failed to export project. Please try again.');
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -233,21 +289,26 @@ export function DocumentationPanel({
     router.push(`/project/${projectId}/settings`);
   };
 
-  const handleFileClick = async (fileId: string, type: 'document' | 'canvas') => {
-    setLoadingFileId(fileId);
-    try {
-      const url = type === 'document'
-        ? `/project/${projectId}/document/${fileId}`
-        : `/project/${projectId}/canvas/${fileId}`;
-      router.push(url);
-    } finally {
-      // Clear loading after a short delay to show the animation
-      setTimeout(() => setLoadingFileId(null), 500);
-    }
-  };
+
 
   const goToDashboard = () => {
     router.push('/dashboard');
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+
+    if (diffInHours < 1) {
+      return 'Just now';
+    } else if (diffInHours < 24) {
+      return `${Math.floor(diffInHours)}h ago`;
+    } else if (diffInHours < 168) { // 7 days
+      return `${Math.floor(diffInHours / 24)}d ago`;
+    } else {
+      return date.toLocaleDateString();
+    }
   };
 
   const PanelContent = () => (
@@ -268,7 +329,10 @@ export function DocumentationPanel({
             <div className="w-5 h-5 rounded bg-primary/10 flex items-center justify-center">
               <FileText className="w-3 h-3 text-primary" />
             </div>
-            <h2 className="font-medium text-sm">Files</h2>
+            <div className="flex flex-col">
+              <h2 className="font-medium text-sm">Files</h2>
+              <span className="text-xs text-muted-foreground">{totalFiles} items</span>
+            </div>
           </div>
           <div className="flex items-center gap-1">
             <DropdownMenu>
@@ -299,9 +363,17 @@ export function DocumentationPanel({
                   <Share className="h-4 w-4" />
                   Share Project
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={exportProject} className="gap-2">
-                  <Download className="h-4 w-4" />
-                  Export Project
+                <DropdownMenuItem
+                  onClick={exportProject}
+                  className="gap-2"
+                  disabled={isExporting}
+                >
+                  {isExporting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
+                  {isExporting ? 'Exporting...' : 'Export Project'}
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator />
@@ -327,6 +399,72 @@ export function DocumentationPanel({
             className="pl-8 h-8 text-sm bg-background"
           />
         </div>
+
+        {/* Filters and View Controls */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs">
+                  <Filter className="h-3 w-3" />
+                  {filterType === 'all' ? 'All' : filterType === 'documents' ? 'Docs' : 'Canvas'}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem onClick={() => setFilterType('all')} className="gap-2">
+                  {filterType === 'all' && <CheckCircle2 className="h-4 w-4" />}
+                  All Files
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilterType('documents')} className="gap-2">
+                  {filterType === 'documents' && <CheckCircle2 className="h-4 w-4" />}
+                  Documents Only
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilterType('canvases')} className="gap-2">
+                  {filterType === 'canvases' && <CheckCircle2 className="h-4 w-4" />}
+                  Canvases Only
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs">
+                  <SortAsc className="h-3 w-3" />
+                  {sortBy === 'name' ? 'Name' : 'Updated'}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem onClick={() => setSortBy('updated')} className="gap-2">
+                  {sortBy === 'updated' && <CheckCircle2 className="h-4 w-4" />}
+                  Last Updated
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy('name')} className="gap-2">
+                  {sortBy === 'name' && <CheckCircle2 className="h-4 w-4" />}
+                  Name A-Z
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'ghost'}
+              size="sm"
+              className="h-7 w-7 p-0"
+              onClick={() => setViewMode('list')}
+            >
+              <List className="h-3 w-3" />
+            </Button>
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'ghost'}
+              size="sm"
+              className="h-7 w-7 p-0"
+              onClick={() => setViewMode('grid')}
+            >
+              <Grid3X3 className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* No Project Actions - Removed duplicate buttons */}
@@ -344,12 +482,15 @@ export function DocumentationPanel({
               ))}
             </div>
           ) : (
-            <div className="space-y-1">
+            <div className={cn(
+              viewMode === 'grid' ? 'grid grid-cols-2 gap-2' : 'space-y-1'
+            )}>
               {/* Documents */}
-              {filteredDocs.map((doc) => (
+              {displayDocs.map((doc) => (
                 <div key={doc.id} className={cn(
-                  "group flex items-center gap-2 p-2 rounded hover:bg-accent transition-colors",
-                  currentFileId === doc.id && "bg-primary/10 border border-primary/20"
+                  "group rounded hover:bg-accent transition-colors",
+                  currentFileId === doc.id && "bg-primary/10 border border-primary/20",
+                  viewMode === 'grid' ? 'p-3 flex flex-col gap-2' : 'flex items-center gap-2 p-2'
                 )}>
                   {editingId === doc.id ? (
                     <>
@@ -385,16 +526,28 @@ export function DocumentationPanel({
                             "h-4 w-4 flex-shrink-0",
                             currentFileId === doc.id ? "text-primary" : "text-blue-500"
                           )} />
-                          <Link
-                            href={`/project/${projectId}/document/${doc.id}`}
-                            className={cn(
-                              "text-sm truncate flex-1 text-left transition-colors",
-                              currentFileId === doc.id && "text-primary font-medium"
+                          <div className={cn(
+                            "flex-1",
+                            viewMode === 'grid' ? 'flex flex-col gap-1' : 'flex items-center gap-2'
+                          )}>
+                            <Link
+                              href={`/project/${projectId}/document/${doc.id}`}
+                              className={cn(
+                                "text-sm truncate text-left transition-colors",
+                                currentFileId === doc.id && "text-primary font-medium",
+                                viewMode === 'grid' ? 'font-medium' : 'flex-1'
+                              )}
+                              prefetch={true}
+                            >
+                              {doc.title}
+                            </Link>
+                            {viewMode === 'grid' && (
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Clock className="h-3 w-3" />
+                                {formatDate(doc.updatedAt)}
+                              </div>
                             )}
-                            prefetch={true}
-                          >
-                            {doc.title}
-                          </Link>
+                          </div>
                         </>
                       )}
                       <DropdownMenu>
@@ -442,10 +595,11 @@ export function DocumentationPanel({
               ))}
 
               {/* Canvases */}
-              {filteredCanvases.map((canvas) => (
+              {displayCanvases.map((canvas) => (
                 <div key={canvas.id} className={cn(
-                  "group flex items-center gap-2 p-2 rounded hover:bg-accent transition-colors",
-                  currentFileId === canvas.id && "bg-primary/10 border border-primary/20"
+                  "group rounded hover:bg-accent transition-colors",
+                  currentFileId === canvas.id && "bg-primary/10 border border-primary/20",
+                  viewMode === 'grid' ? 'p-3 flex flex-col gap-2' : 'flex items-center gap-2 p-2'
                 )}>
                   {editingId === canvas.id ? (
                     <>
@@ -481,16 +635,28 @@ export function DocumentationPanel({
                             "h-4 w-4 flex-shrink-0",
                             currentFileId === canvas.id ? "text-primary" : "text-purple-500"
                           )} />
-                          <Link
-                            href={`/project/${projectId}/canvas/${canvas.id}`}
-                            className={cn(
-                              "text-sm truncate flex-1 text-left transition-colors",
-                              currentFileId === canvas.id && "text-primary font-medium"
+                          <div className={cn(
+                            "flex-1",
+                            viewMode === 'grid' ? 'flex flex-col gap-1' : 'flex items-center gap-2'
+                          )}>
+                            <Link
+                              href={`/project/${projectId}/canvas/${canvas.id}`}
+                              className={cn(
+                                "text-sm truncate text-left transition-colors",
+                                currentFileId === canvas.id && "text-primary font-medium",
+                                viewMode === 'grid' ? 'font-medium' : 'flex-1'
+                              )}
+                              prefetch={true}
+                            >
+                              {canvas.title}
+                            </Link>
+                            {viewMode === 'grid' && (
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Clock className="h-3 w-3" />
+                                {formatDate(canvas.updatedAt)}
+                              </div>
                             )}
-                            prefetch={true}
-                          >
-                            {canvas.title}
-                          </Link>
+                          </div>
                         </>
                       )}
                       <DropdownMenu>
@@ -538,7 +704,7 @@ export function DocumentationPanel({
               ))}
 
               {/* Empty state */}
-              {!isLoading && filteredDocs.length === 0 && filteredCanvases.length === 0 && (
+              {!isLoading && displayDocs.length === 0 && displayCanvases.length === 0 && (
                 <div className="text-center py-8">
                   <p className="text-sm text-muted-foreground mb-3">
                     {searchTerm ? 'No files found' : 'No files yet'}
@@ -597,23 +763,37 @@ export function DocumentationPanel({
             size="sm"
             onClick={exportProject}
             className="flex-1 gap-2 h-8"
+            disabled={isExporting}
           >
-            <Download className="h-3 w-3" />
-            Export
+            {isExporting ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <Download className="h-3 w-3" />
+            )}
+            {isExporting ? 'Exporting...' : 'Export'}
           </Button>
         </div>
 
-        {/* Project Link */}
-        <Link href={`/project/${projectId}`} prefetch={true} className="w-full">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full gap-2 h-8 text-xs"
-          >
-            <ExternalLink className="h-3 w-3" />
-            Open Project View
-          </Button>
-        </Link>
+        {/* Project Info */}
+        <div className="p-3 bg-muted/50 rounded-lg">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-xs font-medium text-muted-foreground">PROJECT</h4>
+            <Badge variant="secondary" className="text-xs">
+              {totalFiles} files
+            </Badge>
+          </div>
+          <p className="text-sm font-medium truncate mb-2">{projectName}</p>
+          <Link href={`/project/${projectId}`} prefetch={true} className="w-full">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full gap-2 h-7 text-xs"
+            >
+              <ExternalLink className="h-3 w-3" />
+              Open Project View
+            </Button>
+          </Link>
+        </div>
 
         {/* Feedback Thread */}
         <div className="pt-2">
