@@ -15,6 +15,7 @@ import {
 
 // Use optimized lazy loading for better performance
 import { LazyExcalidrawCanvas } from '@/components/optimized/LazyExcalidrawCanvas';
+import { useApi } from '@/hooks/useApi';
 
 interface FullScreenCanvasEditorProps {
   projectId: string;
@@ -28,6 +29,11 @@ export function FullScreenCanvasEditor({
   projectName,
 }: FullScreenCanvasEditorProps) {
   const router = useRouter();
+
+  // Fetch canvas data to get title
+  const { data: canvas } = useApi(`/api/canvas/${canvasId}`);
+
+  // Set document title
   const [showDocumentPanel, setShowDocumentPanel] = useState(false);
   const [saving, setSaving] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -111,38 +117,34 @@ export function FullScreenCanvasEditor({
             variant="outline"
             size="sm"
             onClick={() => setShowDocumentPanel(!showDocumentPanel)}
-            className="gap-2"
+            title={showDocumentPanel ? 'Hide Files' : 'Show Files'}
           >
             <PanelLeftOpen className="w-4 h-4" />
-            {showDocumentPanel ? 'Hide' : 'Show'} Files
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => router.push(`/project/${projectId}/split?left=${canvasId}&leftType=canvas`)}
-            className="gap-2"
+            title="Split View"
           >
             <SplitSquareHorizontal className="w-4 h-4" />
-            Split View
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={handleSave}
             disabled={saving}
-            className="gap-2"
+            title={saving ? 'Saving...' : 'Save'}
           >
             <Save className="w-4 h-4" />
-            {saving ? 'Saving...' : 'Save'}
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={toggleFullScreen}
-            className="gap-2"
+            title={isFullScreen ? 'Exit Full Screen' : 'Full Screen'}
           >
             {isFullScreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
-            {isFullScreen ? 'Exit' : 'Full Screen'}
           </Button>
         </div>
       </div>

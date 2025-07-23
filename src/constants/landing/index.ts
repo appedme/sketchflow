@@ -4,7 +4,7 @@ export const LANDING_CONTENT = {
     badge: "BETA",
     title: "Sketch. Document. Collaborate.",
     subtitle: "All in one place",
-    description: " "||"Transform your ideas into visual stories with powerful diagramming and seamless documentation. Community sharing, commenting, and blog publishing features coming soon.",
+    description: " " || "Transform your ideas into visual stories with powerful diagramming and seamless documentation. Community sharing, commenting, and blog publishing features coming soon.",
     announcement: "Welcome to Sketchflow 👋",
     cta: {
       primary: "Start Creating",
@@ -65,6 +65,26 @@ export const LANDING_CONTENT = {
       title: "Personal Organization",
       description: "Organize personal goals, create habit trackers, and visualize life planning with customizable templates.",
       icon: "User"
+    },
+    {
+      title: "Photo Gallery",
+      description: "Create visual galleries and photo collections with drag-and-drop functionality for organizing images.",
+      icon: "Image"
+    },
+    {
+      title: "Kanban Boards",
+      description: "Organize tasks and workflows with visual Kanban boards for agile project management and productivity.",
+      icon: "Kanban"
+    },
+    {
+      title: "System Design",
+      description: "Design complex system architectures, database schemas, and technical infrastructure diagrams.",
+      icon: "Network"
+    },
+    {
+      title: "Kids Drawing",
+      description: "Fun and creative drawing space for children with colorful tools and simple interface for artistic expression.",
+      icon: "Paintbrush"
     }
   ],
   navigation: {

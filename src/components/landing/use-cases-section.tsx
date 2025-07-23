@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Code, Building, GraduationCap, Calendar, Palette, Search, PenTool, User } from "lucide-react";
+import { Code, Building, GraduationCap, Calendar, Palette, Search, PenTool, User, Image, FileImage, Kanban, Network, Paintbrush } from "lucide-react";
 import { LANDING_CONTENT } from "@/constants/landing";
-import { cn } from "@/lib/utils";
+
 import { BorderBeam } from "../magicui/border-beam";
 
 const iconMap = {
@@ -13,6 +13,11 @@ const iconMap = {
   Search,
   PenTool,
   User,
+  Image,
+  FileImage,
+  Kanban,
+  Network,
+  Paintbrush,
 } as const;
 
 export function UseCasesSection() {

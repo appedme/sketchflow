@@ -11,6 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ShareDialog } from './ShareDialog';
+import { ProjectSettingsModal } from './ProjectSettingsModal';
 import {
   ResizableHandle,
   ResizablePanel,
@@ -89,6 +90,7 @@ export function DocumentationPanel({
   const [filterType, setFilterType] = useState<'all' | 'documents' | 'canvases'>('all');
   const [isSavingAll, setIsSavingAll] = useState(false);
   const [isRevalidating, setIsRevalidating] = useState(false);
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
 
   // Get current file ID from URL
   const getCurrentFileId = () => {
@@ -108,6 +110,7 @@ export function DocumentationPanel({
   const { data: canvases = [], isLoading: canvasLoading } = useApi<Canvas[]>(
     `/api/projects/${projectId}/canvases`
   );
+  const { data: project } = useApi(`/api/projects/${projectId}`);
 
   const isLoading = docsLoading || canvasLoading;
 
@@ -244,6 +247,14 @@ export function DocumentationPanel({
     setShareDialogOpen(true);
   };
 
+  const handleShareDialogClose = (open: boolean) => {
+    setShareDialogOpen(open);
+    if (!open) {
+      // Refresh project data when dialog closes to get updated visibility
+      mutate(`/api/projects/${projectId}`);
+    }
+  };
+
   const exportProject = async () => {
     setIsExporting(true);
     try {
@@ -295,7 +306,7 @@ export function DocumentationPanel({
 
 
   const openProjectSettings = () => {
-    router.push(`/project/${projectId}/settings`);
+    setSettingsModalOpen(true);
   };
 
 
@@ -954,7 +965,14 @@ export function DocumentationPanel({
           projectId={projectId}
           projectName={projectName}
           isOpen={shareDialogOpen}
-          onOpenChange={setShareDialogOpen}
+          onOpenChange={handleShareDialogClose}
+          projectVisibility={project?.visibility}
+        />
+        <ProjectSettingsModal
+          projectId={projectId}
+          projectName={projectName}
+          isOpen={settingsModalOpen}
+          onOpenChange={setSettingsModalOpen}
         />
       </>
     );
@@ -967,7 +985,14 @@ export function DocumentationPanel({
         projectId={projectId}
         projectName={projectName}
         isOpen={shareDialogOpen}
-        onOpenChange={setShareDialogOpen}
+        onOpenChange={handleShareDialogClose}
+        projectVisibility={project?.visibility}
+      />
+      <ProjectSettingsModal
+        projectId={projectId}
+        projectName={projectName}
+        isOpen={settingsModalOpen}
+        onOpenChange={setSettingsModalOpen}
       />
     </>
   );
