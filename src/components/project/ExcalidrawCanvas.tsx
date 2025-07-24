@@ -30,7 +30,7 @@ import { OpenMojiService, OpenMojiIcon } from '@/lib/services/openmoji';
 import { PexelsSidebar } from '@/components/canvas/PexelsSidebar';
 import { PexelsService, PexelsPhoto } from '@/lib/services/pexels';
 import Image from "next/image";
-import { FileText, PencilRuler as CanvasIcon, Smile, Camera } from 'lucide-react';
+import { FileText, PencilRuler as CanvasIcon, Smile, Camera, FileTextIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
 interface ExcalidrawCanvasProps {
@@ -107,12 +107,25 @@ function ExcalidrawCanvasContent({
   }, []);
 
   // Render loading state
-  if (isLoading) {
+   if (isLoading) {
     return (
-      <div className="h-full flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading canvas...</p>
+      <div className="h-full flex items-center justify-center bg-gradient-to-br from-background via-background/95 to-muted/20">
+        <div className="text-center space-y-6 p-8">
+          <div className="relative">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary/20 border-t-primary mx-auto"></div>
+            <div className="absolute inset-0 animate-pulse rounded-full h-12 w-12 border-2 border-primary/10 mx-auto"></div>
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-foreground">Loading Canvas</h3>
+            <p className="text-sm text-muted-foreground max-w-xs">
+              Preparing your creative workspace...
+            </p>
+          </div>
+          <div className="flex items-center justify-center space-x-1">
+            <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+            <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+            <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"></div>
+          </div>
         </div>
       </div>
     );
@@ -152,6 +165,19 @@ function ExcalidrawCanvasContent({
           <MainMenu.DefaultItems.SaveToActiveFile />
           <MainMenu.DefaultItems.LoadScene />
           <MainMenu.DefaultItems.Export />
+          <MainMenu.Item
+            icon={<FileTextIcon size={14} />}
+            onClick={() => {
+              if (excalidrawAPIRef.current) {
+                excalidrawAPIRef.current.updateScene({
+                  elements: [],
+                });
+              }
+            }}
+          >
+            Clear Canvas
+          </MainMenu.Item>
+
           <MainMenu.Separator />
           <MainMenu.DefaultItems.Help />
           <MainMenu.DefaultItems.ToggleTheme />
