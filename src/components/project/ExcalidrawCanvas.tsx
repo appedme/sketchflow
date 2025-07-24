@@ -7,8 +7,6 @@ import {
   WelcomeScreen,
   Sidebar,
   convertToExcalidrawElements,
-  serializeAsJSON,
-  loadSceneOrLibraryFromBlob,
   exportToCanvas,
   exportToSvg,
   exportToBlob
@@ -64,7 +62,7 @@ function ExcalidrawCanvasContent({
   const pexelsService = useMemo(() => PexelsService.getInstance(), []);
 
   const { theme } = useTheme();
-  
+
   const {
     elements,
     appState,
@@ -85,7 +83,7 @@ function ExcalidrawCanvasContent({
   ) => {
     // Don't update if in read-only mode or public mode
     if (isReadOnly || shareToken) return;
-    
+
     // Only update if there are actual changes to prevent infinite loops
     if (JSON.stringify(newElements) !== JSON.stringify(elements)) {
       updateElements(newElements);
@@ -151,17 +149,16 @@ function ExcalidrawCanvasContent({
         <MainMenu>
           <MainMenu.DefaultItems.ClearCanvas />
           <MainMenu.DefaultItems.SaveAsImage />
+          <MainMenu.DefaultItems.SaveToActiveFile />
+          <MainMenu.DefaultItems.LoadScene />
+          <MainMenu.DefaultItems.Export />
+          <MainMenu.Separator />
           <MainMenu.DefaultItems.Help />
-          {!isReadOnly && !shareToken && (
-            <>
-              <MainMenu.DefaultItems.LoadScene />
-              <MainMenu.DefaultItems.SaveScene />
-            </>
-          )}
+          <MainMenu.DefaultItems.ToggleTheme />
         </MainMenu>
-        
+
         <WelcomeScreen>
-          <CanvasWelcomeScreen 
+          <CanvasWelcomeScreen
             projectName={projectName}
             isReadOnly={isReadOnly || !!shareToken}
           />
@@ -192,7 +189,7 @@ function ExcalidrawCanvasContent({
                       textAlign: "center" as const,
                       verticalAlign: "middle" as const,
                     };
-                    
+
                     const elements = convertToExcalidrawElements([newElement]);
                     excalidrawAPIRef.current.updateScene({
                       elements: [...(excalidrawAPIRef.current.getSceneElements() || []), ...elements],
@@ -219,9 +216,9 @@ function ExcalidrawCanvasContent({
                           canvas.width = img.width;
                           canvas.height = img.height;
                           ctx.drawImage(img, 0, 0);
-                          
+
                           const dataURL = canvas.toDataURL('image/png');
-                          
+
                           const newElement = {
                             type: "image" as const,
                             x: 100,
@@ -230,7 +227,7 @@ function ExcalidrawCanvasContent({
                             height: Math.min(img.height, 300),
                             fileId: `pexels-${photo.id}`,
                           };
-                          
+
                           const elements = convertToExcalidrawElements([newElement]);
                           const files = {
                             [`pexels-${photo.id}`]: {
@@ -240,7 +237,7 @@ function ExcalidrawCanvasContent({
                               created: Date.now(),
                             }
                           };
-                          
+
                           excalidrawAPIRef.current?.updateScene({
                             elements: [...(excalidrawAPIRef.current.getSceneElements() || []), ...elements],
                             files: {
@@ -281,8 +278,8 @@ function ExcalidrawCanvasContent({
 
 export function ExcalidrawCanvas(props: ExcalidrawCanvasProps) {
   return (
-    <CanvasProvider 
-      projectId={props.projectId} 
+    <CanvasProvider
+      projectId={props.projectId}
       canvasId={props.canvasId}
       shareToken={props.shareToken}
     >

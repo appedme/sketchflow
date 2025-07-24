@@ -28,7 +28,7 @@ export function HeroSection() {
           preload="auto"
           className="w-full h-full object-cover"
         >
-          <source src="/bg1.mp4" type="video/mp4" />
+          <source src="https://cdn.jsdelivr.net/gh/free-whiteboard-online/Free-Erasorio-Alternative-for-Collaborative-Design@4bf1732dd171958526714c0e772ccfbd301e53d3/uploads/2025-07-22T09-05-38-977Z-6pihbnj2j.png" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
         {/* Dark overlay for better text readability */}
