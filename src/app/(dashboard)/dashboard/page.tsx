@@ -115,14 +115,18 @@ export default function DashboardPage() {
     return null;
   }
 
-  // Generate random project names
-  const generateRandomName = () => {
-    const adjectives = ['Creative', 'Innovative', 'Dynamic', 'Modern', 'Smart', 'Bold', 'Fresh', 'Bright', 'Quick', 'Cool'];
-    const nouns = ['Project', 'Canvas', 'Workspace', 'Studio', 'Lab', 'Hub', 'Space', 'Board', 'Flow', 'Sketch'];
+  // Generate project names using unique name generator (client-side version)
+  const generateProjectName = () => {
+    // Using the same dictionaries as the server-side version
+    const adjectives = ['Brave', 'Clever', 'Bright', 'Swift', 'Bold', 'Gentle', 'Wise', 'Kind', 'Strong', 'Quick', 'Happy', 'Calm', 'Fresh', 'Smart', 'Cool'];
+    const colors = ['Red', 'Blue', 'Green', 'Yellow', 'Purple', 'Orange', 'Pink', 'Brown', 'Black', 'White', 'Gray', 'Silver', 'Gold', 'Copper', 'Bronze'];
+    const animals = ['Tiger', 'Lion', 'Eagle', 'Wolf', 'Bear', 'Fox', 'Deer', 'Rabbit', 'Elephant', 'Dolphin', 'Whale', 'Shark', 'Hawk', 'Owl', 'Panda'];
+
     const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-    const noun = nouns[Math.floor(Math.random() * nouns.length)];
-    const number = Math.floor(Math.random() * 1000) + 1;
-    return `${adjective} ${noun} ${number}`;
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const animal = animals[Math.floor(Math.random() * animals.length)];
+
+    return `${adjective} ${color} ${animal}`;
   };
 
   // Handle instant project creation
@@ -133,7 +137,7 @@ export default function DashboardPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: generateRandomName(),
+          name: generateProjectName(),
           description: 'A new project ready for your ideas',
           category: 'general',
           visibility: 'private',
