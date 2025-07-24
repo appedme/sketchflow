@@ -33,3 +33,6 @@ create a repo cdn viewer toll show all github repo files with copy jsdelivr cdn 
 
 add twitter tweets as the what users say section
 
+
+
+replit like adjustable ui no need to. catch data just always keep the files loaded but invisible on click from the docs panel make it visible and load the data in the canvas or document
