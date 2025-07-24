@@ -1,5 +1,5 @@
 import { uniqueNamesGenerator, Config, adjectives, colors, animals, names, starWars } from 'unique-names-generator';
-import { getDb } from '@/lib/db';
+import { getDb } from '@/lib/db/connection';
 import { projects, documents, canvases } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
@@ -29,15 +29,26 @@ const canvasConfig: Config = {
  * Generate a unique project ID with database uniqueness check
  */
 export async function generateUniqueProjectId(): Promise<string> {
+    // In development, if database is not configured, return simple ID with random suffix
+    if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+        try {
+            getDb(); // Test if database is available
+        } catch (error) {
+            console.warn('Database not available in development, using simple ID generation');
+            const id = uniqueNamesGenerator(projectConfig);
+            return `${id}-${Math.random().toString(36).substring(2, 8)}`;
+        }
+    }
+
     let attempts = 0;
     const maxAttempts = 10;
-    const db = getDb();
 
     while (attempts < maxAttempts) {
         const id = uniqueNamesGenerator(projectConfig);
 
         try {
             // Check if ID already exists in database
+            const db = getDb();
             const existing = await db
                 .select({ id: projects.id })
                 .from(projects)
@@ -49,7 +60,7 @@ export async function generateUniqueProjectId(): Promise<string> {
             }
         } catch (error) {
             console.error('Error checking project ID uniqueness:', error);
-            // If database check fails, add random suffix and return
+            // If database check fails (e.g., in development), add random suffix and return
             return `${id}-${Math.random().toString(36).substring(2, 8)}`;
         }
 
@@ -65,6 +76,17 @@ export async function generateUniqueProjectId(): Promise<string> {
  * Generate a unique document ID with database uniqueness check
  */
 export async function generateUniqueDocumentId(): Promise<string> {
+    // In development, if database is not configured, return simple ID with random suffix
+    if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+        try {
+            getDb(); // Test if database is available
+        } catch (error) {
+            console.warn('Database not available in development, using simple ID generation');
+            const id = uniqueNamesGenerator(documentConfig);
+            return `${id}-${Math.random().toString(36).substring(2, 8)}`;
+        }
+    }
+
     let attempts = 0;
     const maxAttempts = 10;
 
@@ -73,6 +95,7 @@ export async function generateUniqueDocumentId(): Promise<string> {
 
         try {
             // Check if ID already exists in database
+            const db = getDb();
             const existing = await db
                 .select({ id: documents.id })
                 .from(documents)
@@ -84,7 +107,7 @@ export async function generateUniqueDocumentId(): Promise<string> {
             }
         } catch (error) {
             console.error('Error checking document ID uniqueness:', error);
-            // If database check fails, add random suffix and return
+            // If database check fails (e.g., in development), add random suffix and return
             return `${id}-${Math.random().toString(36).substring(2, 8)}`;
         }
 
@@ -100,6 +123,17 @@ export async function generateUniqueDocumentId(): Promise<string> {
  * Generate a unique canvas ID with database uniqueness check
  */
 export async function generateUniqueCanvasId(): Promise<string> {
+    // In development, if database is not configured, return simple ID with random suffix
+    if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+        try {
+            getDb(); // Test if database is available
+        } catch (error) {
+            console.warn('Database not available in development, using simple ID generation');
+            const id = uniqueNamesGenerator(canvasConfig);
+            return `${id}-${Math.random().toString(36).substring(2, 8)}`;
+        }
+    }
+
     let attempts = 0;
     const maxAttempts = 10;
 
@@ -108,6 +142,7 @@ export async function generateUniqueCanvasId(): Promise<string> {
 
         try {
             // Check if ID already exists in database
+            const db = getDb();
             const existing = await db
                 .select({ id: canvases.id })
                 .from(canvases)
@@ -119,7 +154,7 @@ export async function generateUniqueCanvasId(): Promise<string> {
             }
         } catch (error) {
             console.error('Error checking canvas ID uniqueness:', error);
-            // If database check fails, add random suffix and return
+            // If database check fails (e.g., in development), add random suffix and return
             return `${id}-${Math.random().toString(36).substring(2, 8)}`;
         }
 
