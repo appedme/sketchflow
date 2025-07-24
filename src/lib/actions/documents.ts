@@ -5,6 +5,7 @@ import { nanoid } from 'nanoid';
 import { getDb } from '@/lib/db/connection';
 import { documents, projects, projectCollaborators, type NewDocument } from '@/lib/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
+import { generateUniqueDocumentId } from '@/lib/utils/id-generator';
 
 export async function createDocument(projectId: string, title: string, content?: any) {
   const userId = await getCurrentUserId();
@@ -32,7 +33,7 @@ export async function createDocument(projectId: string, title: string, content?:
       throw new Error('Insufficient permissions');
     }
 
-    const documentId = nanoid();
+    const documentId = await generateUniqueDocumentId();
     const defaultContent = content || [
       {
         type: 'h1',

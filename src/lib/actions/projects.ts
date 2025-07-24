@@ -6,6 +6,7 @@ import { nanoid } from 'nanoid';
 import { getDb } from '@/lib/db/connection';
 import { projects, templates, projectCollaborators, type NewProject } from '@/lib/db/schema';
 import { eq, and, desc, count, gte, sql } from 'drizzle-orm';
+import { generateUniqueProjectId } from '@/lib/utils/id-generator';
 
 // Server action for form submissions (with FormData)
 export async function createProject(formData: FormData) {
@@ -34,7 +35,7 @@ export async function createProject(formData: FormData) {
       throw new Error('Missing required fields');
     }
 
-    const projectId = nanoid();
+    const projectId = await generateUniqueProjectId();
 
     const newProject: NewProject = {
       id: projectId,
@@ -100,7 +101,7 @@ export async function createProjectFromData(data: {
       throw new Error('Missing required fields');
     }
 
-    const projectId = nanoid();
+    const projectId = await generateUniqueProjectId();
 
     const newProject: NewProject = {
       id: projectId,

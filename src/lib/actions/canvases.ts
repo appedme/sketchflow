@@ -5,6 +5,7 @@ import { nanoid } from 'nanoid';
 import { getDb } from '@/lib/db/connection';
 import { canvases, projects, projectCollaborators, type NewCanvas } from '@/lib/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
+import { generateUniqueCanvasId } from '@/lib/utils/id-generator';
 
 export async function createCanvas(projectId: string, title: string, elements?: any, appState?: any, files?: any, userId?: string) {
   const authUserId = await getCurrentUserId();
@@ -33,7 +34,7 @@ export async function createCanvas(projectId: string, title: string, elements?: 
       throw new Error('Insufficient permissions');
     }
 
-    const canvasId = nanoid();
+    const canvasId = await generateUniqueCanvasId();
     const defaultElements = elements || [];
     const defaultAppState = appState || {
       viewBackgroundColor: '#ffffff',
