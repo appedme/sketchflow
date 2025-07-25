@@ -7,7 +7,7 @@ const exampleTweets = [
 ];
 
 function TweetGridDemo() {
-    return <TweetGrid tweets={exampleTweets} columns={2} spacing="md" />;
+    return <TweetGrid tweets={exampleTweets} columns={3} spacing="md" />;
 }
 
 export { TweetGridDemo };
