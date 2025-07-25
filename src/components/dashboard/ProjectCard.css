@@ -388,6 +388,136 @@
   margin-top: calc(var(--project-card-spacing) * 2);
 }
 
+/* Public Project Styling */
+.project-card--public {
+  border-color: var(--project-card-public-color);
+  background: linear-gradient(135deg, var(--project-card-bg) 0%, color-mix(in srgb, var(--project-card-public-color) 5%, transparent) 100%);
+}
+
+.project-card--public:hover {
+  border-color: var(--project-card-public-hover);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--project-card-public-color) 15%, transparent);
+}
+
+/* Active Project Styling */
+.project-card--active {
+  position: relative;
+}
+
+.project-card--active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--project-card-active-color);
+  border-radius: var(--project-card-radius) 0 0 var(--project-card-radius);
+}
+
+/* Status Indicators */
+.project-card__status-indicators {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--project-card-spacing));
+  align-items: flex-end;
+}
+
+/* Visibility Badge */
+.project-card__visibility-badge {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--project-card-spacing));
+  background: var(--project-card-stats-bg);
+  padding: calc(var(--project-card-spacing)) calc(var(--project-card-spacing) * 2);
+  border-radius: calc(var(--project-card-radius) / 2);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--project-card-stats-text);
+  border: 1px solid var(--project-card-border);
+  transition: var(--project-card-transition);
+}
+
+.project-card__visibility-badge--public {
+  background: color-mix(in srgb, var(--project-card-public-color) 10%, transparent);
+  border-color: var(--project-card-public-color);
+  color: var(--project-card-public-hover);
+}
+
+.project-card__visibility-badge--compact {
+  padding: calc(var(--project-card-spacing) / 2) calc(var(--project-card-spacing));
+  font-size: 0.6875rem;
+}
+
+.project-card__visibility-text {
+  text-transform: capitalize;
+  font-weight: 500;
+}
+
+.project-card__visibility-icon {
+  width: 12px;
+  height: 12px;
+}
+
+/* Status Badge */
+.project-card__status-badge {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--project-card-spacing));
+  background: var(--project-card-stats-bg);
+  padding: calc(var(--project-card-spacing)) calc(var(--project-card-spacing) * 2);
+  border-radius: calc(var(--project-card-radius) / 2);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--project-card-stats-text);
+  border: 1px solid var(--project-card-border);
+  transition: var(--project-card-transition);
+}
+
+.project-card__status-badge--compact {
+  padding: calc(var(--project-card-spacing) / 2) calc(var(--project-card-spacing));
+  font-size: 0.6875rem;
+}
+
+.project-card__status-badge--active {
+  background: color-mix(in srgb, var(--project-card-active-color) 10%, transparent);
+  border-color: var(--project-card-active-color);
+  color: var(--project-card-public-hover);
+}
+
+.project-card__status-badge--inactive {
+  background: rgba(156, 163, 175, 0.1);
+  border-color: #9ca3af;
+  color: #6b7280;
+}
+
+.project-card__status-badge--draft {
+  background: rgba(251, 191, 36, 0.1);
+  border-color: #fbbf24;
+  color: #d97706;
+}
+
+.project-card__status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.project-card__status-text {
+  text-transform: capitalize;
+  font-weight: 500;
+}
+
+/* Header Layout Updates */
+.project-card__header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: calc(var(--project-card-spacing) * 2);
+  gap: calc(var(--project-card-spacing) * 2);
+}
+
 /* Loading States */
 .project-card--loading {
   opacity: 0.6;
@@ -401,9 +531,12 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
@@ -415,11 +548,11 @@
     height: auto;
     min-height: 240px;
   }
-  
+
   .project-card__form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .project-card__tags-input {
     flex-direction: column;
   }

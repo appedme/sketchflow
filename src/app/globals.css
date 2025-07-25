@@ -76,6 +76,9 @@
   --project-card-radius: var(--radius);
   --project-card-spacing: var(--spacing);
   --project-card-transition: all 0.2s ease-in-out;
+  --project-card-public-color: #10b981;
+  --project-card-public-hover: #059669;
+  --project-card-active-color: #10b981;
 }
 
 .dark {
@@ -112,20 +115,11 @@
   --project-card-tag-text: var(--secondary-foreground);
   --project-card-stats-bg: var(--muted);
   --project-card-stats-text: var(--muted-foreground);
+  --project-card-public-color: #10b981;
+  --project-card-public-hover: #059669;
+  --project-card-active-color: #10b981;
 
-  /* Dark mode project card overrides */
-  --project-card-bg: var(--card);
-  --project-card-border: var(--border);
-  --project-card-hover-bg: oklch(0.2603 0 0);
-  --project-card-hover-border: var(--ring);
-  --project-card-text: var(--card-foreground);
-  --project-card-text-muted: var(--muted-foreground);
-  --project-card-avatar-bg: var(--primary);
-  --project-card-avatar-text: var(--primary-foreground);
-  --project-card-tag-bg: var(--secondary);
-  --project-card-tag-text: var(--secondary-foreground);
-  --project-card-stats-bg: var(--muted);
-  --project-card-stats-text: var(--muted-foreground);
+
   --chart-1: oklch(0.8003 0.1821 151.7110);
   --chart-2: oklch(0.7137 0.1434 254.6240);
   --chart-3: oklch(0.7090 0.1592 293.5412);

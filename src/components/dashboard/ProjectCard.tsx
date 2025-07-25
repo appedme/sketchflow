@@ -41,13 +41,13 @@ import {
 import Link from "next/link";
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { 
-    useUpdateProject, 
-    useDeleteProject, 
-    useDuplicateProject, 
+import {
+    useUpdateProject,
+    useDeleteProject,
+    useDuplicateProject,
     useToggleFavorite,
     type Project,
-    type UpdateProjectData 
+    type UpdateProjectData
 } from '@/hooks/useProjects';
 import './ProjectCard.css';
 
@@ -85,7 +85,7 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                 visibility: editedVisibility,
                 tags: editedTags,
             };
-            
+
             await updateProject.trigger({ projectId: project.id, data: updateData });
             setIsEditing(false);
             onUpdate?.();
@@ -116,9 +116,9 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
 
     const handleToggleFavorite = async () => {
         try {
-            await toggleFavorite.trigger({ 
-                projectId: project.id, 
-                isFavorite: !project.isFavorite 
+            await toggleFavorite.trigger({
+                projectId: project.id,
+                isFavorite: !project.isFavorite
             });
             onUpdate?.();
         } catch (error) {
@@ -166,8 +166,8 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
     };
 
     const getVisibilityIcon = () => {
-        return project.visibility === 'public' ? 
-            <Globe className="project-card__visibility-icon" /> : 
+        return project.visibility === 'public' ?
+            <Globe className="project-card__visibility-icon" /> :
             <Lock className="project-card__visibility-icon" />;
     };
 
@@ -179,12 +179,16 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
     if (viewMode === 'list') {
         return (
             <>
-                <Card className="project-card project-card--list">
+                <Card className={cn(
+                    "project-card project-card--list",
+                    project.visibility === 'public' && "project-card--public",
+                    project.status === 'active' && "project-card--active"
+                )}>
                     <CardContent className="project-card__content project-card__content--list">
                         <div className="project-card__main">
                             <div className="project-card__header">
                                 <div className="project-card__title-section">
-                                    <Link 
+                                    <Link
                                         href={`/project/${project.id}`}
                                         className="project-card__title-link"
                                     >
@@ -193,10 +197,29 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                     <div className="project-card__meta">
                                         {getCategoryIcon(project.category)}
                                         <span className="project-card__category">{project.category}</span>
-                                        {getVisibilityIcon()}
+
+                                        {/* Visibility Badge - Always Visible */}
+                                        <div className={cn(
+                                            "project-card__visibility-badge project-card__visibility-badge--compact",
+                                            project.visibility === 'public' && "project-card__visibility-badge--public"
+                                        )}>
+                                            {getVisibilityIcon()}
+                                            <span className="project-card__visibility-text">{project.visibility}</span>
+                                        </div>
+
+                                        {/* Status Badge - Always Visible */}
+                                        {project.status && (
+                                            <div className={cn(
+                                                "project-card__status-badge project-card__status-badge--compact",
+                                                `project-card__status-badge--${project.status}`
+                                            )}>
+                                                <div className="project-card__status-dot" />
+                                                <span className="project-card__status-text">{project.status}</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
-                                
+
                                 <div className="project-card__actions">
                                     <Button
                                         variant="ghost"
@@ -204,12 +227,12 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                         onClick={handleToggleFavorite}
                                         className="project-card__favorite-btn"
                                     >
-                                        {project.isFavorite ? 
-                                            <Star className="project-card__star project-card__star--filled" /> : 
+                                        {project.isFavorite ?
+                                            <Star className="project-card__star project-card__star--filled" /> :
                                             <StarOff className="project-card__star" />
                                         }
                                     </Button>
-                                    
+
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
                                             <Button variant="ghost" size="sm" className="project-card__menu-btn">
@@ -238,23 +261,23 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                     </DropdownMenu>
                                 </div>
                             </div>
-                            
+
                             {project.description && (
                                 <p className="project-card__description">{project.description}</p>
                             )}
-                            
+
                             <div className="project-card__footer">
                                 <div className="project-card__stats">
                                     <div className="project-card__stat">
                                         <Eye className="project-card__stat-icon" />
-                                        <span className="project-card__stat-text">{project.viewCount || 0}</span>
+                                        <span className="project-card__stat-text">{project.viewCount || 0} views</span>
                                     </div>
                                     <div className="project-card__stat">
                                         <Clock className="project-card__stat-icon" />
                                         <span className="project-card__stat-text">{formatLastActivity()}</span>
                                     </div>
                                 </div>
-                                
+
                                 {project.tags && project.tags.length > 0 && (
                                     <div className="project-card__tags">
                                         {project.tags.slice(0, 3).map((tag) => (
@@ -273,9 +296,9 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                         </div>
                     </CardContent>
                 </Card>
-                
+
                 {isLoading && <ProjectLoadingOverlay isLoading={isLoading} />}
-                
+
                 <Dialog open={isEditing} onOpenChange={setIsEditing}>
                     <DialogContent className="project-card__edit-dialog">
                         <DialogHeader>
@@ -291,7 +314,7 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                     className="project-card__form-input"
                                 />
                             </div>
-                            
+
                             <div className="project-card__form-group">
                                 <Label htmlFor="description">Description</Label>
                                 <Textarea
@@ -302,7 +325,7 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                     rows={3}
                                 />
                             </div>
-                            
+
                             <div className="project-card__form-row">
                                 <div className="project-card__form-group">
                                     <Label htmlFor="category">Category</Label>
@@ -319,7 +342,7 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                         </SelectContent>
                                     </Select>
                                 </div>
-                                
+
                                 <div className="project-card__form-group">
                                     <Label htmlFor="visibility">Visibility</Label>
                                     <Select value={editedVisibility} onValueChange={setEditedVisibility}>
@@ -333,7 +356,7 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                     </Select>
                                 </div>
                             </div>
-                            
+
                             <div className="project-card__form-group">
                                 <Label>Tags</Label>
                                 <div className="project-card__tags-input">
@@ -354,7 +377,7 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                         <Plus className="project-card__add-tag-icon" />
                                     </Button>
                                 </div>
-                                
+
                                 {editedTags.length > 0 && (
                                     <div className="project-card__current-tags">
                                         {editedTags.map((tag) => (
@@ -371,7 +394,7 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                     </div>
                                 )}
                             </div>
-                            
+
                             <div className="project-card__form-actions">
                                 <Button variant="outline" onClick={handleCancel}>
                                     Cancel
@@ -390,14 +413,40 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
     // Grid view (default)
     return (
         <>
-            <Card className="project-card project-card--grid">
+            <Card className={cn(
+                "project-card project-card--grid",
+                project.visibility === 'public' && "project-card--public",
+                project.status === 'active' && "project-card--active"
+            )}>
                 <CardHeader className="project-card__header">
                     <div className="project-card__header-top">
                         <div className="project-card__category-badge">
                             {getCategoryIcon(project.category)}
                             <span className="project-card__category-text">{project.category}</span>
                         </div>
-                        
+
+                        <div className="project-card__status-indicators">
+                            {/* Visibility Badge - Always Visible */}
+                            <div className={cn(
+                                "project-card__visibility-badge",
+                                project.visibility === 'public' && "project-card__visibility-badge--public"
+                            )}>
+                                {getVisibilityIcon()}
+                                <span className="project-card__visibility-text">{project.visibility}</span>
+                            </div>
+
+                            {/* Status Badge - Always Visible */}
+                            {/* {project.status && (
+                                <div className={cn(
+                                    "project-card__status-badge",
+                                    `project-card__status-badge--${project.status}`
+                                )}>
+                                    <div className="project-card__status-dot" />
+                                    <span className="project-card__status-text">{project.status}</span>
+                                </div>
+                            )} */}
+                        </div>
+
                         <div className="project-card__header-actions">
                             <Button
                                 variant="ghost"
@@ -405,12 +454,12 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                 onClick={handleToggleFavorite}
                                 className="project-card__favorite-btn"
                             >
-                                {project.isFavorite ? 
-                                    <Star className="project-card__star project-card__star--filled" /> : 
+                                {project.isFavorite ?
+                                    <Star className="project-card__star project-card__star--filled" /> :
                                     <StarOff className="project-card__star" />
                                 }
                             </Button>
-                            
+
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" size="sm" className="project-card__menu-btn">
@@ -439,38 +488,34 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                             </DropdownMenu>
                         </div>
                     </div>
-                    
-                    <Link 
+
+                    <Link
                         href={`/project/${project.id}`}
                         className="project-card__title-link"
                     >
                         <h3 className="project-card__title">{project.name}</h3>
                     </Link>
-                    
+
                     {project.description && (
                         <p className="project-card__description">{project.description}</p>
                     )}
                 </CardHeader>
-                
+
                 <CardContent className="project-card__content">
                     <div className="project-card__footer">
                         <div className="project-card__stats">
                             <div className="project-card__stat">
                                 <Eye className="project-card__stat-icon" />
-                                <span className="project-card__stat-text">{project.viewCount || 0}</span>
-                            </div>
-                            <div className="project-card__stat">
-                                {getVisibilityIcon()}
-                                <span className="project-card__stat-text">{project.visibility}</span>
+                                <span className="project-card__stat-text">{project.viewCount || 0} views</span>
                             </div>
                         </div>
-                        
+
                         <div className="project-card__activity">
                             <Clock className="project-card__activity-icon" />
                             <span className="project-card__activity-text">{formatLastActivity()}</span>
                         </div>
                     </div>
-                    
+
                     {project.tags && project.tags.length > 0 && (
                         <div className="project-card__tags">
                             {project.tags.slice(0, 2).map((tag) => (
@@ -487,9 +532,9 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                     )}
                 </CardContent>
             </Card>
-            
+
             {isLoading && <ProjectLoadingOverlay isLoading={isLoading} />}
-            
+
             <Dialog open={isEditing} onOpenChange={setIsEditing}>
                 <DialogContent className="project-card__edit-dialog">
                     <DialogHeader>
@@ -505,7 +550,7 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                 className="project-card__form-input"
                             />
                         </div>
-                        
+
                         <div className="project-card__form-group">
                             <Label htmlFor="description">Description</Label>
                             <Textarea
@@ -516,7 +561,7 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                 rows={3}
                             />
                         </div>
-                        
+
                         <div className="project-card__form-row">
                             <div className="project-card__form-group">
                                 <Label htmlFor="category">Category</Label>
@@ -533,7 +578,7 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                     </SelectContent>
                                 </Select>
                             </div>
-                            
+
                             <div className="project-card__form-group">
                                 <Label htmlFor="visibility">Visibility</Label>
                                 <Select value={editedVisibility} onValueChange={setEditedVisibility}>
@@ -547,7 +592,7 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                 </Select>
                             </div>
                         </div>
-                        
+
                         <div className="project-card__form-group">
                             <Label>Tags</Label>
                             <div className="project-card__tags-input">
@@ -568,7 +613,7 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                     <Plus className="project-card__add-tag-icon" />
                                 </Button>
                             </div>
-                            
+
                             {editedTags.length > 0 && (
                                 <div className="project-card__current-tags">
                                     {editedTags.map((tag) => (
@@ -585,7 +630,7 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                 </div>
                             )}
                         </div>
-                        
+
                         <div className="project-card__form-actions">
                             <Button variant="outline" onClick={handleCancel}>
                                 Cancel
