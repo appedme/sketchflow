@@ -1,0 +1,35 @@
+/* Tweet Grid Styles */
+.tweet-grid-container {
+    display: grid;
+    align-items: start;
+}
+
+.tweet-grid-item {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Ensure consistent tweet heights */
+.tweet-grid-item [data-tweet-container] {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.tweet-grid-item [data-tweet-container]>div {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Override react-tweet default styles for consistent heights */
+.tweet-grid-item .react-tweet-theme {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.tweet-grid-item .react-tweet-theme>div {
+    flex: 1;
+}

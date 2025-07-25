@@ -1,48 +1,17 @@
 'use client'
 
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles } from "lucide-react";
-import { useEffect } from "react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
-
-// TypeScript declaration for Twitter widgets
-declare global {
-  interface Window {
-    twttr: {
-      widgets: {
-        load: () => void;
-      };
-    };
-  }
-}
+import { TweetGrid } from "@/components/ui/tweet-grid";
 
 export function TestimonialsSection() {
-  // Load Twitter widgets script
-  useEffect(() => {
-    // Check if Twitter widgets script is already loaded
-    if (document.querySelector('script[src="https://platform.twitter.com/widgets.js"]')) {
-      // If script exists, just reload widgets
-      if (window.twttr && window.twttr.widgets) {
-        window.twttr.widgets.load();
-      }
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = 'https://platform.twitter.com/widgets.js';
-    script.async = true;
-
-    script.onload = () => {
-      // Ensure widgets are loaded after script loads
-      if (window.twttr && window.twttr.widgets) {
-        window.twttr.widgets.load();
-      }
-    };
-
-    document.body.appendChild(script);
-  }, []);
+  // Tweet IDs extracted from the URLs
+  const tweets = [
+    "1947960911832162360", // @sarvagya_kul
+    "1947957536659054848", // @SH20RAJ
+  ];
 
 
 
@@ -83,49 +52,12 @@ export function TestimonialsSection() {
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            {/* Tweet 1 - @sarvagya_kul */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              viewport={{ once: true }}
-              className="flex justify-center"
-            >
-              <Card className="border-primary/10 bg-gradient-to-br from-background to-muted/30 backdrop-blur-sm shadow-lg overflow-hidden">
-                <CardContent className="p-4">
-                  <blockquote className="twitter-tweet" data-theme="dark" data-width="400" data-dnt="true">
-                    <p lang="en" dir="ltr">
-                      <a href="https://x.com/sarvagya_kul/status/1947960911832162360?ref_src=twsrc%5Etfw">
-                        View this tweet from @sarvagya_kul
-                      </a>
-                    </p>
-                  </blockquote>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Tweet 2 - @SH20RAJ */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="flex justify-center"
-            >
-              <Card className="border-primary/10 bg-gradient-to-br from-background to-muted/30 backdrop-blur-sm shadow-lg overflow-hidden">
-                <CardContent className="p-4">
-                  <blockquote className="twitter-tweet" data-theme="dark" data-width="400" data-dnt="true">
-                    <p lang="en" dir="ltr">
-                      <a href="https://x.com/SH20RAJ/status/1947957536659054848?ref_src=twsrc%5Etfw">
-                        View this tweet from @SH20RAJ
-                      </a>
-                    </p>
-                  </blockquote>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
+          <TweetGrid
+            tweets={tweets}
+            columns={2}
+            spacing="lg"
+            className="max-w-4xl mx-auto"
+          />
         </motion.div>
 
         {/* Call to Action */}
