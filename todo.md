@@ -18,3 +18,6 @@ r2 ui like aws ui
 
 
 branwash ai instead of finetune ai
+
+
+use copy paste method instead of adding image to canvas for openmoji and pexels

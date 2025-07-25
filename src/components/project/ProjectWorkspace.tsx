@@ -13,6 +13,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { ViewTracker } from './ViewTracker';
 
 // Use optimized lazy loading for better performance
 import { LazyExcalidrawCanvas } from '@/components/optimized/LazyExcalidrawCanvas';
@@ -47,6 +48,9 @@ export function ProjectWorkspace({
   const [saving, setSaving] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isCloning, setIsCloning] = useState(false);
+
+  // Track project views
+  const isOwner = currentUser && project && project.ownerId === currentUser.id;
 
   // Clone project function using SWR
   const handleCloneProject = async () => {
@@ -215,6 +219,13 @@ export function ProjectWorkspace({
             />
           )}
           <h1 className="font-medium text-sm truncate">{projectName}</h1>
+          <ViewTracker
+            projectId={projectId}
+            userId={currentUser?.id}
+            isOwner={isOwner}
+            showLiveCount={true}
+            className="text-xs"
+          />
         </div>
         <div className="flex items-center gap-2">
           {isPublicView ? (

@@ -43,9 +43,7 @@ export async function POST(
       const collaboration = await db
         .select()
         .from(projectCollaborators)
-        .where(eq(projectCollaborators.projectId, projectId))
-        .where(eq(projectCollaborators.userId, user.id))
-        .limit(1);
+        .where(eq(projectCollaborators.projectId, projectId) && eq(projectCollaborators.userId, user.id));
 
       if (collaboration.length === 0) {
         return NextResponse.json({ error: 'Access denied' }, { status: 403 });

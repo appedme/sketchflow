@@ -367,17 +367,30 @@ export async function deleteProject(projectId: string, userId: string) {
 export async function incrementProjectViews(projectId: string) {
   try {
     const db = getDb();
+    console.log('Incrementing views for project:', projectId);
+
+    // First, get the current view count
+    const currentProject = await db
+      .select({ viewCount: projects.viewCount })
+      .from(projects)
+      .where(eq(projects.id, projectId))
+      .limit(1);
+
+    console.log('Current project view count:', currentProject[0]?.viewCount);
 
     // Increment view count
-    await db
+    const result = await db
       .update(projects)
       .set({
-        viewCount: sql`${projects.viewCount} + 1`,
+        viewCount: sql`COALESCE(${projects.viewCount}, 0) + 1`,
         updatedAt: new Date().toISOString(),
       })
-      .where(eq(projects.id, projectId));
+      .where(eq(projects.id, projectId))
+      .returning({ viewCount: projects.viewCount });
 
-    return { success: true };
+    console.log('Updated view count:', result[0]?.viewCount);
+
+    return { success: true, newViewCount: result[0]?.viewCount };
   } catch (error) {
     console.error('Error incrementing project views:', error);
     return { success: false };
