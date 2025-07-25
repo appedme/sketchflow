@@ -11,6 +11,7 @@ export function TestimonialsSection() {
   const tweets = [
     "1947960911832162360", // @sarvagya_kul
     "1947957536659054848", // @SH20RAJ
+    "1948577885109018977", // Third tweet
   ];
 
 
@@ -54,9 +55,9 @@ export function TestimonialsSection() {
         >
           <TweetGrid
             tweets={tweets}
-            columns={2}
+            columns={3}
             spacing="lg"
-            className="max-w-4xl mx-auto"
+            className="max-w-6xl mx-auto"
           />
         </motion.div>
 
