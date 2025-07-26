@@ -94,60 +94,7 @@ export function FullScreenCanvasEditor({
 
   return (
     <div className="h-full flex flex-col bg-background">
-      {/* Header */}
-      <div className="h-12 bg-background border-b border-border flex items-center justify-between px-4 flex-shrink-0">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push(`/project/${projectId}`)}
-            className="gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </Button>
-          <Separator orientation="vertical" className="h-6" />
-          <div className="flex items-center gap-2">
-            <PencilRuler className="w-4 h-4 text-primary" />
-            <h1 className="font-semibold text-lg text-foreground">Canvas Editor</h1>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowDocumentPanel(!showDocumentPanel)}
-            title={showDocumentPanel ? 'Hide Files' : 'Show Files'}
-          >
-            <PanelLeftOpen className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.push(`/project/${projectId}/split?left=${canvasId}&leftType=canvas`)}
-            title="Split View"
-          >
-            <SplitSquareHorizontal className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleSave}
-            disabled={saving}
-            title={saving ? 'Saving...' : 'Save'}
-          >
-            <Save className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={toggleFullScreen}
-            title={isFullScreen ? 'Exit Full Screen' : 'Full Screen'}
-          >
-            {isFullScreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
-          </Button>
-        </div>
-      </div>
+      
 
       {/* Main Content Area with Resizable Panels */}
       <div className="flex-1 overflow-hidden">
