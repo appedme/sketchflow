@@ -161,7 +161,7 @@ export async function getCanvases(projectId: string, userId?: string) {
     return projectCanvases;
   } catch (error) {
     console.error('Error fetching canvases:', error);
-    return [];
+    throw error; // Re-throw the error instead of returning empty array
   }
 }
 

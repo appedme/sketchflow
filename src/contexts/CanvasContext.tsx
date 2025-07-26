@@ -57,17 +57,18 @@ export function CanvasProvider({ children, projectId, canvasId, shareToken }: Ca
 
   // Load canvas data directly without caching
   const loadCanvasData = useCallback(async () => {
-    if (!shareToken && !user?.id) return;
-    
+    // For public projects, we don't need shareToken or user authentication
+    // The API endpoints will handle public project access validation
+
     try {
       setIsLoading(true);
       setError(null);
-      
+
       const apiUrl = shareToken && canvasId
         ? `/api/public/canvases/${canvasId}?shareToken=${shareToken}`
         : canvasId
-        ? `/api/canvas/${canvasId}/load`
-        : `/api/canvas/project/${projectId}/load`;
+          ? `/api/canvas/${canvasId}/load`
+          : `/api/canvas/project/${projectId}/load`;
 
       const response = await fetch(apiUrl);
       if (!response.ok) {
@@ -75,7 +76,7 @@ export function CanvasProvider({ children, projectId, canvasId, shareToken }: Ca
       }
 
       const canvasData = await response.json();
-      
+
       const newElements = canvasData?.elements || [];
       const newAppState = {
         ...canvasData?.appState,
@@ -128,7 +129,7 @@ export function CanvasProvider({ children, projectId, canvasId, shareToken }: Ca
   ) => {
     // Don't auto-save in public mode
     if (shareToken) return;
-    
+
     // Clear existing timeout
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);

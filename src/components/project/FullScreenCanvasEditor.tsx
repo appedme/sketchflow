@@ -21,12 +21,14 @@ interface FullScreenCanvasEditorProps {
   projectId: string;
   canvasId: string;
   projectName: string;
+  isReadOnly?: boolean;
 }
 
 export function FullScreenCanvasEditor({
   projectId,
   canvasId,
   projectName,
+  isReadOnly = false,
 }: FullScreenCanvasEditorProps) {
   const router = useRouter();
 
@@ -182,7 +184,7 @@ export function FullScreenCanvasEditor({
               projectId={projectId}
               canvasId={canvasId}
               projectName={projectName}
-              isReadOnly={false}
+              isReadOnly={isReadOnly}
             />
           </ResizablePanel>
         </ResizablePanelGroup>

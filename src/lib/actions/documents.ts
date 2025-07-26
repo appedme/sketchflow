@@ -156,7 +156,7 @@ export async function getDocuments(projectId: string, userId?: string) {
     return projectDocuments;
   } catch (error) {
     console.error('Error fetching documents:', error);
-    return [];
+    throw error; // Re-throw the error instead of returning empty array
   }
 }
 

@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import { mutate } from 'swr';
 import { cn } from '@/lib/utils';
-import { useApi } from '@/hooks/useApi';
+import { useApi, usePublicApi } from '@/hooks/useApi';
 
 interface Document {
   id: string;
@@ -89,14 +89,15 @@ export function DocumentationPanel({
 
   const currentFileId = getCurrentFileId();
 
-  // Fetch data
-  const { data: documents = [], isLoading: docsLoading } = useApi<Document[]>(
+  // Fetch data - use public API if user is not authenticated
+  const apiHook = user ? useApi : usePublicApi;
+  const { data: documents = [], isLoading: docsLoading } = apiHook<Document[]>(
     `/api/projects/${projectId}/documents`
   );
-  const { data: canvases = [], isLoading: canvasLoading } = useApi<Canvas[]>(
+  const { data: canvases = [], isLoading: canvasLoading } = apiHook<Canvas[]>(
     `/api/projects/${projectId}/canvases`
   );
-  const { data: project } = useApi(`/api/projects/${projectId}`);
+  const { data: project } = apiHook(`/api/projects/${projectId}`);
 
   const isLoading = docsLoading || canvasLoading;
 

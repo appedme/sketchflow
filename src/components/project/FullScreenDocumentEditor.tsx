@@ -15,12 +15,14 @@ interface FullScreenDocumentEditorProps {
   projectId: string;
   documentId: string;
   projectName: string;
+  isReadOnly?: boolean;
 }
 
 export function FullScreenDocumentEditor({
   projectId,
   documentId,
   projectName,
+  isReadOnly = false,
 }: FullScreenDocumentEditorProps) {
   const router = useRouter();
   const [showDocumentPanel, setShowDocumentPanel] = useState(false);
@@ -149,6 +151,7 @@ export function FullScreenDocumentEditor({
               documentId={documentId}
               projectId={projectId}
               projectName={projectName}
+              isReadOnly={isReadOnly}
               className="h-full"
             />
           </ResizablePanel>

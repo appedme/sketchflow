@@ -8,15 +8,10 @@ export async function GET(
 ) {
   try {
     const user = await stackServerApp.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { canvasId } = await params;
 
-    // Get the specific canvas
-    const canvas = await getCanvas(canvasId, user.id);
+    // Get the specific canvas - supports public projects
+    const canvas = await getCanvas(canvasId, user?.id);
     console.log('Found canvas:', canvas ? { id: canvas.id, title: canvas.title, hasElements: !!canvas.elements } : 'none');
 
     if (!canvas) {
