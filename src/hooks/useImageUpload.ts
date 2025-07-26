@@ -1,11 +1,11 @@
 import { useCallback } from 'react';
-import { uploadImageToFreeImage, uploadImageFromDataURL } from '@/lib/imageUpload';
+import { uploadImageToImgBB, uploadImageFromDataURL } from '@/lib/imageUpload';
 
 export function useImageUpload() {
   const uploadFile = useCallback(async (file: File) => {
     try {
-      const result = await uploadImageToFreeImage(file);
-      
+      const result = await uploadImageToImgBB(file);
+
       if (result.success && result.url) {
         return {
           success: true,
@@ -17,7 +17,7 @@ export function useImageUpload() {
       }
     } catch (error) {
       console.error('Image upload error:', error);
-      
+
       // Fallback to data URL
       const dataURL = await new Promise<string>((resolve) => {
         const reader = new FileReader();
@@ -37,7 +37,7 @@ export function useImageUpload() {
   const uploadDataURL = useCallback(async (dataURL: string, filename?: string) => {
     try {
       const result = await uploadImageFromDataURL(dataURL, filename);
-      
+
       if (result.success && result.url) {
         return {
           success: true,
@@ -49,7 +49,7 @@ export function useImageUpload() {
       }
     } catch (error) {
       console.error('Data URL upload error:', error);
-      
+
       return {
         success: false,
         url: dataURL,

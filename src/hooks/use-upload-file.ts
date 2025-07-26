@@ -1,93 +1,85 @@
 import * as React from 'react';
-
-import type { OurFileRouter } from '@/lib/uploadthing';
-import type {
-  ClientUploadedFileData,
-  UploadFilesOptions,
-} from 'uploadthing/types';
-
-import { generateReactHelpers } from '@uploadthing/react';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { uploadImageToImgBB } from '@/lib/imageUpload';
 
-export type UploadedFile<T = unknown> = ClientUploadedFileData<T>;
+export interface UploadedFile {
+  key: string;
+  name: string;
+  size: number;
+  type: string;
+  url: string;
+  appUrl?: string;
+}
 
-interface UseUploadFileProps
-  extends Pick<
-    UploadFilesOptions<OurFileRouter['editorUploader']>,
-    'headers' | 'onUploadBegin' | 'onUploadProgress' | 'skipPolling'
-  > {
+interface UseUploadFileProps {
   onUploadComplete?: (file: UploadedFile) => void;
   onUploadError?: (error: unknown) => void;
+  onUploadBegin?: (file: File) => void;
+  onUploadProgress?: (progress: number) => void;
 }
 
 export function useUploadFile({
   onUploadComplete,
   onUploadError,
-  ...props
+  onUploadBegin,
+  onUploadProgress,
 }: UseUploadFileProps = {}) {
   const [uploadedFile, setUploadedFile] = React.useState<UploadedFile>();
   const [uploadingFile, setUploadingFile] = React.useState<File>();
   const [progress, setProgress] = React.useState<number>(0);
   const [isUploading, setIsUploading] = React.useState(false);
 
-  async function uploadThing(file: File) {
+  async function uploadFile(file: File) {
     setIsUploading(true);
     setUploadingFile(file);
+    setProgress(0);
 
     try {
-      const res = await uploadFiles('editorUploader', {
-        ...props,
-        files: [file],
-        onUploadProgress: ({ progress }) => {
-          setProgress(Math.min(progress, 100));
-        },
-      });
+      onUploadBegin?.(file);
 
-      setUploadedFile(res[0]);
+      // Simulate progress for better UX
+      const progressInterval = setInterval(() => {
+        setProgress(prev => {
+          const newProgress = Math.min(prev + Math.random() * 15, 90);
+          onUploadProgress?.(newProgress);
+          return newProgress;
+        });
+      }, 200);
 
-      onUploadComplete?.(res[0]);
+      const result = await uploadImageToImgBB(file);
 
-      return uploadedFile;
+      clearInterval(progressInterval);
+
+      if (result.success && result.url) {
+        const uploadedFileData: UploadedFile = {
+          key: `freeimage-${Date.now()}`,
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          url: result.url,
+          appUrl: result.url,
+        };
+
+        setProgress(100);
+        onUploadProgress?.(100);
+        setUploadedFile(uploadedFileData);
+        onUploadComplete?.(uploadedFileData);
+
+        return uploadedFileData;
+      } else {
+        throw new Error(result.error || 'Upload failed');
+      }
     } catch (error) {
       const errorMessage = getErrorMessage(error);
-
-      const message =
-        errorMessage.length > 0
-          ? errorMessage
-          : 'Something went wrong, please try again later.';
+      const message = errorMessage.length > 0
+        ? errorMessage
+        : 'Something went wrong, please try again later.';
 
       toast.error(message);
-
       onUploadError?.(error);
 
-      // Mock upload for unauthenticated users
-      // toast.info('User not logged in. Mocking upload process.');
-      const mockUploadedFile = {
-        key: 'mock-key-0',
-        appUrl: `https://mock-app-url.com/${file.name}`,
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        url: URL.createObjectURL(file),
-      } as UploadedFile;
-
-      // Simulate upload progress
-      let progress = 0;
-
-      const simulateProgress = async () => {
-        while (progress < 100) {
-          await new Promise((resolve) => setTimeout(resolve, 50));
-          progress += 2;
-          setProgress(Math.min(progress, 100));
-        }
-      };
-
-      await simulateProgress();
-
-      setUploadedFile(mockUploadedFile);
-
-      return mockUploadedFile;
+      throw error;
     } finally {
       setProgress(0);
       setIsUploading(false);
@@ -99,13 +91,10 @@ export function useUploadFile({
     isUploading,
     progress,
     uploadedFile,
-    uploadFile: uploadThing,
+    uploadFile,
     uploadingFile,
   };
 }
-
-export const { uploadFiles, useUploadThing } =
-  generateReactHelpers<OurFileRouter>();
 
 export function getErrorMessage(err: unknown) {
   const unknownError = 'Something went wrong, please try again later.';

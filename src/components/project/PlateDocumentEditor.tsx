@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useDebounce } from '@/hooks/use-debounce';
 import { cn } from '@/lib/utils';
-import { uploadImageToFreeImage } from '@/lib/imageUpload';
+import { uploadImageToImgBB } from '@/lib/imageUpload';
 import { useFileOperations } from '@/components/files/FileStatusIndicator';
 import { useLoading } from '@/components/ui/loading-bar';
 
@@ -276,7 +276,7 @@ export function PlateDocumentEditor({
       // Start upload operation
       startOperation(uploadId, 'uploading', file.name, 'Uploading image...');
 
-      const result = await uploadImageToFreeImage(file);
+      const result = await uploadImageToImgBB(file);
 
       if (result.success && result.url) {
         // Insert image into editor

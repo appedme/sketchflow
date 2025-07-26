@@ -21,3 +21,16 @@ branwash ai instead of finetune ai
 
 
 use copy paste method instead of adding image to canvas for openmoji and pexels
+
+
+https://docs.excalidraw.com/docs/@excalidraw/excalidraw/api/utils
+
+https://docs.excalidraw.com/docs/@excalidraw/excalidraw/api/children-components/live-collaboration-trigger
+
+edit  canvas with excalidraw css search for the documentation
+
+
+add image upload support to docs
+
+
+

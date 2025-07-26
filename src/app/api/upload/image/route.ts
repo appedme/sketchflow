@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUserId } from '@/lib/actions/auth';
-import { uploadImageToFreeImage, uploadImageFromDataURL } from '@/lib/imageUpload';
+import { uploadImageToImgBB, uploadImageFromDataURL } from '@/lib/imageUpload';
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'File size must be less than 10MB' }, { status: 400 });
       }
 
-      const result = await uploadImageToFreeImage(file);
+      const result = await uploadImageToImgBB(file);
 
       if (result.success) {
         return NextResponse.json({
