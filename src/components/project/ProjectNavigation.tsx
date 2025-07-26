@@ -29,7 +29,7 @@ import {
     Palette,
     Download,
     Loader2,
-    ArrowLeft,
+
     RefreshCw,
     Maximize,
     SplitSquareHorizontal,
@@ -130,38 +130,43 @@ export function ProjectNavigation({
     };
 
     return (
-        <div className="h-12 border-b bg-background/80 backdrop-blur-sm flex items-center justify-between px-4 z-10">
+        <div className="h-12 border-b bg-background/80 backdrop-blur-sm flex items-center justify-between px-2 sm:px-4 z-10 overflow-x-auto">
             {/* Left Section */}
-            <div className="flex items-center gap-3">
-                {/* Back to Dashboard */}
+            <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
+                {/* Files Panel Toggle */}
                 <Button
                     variant="ghost"
                     size="sm"
-                    onClick={goToDashboard}
-                    className="gap-2 text-muted-foreground hover:text-foreground"
+                    onClick={onToggleDocumentPanel}
+                    className="gap-2 hidden md:flex"
                 >
-                    <Home className="w-4 h-4" />
+                    {showDocumentPanel ? (
+                        <PanelLeftClose className="w-4 h-4" />
+                    ) : (
+                        <PanelLeftOpen className="w-4 h-4" />
+                    )}
+                    <span className="hidden lg:inline">Files</span>
                 </Button>
 
-
-
                 {/* Project Name */}
-                <div className="flex items-center gap-2">
-                    <h1 className="font-medium text-sm truncate max-w-[200px]">{projectName}</h1>
+                <div className="flex items-center gap-1 sm:gap-2 min-w-0">
+                    <h1 className="font-medium text-sm truncate max-w-[120px] sm:max-w-[200px]">{projectName}</h1>
 
-                    {/* View Tracker */}
-                    <ViewTracker
-                        projectId={projectId}
-                        userId={currentUser?.id}
-                        isOwner={isOwner}
-                        showLiveCount={true}
-                        className="text-xs"
-                    />
+                    {/* View Tracker - Hidden on mobile */}
+                    <div className="hidden sm:block">
+                        <ViewTracker
+                            projectId={projectId}
+                            userId={currentUser?.id}
+                            isOwner={isOwner}
+                            showLiveCount={true}
+                            className="text-xs"
+                        />
+                    </div>
                 </div>
             </div>
 
             {/* Right Section */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                 {isPublicView ? (
                     <>
                         {/* Public View Indicator */}
@@ -244,20 +249,20 @@ export function ProjectNavigation({
                             </DropdownMenu>
                         )}
 
-                        {/* Save Button */}
+                        {/* Save Button - Hidden on mobile */}
                         <Button
                             size="sm"
                             variant="outline"
                             onClick={onSave}
                             disabled={saving || isReadOnly}
-                            className="gap-2"
+                            className="gap-2 hidden sm:flex"
                         >
                             {saving ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />
                             ) : (
                                 <Save className="w-4 h-4" />
                             )}
-                            {saving ? 'Saving...' : 'Save'}
+                            <span className="hidden md:inline">{saving ? 'Saving...' : 'Save'}</span>
                         </Button>
 
                         {/* Share Button */}
@@ -284,15 +289,15 @@ export function ProjectNavigation({
                             ) : (
                                 <PanelLeftOpen className="w-4 h-4" />
                             )}
-                            {/* Files */}
+                            <span className="hidden lg:inline">Files</span>
                         </Button>
 
-                        {/* View Options */}
+                        {/* View Options - Hidden on mobile */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button size="sm" variant="outline" className="gap-2">
+                                <Button size="sm" variant="outline" className="gap-2 hidden md:flex">
                                     <Eye className="w-4 h-4" />
-                                    {/* View */}
+                                    <span className="hidden lg:inline">View</span>
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48">
@@ -362,6 +367,19 @@ export function ProjectNavigation({
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48">
+                                {/* Mobile-only actions */}
+                                <div className="sm:hidden">
+                                    <DropdownMenuItem onClick={onSave} disabled={saving || isReadOnly} className="gap-2">
+                                        {saving ? (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                            <Save className="h-4 w-4" />
+                                        )}
+                                        {saving ? 'Saving...' : 'Save'}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                </div>
+
                                 {/* Project Actions */}
                                 <DropdownMenuItem onClick={onExport} disabled={isExporting} className="gap-2">
                                     {isExporting ? (
