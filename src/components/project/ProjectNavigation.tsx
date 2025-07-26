@@ -39,6 +39,7 @@ import { useTheme } from 'next-themes';
 import { ViewTracker } from './ViewTracker';
 import { ShareDialog } from './ShareDialog';
 import { ProjectDetailsModal } from './ProjectDetailsModal';
+import { ProjectSettingsModal } from './ProjectSettingsModal';
 
 interface ProjectNavigationProps {
     projectId: string;
@@ -125,9 +126,8 @@ export function ProjectNavigation({
         router.push('/dashboard');
     };
 
-    const goToSettings = () => {
-        router.push(`/project/${projectId}/settings`);
-    };
+    // Settings modal state
+    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
     return (
         <div className="h-12 bg-background/80 backdrop-blur-sm flex items-center justify-between px-2 sm:px-4 z-10 overflow-x-auto">
@@ -278,12 +278,12 @@ export function ProjectNavigation({
                             </Button>
                         </ShareDialog>
 
-                       
+
 
                         {/* View Options - Hidden on mobile */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button size="sm" variant=" " className="gap-2 hidden md:flex">
+                                <Button size="sm" variant="ghost" className="gap-2 hidden md:flex">
                                     <Eye className="w-4 h-4" />
                                     {/* <span className="hidden lg:inline">View</span> */}
                                 </Button>
@@ -392,10 +392,21 @@ export function ProjectNavigation({
                                         Project Overview
                                     </DropdownMenuItem>
                                 </ProjectDetailsModal>
-                                <DropdownMenuItem onClick={goToSettings} className="gap-2">
-                                    <Settings className="h-4 w-4" />
-                                    Project Settings
-                                </DropdownMenuItem>
+                                <ProjectSettingsModal
+                                    projectId={projectId}
+                                    projectName={projectName}
+                                    isOpen={isSettingsModalOpen}
+                                    onOpenChange={setIsSettingsModalOpen}
+                                    trigger={
+                                        <DropdownMenuItem
+                                            onSelect={(e) => e.preventDefault()}
+                                            className="gap-2"
+                                        >
+                                            <Settings className="h-4 w-4" />
+                                            Project Settings
+                                        </DropdownMenuItem>
+                                    }
+                                />
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
                                     onClick={() => window.open('https://x.com/SH20RAJ/status/1947957536659054848', '_blank')}
@@ -408,8 +419,8 @@ export function ProjectNavigation({
                             </DropdownMenuContent>
                         </DropdownMenu>
 
-                         {/* Back to Dashboard */}
-                         <Button
+                        {/* Back to Dashboard */}
+                        <Button
                             variant="ghost"
                             size="sm"
                             onClick={goToDashboard}

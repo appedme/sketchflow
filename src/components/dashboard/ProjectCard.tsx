@@ -41,6 +41,7 @@ import {
 import Link from "next/link";
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { ProjectSettingsModal } from '@/components/project/ProjectSettingsModal';
 import {
     useUpdateProject,
     useDeleteProject,
@@ -146,12 +147,8 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
         }
     };
 
-    const openProjectSettings = () => {
-        setIsLoading(true);
-        setTimeout(() => {
-            router.push(`/project/${project.id}/settings`);
-        }, 800);
-    };
+    // Settings modal state
+    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
     const getCategoryIcon = (category: string) => {
         const iconMap: Record<string, any> = {
@@ -248,10 +245,20 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                                 <Copy className="project-card__dropdown-icon" />
                                                 Duplicate
                                             </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={openProjectSettings}>
-                                                <Settings className="project-card__dropdown-icon" />
-                                                Settings
-                                            </DropdownMenuItem>
+                                            <ProjectSettingsModal
+                                                projectId={project.id}
+                                                projectName={project.name}
+                                                isOpen={isSettingsModalOpen}
+                                                onOpenChange={setIsSettingsModalOpen}
+                                                trigger={
+                                                    <DropdownMenuItem
+                                                        onSelect={(e) => e.preventDefault()}
+                                                    >
+                                                        <Settings className="project-card__dropdown-icon" />
+                                                        Settings
+                                                    </DropdownMenuItem>
+                                                }
+                                            />
                                             <DropdownMenuSeparator />
                                             <DropdownMenuItem onClick={handleDelete} className="project-card__delete-item">
                                                 <Trash2 className="project-card__dropdown-icon" />
@@ -475,10 +482,20 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                         <Copy className="project-card__dropdown-icon" />
                                         Duplicate
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={openProjectSettings}>
-                                        <Settings className="project-card__dropdown-icon" />
-                                        Settings
-                                    </DropdownMenuItem>
+                                    <ProjectSettingsModal
+                                        projectId={project.id}
+                                        projectName={project.name}
+                                        isOpen={isSettingsModalOpen}
+                                        onOpenChange={setIsSettingsModalOpen}
+                                        trigger={
+                                            <DropdownMenuItem
+                                                onSelect={(e) => e.preventDefault()}
+                                            >
+                                                <Settings className="project-card__dropdown-icon" />
+                                                Settings
+                                            </DropdownMenuItem>
+                                        }
+                                    />
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem onClick={handleDelete} className="project-card__delete-item">
                                         <Trash2 className="project-card__dropdown-icon" />
