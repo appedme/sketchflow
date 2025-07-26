@@ -35,7 +35,6 @@ import {
     SplitSquareHorizontal
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { cn } from '@/lib/utils';
 import { ViewTracker } from './ViewTracker';
 import { ShareDialog } from './ShareDialog';
 
@@ -133,7 +132,7 @@ export function ProjectNavigation({
             {/* Left Section */}
             <div className="flex items-center gap-3">
                 {/* Back to Dashboard */}
-                <Button
+                {/* <Button
                     variant="ghost"
                     size="sm"
                     onClick={goToDashboard}
@@ -141,7 +140,7 @@ export function ProjectNavigation({
                 >
                     <ArrowLeft className="w-4 h-4" />
                     <Home className="w-4 h-4" />
-                </Button>
+                </Button> */}
 
 
 
@@ -267,6 +266,21 @@ export function ProjectNavigation({
                             projectVisibility={project?.visibility}
                         />
 
+                        {/* Files Panel Toggle */}
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={onToggleDocumentPanel}
+                            className="gap-2"
+                        >
+                            {showDocumentPanel ? (
+                                <PanelLeftClose className="w-4 h-4" />
+                            ) : (
+                                <PanelLeftOpen className="w-4 h-4" />
+                            )}
+                            Files
+                        </Button>
+
                         {/* View Options */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -276,19 +290,6 @@ export function ProjectNavigation({
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48">
-                                {/* Files Panel Toggle */}
-                                <DropdownMenuItem
-                                    onClick={onToggleDocumentPanel}
-                                    className="gap-2"
-                                >
-                                    {showDocumentPanel ? (
-                                        <PanelLeftClose className="h-4 w-4" />
-                                    ) : (
-                                        <PanelLeftOpen className="h-4 w-4" />
-                                    )}
-                                    {showDocumentPanel ? 'Hide Files' : 'Show Files'}
-                                </DropdownMenuItem>
-
                                 {/* Split View */}
                                 <DropdownMenuItem
                                     onClick={() => {
@@ -309,14 +310,16 @@ export function ProjectNavigation({
                                 {/* Full Screen */}
                                 <DropdownMenuItem
                                     onClick={() => {
-                                        if (document.documentElement.requestFullscreen) {
+                                        if (!document.fullscreenElement) {
                                             document.documentElement.requestFullscreen();
+                                        } else {
+                                            document.exitFullscreen();
                                         }
                                     }}
                                     className="gap-2"
                                 >
                                     <Maximize className="h-4 w-4" />
-                                    Full Screen
+                                    Toggle Full Screen
                                 </DropdownMenuItem>
 
                                 <DropdownMenuSeparator />

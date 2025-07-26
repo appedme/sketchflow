@@ -3,9 +3,6 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, PanelLeftOpen, SplitSquareHorizontal, FileText, Maximize, Minimize } from 'lucide-react';
 import { LazyPlateEditor } from '@/components/optimized/LazyPlateEditor';
 import { DocumentationPanel } from './DocumentationPanel';
 import {
@@ -71,7 +68,7 @@ export function FullScreenDocumentEditor({
   return (
     <div className="h-full flex flex-col bg-background">
       {/* Header */}
-      <div className="h-12 bg-background border-b border-border flex items-center justify-between px-4 flex-shrink-0">
+      {/* <div className="h-12 bg-background border-b border-border flex items-center justify-between px-4 flex-shrink-0">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
@@ -117,7 +114,7 @@ export function FullScreenDocumentEditor({
             {isFullScreen ? 'Exit' : 'Full Screen'}
           </Button>
         </div>
-      </div>
+      </div> */}
 
       {/* Main Content Area with Resizable Panels */}
       <div className="flex-1 overflow-hidden">

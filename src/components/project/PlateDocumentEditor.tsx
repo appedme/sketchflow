@@ -4,35 +4,15 @@ import * as React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import { Plate, usePlateEditor, PlateContent } from 'platejs/react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { EditorKit } from '@/components/editor/editor-kit';
 import { Editor, EditorContainer } from '@/components/ui/editor';
 import {
-  Save,
-  Edit3,
-  Eye,
-  ChevronDown,
   Loader2,
   AlertCircle,
-  CheckCircle2,
-  Clock,
-  User,
   FileText,
-  Image,
-  Upload,
-  Maximize2
 } from 'lucide-react';
 import { useDebounce } from '@/hooks/use-debounce';
-import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { uploadImageToFreeImage } from '@/lib/imageUpload';
 import { useFileOperations } from '@/components/files/FileStatusIndicator';
@@ -116,15 +96,15 @@ export function PlateDocumentEditor({
     try {
       setIsLoading(true);
       setError(null);
-      
+
       // Start loading indicator
       startLoading('Loading document...', 'default');
 
       // Use public API if shareToken is provided (for shared content)
-      const apiUrl = shareToken 
+      const apiUrl = shareToken
         ? `/api/public/documents/${documentId}?shareToken=${shareToken}`
         : `/api/documents/${documentId}`;
-      
+
       const response = await fetch(apiUrl);
       if (!response.ok) {
         throw new Error('Failed to load document');
@@ -154,11 +134,11 @@ export function PlateDocumentEditor({
     if (!document || isSaving || shareToken) return; // Don't save if using shareToken (public mode)
 
     const operationId = `save-doc-${documentId}-${Date.now()}`;
-    
+
     try {
       setIsSaving(true);
       setError(null);
-      
+
       // Start file operation
       startOperation(operationId, 'saving', `Document: ${document.title}`, 'Saving document...');
 
@@ -195,14 +175,14 @@ export function PlateDocumentEditor({
       setDocument(updatedDoc);
       setLastSaved(new Date());
       setHasUnsavedChanges(false);
-      
+
       // Complete operation successfully
       completeOperation(operationId, true, 'Document saved successfully');
 
     } catch (err) {
       console.error('Error saving document:', err);
       setError(err instanceof Error ? err.message : 'Failed to save document');
-      
+
       // Complete operation with error
       completeOperation(operationId, false, 'Failed to save document');
     } finally {
@@ -235,17 +215,40 @@ export function PlateDocumentEditor({
     }
   }, [debouncedTitle, document, localTitle, isReadOnly, saveDocument]);
 
+  // Handle manual save
+  const handleManualSave = useCallback(() => {
+    if (document && editor) {
+      saveDocument(localTitle, (editor as any).children);
+    }
+  }, [document, editor, localTitle, saveDocument]);
+
   // Load document on mount
   useEffect(() => {
     loadDocument();
   }, [loadDocument]);
 
-  // Handle manual save
-  const handleManualSave = () => {
-    if (document && editor) {
-      saveDocument(localTitle, (editor as any).children);
-    }
-  };
+  // Handle custom events from navigation
+  useEffect(() => {
+    const handleDocumentSave = () => {
+      handleManualSave();
+    };
+
+    const handleFullScreen = () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    };
+
+    window.addEventListener('document-save-all', handleDocumentSave);
+    window.addEventListener('document-fullscreen', handleFullScreen);
+
+    return () => {
+      window.removeEventListener('document-save-all', handleDocumentSave);
+      window.removeEventListener('document-fullscreen', handleFullScreen);
+    };
+  }, [handleManualSave]);
 
   // Handle image upload
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -265,11 +268,11 @@ export function PlateDocumentEditor({
     }
 
     const uploadId = `upload-img-${Date.now()}`;
-    
+
     try {
       setIsUploadingImage(true);
       setError(null);
-      
+
       // Start upload operation
       startOperation(uploadId, 'uploading', file.name, 'Uploading image...');
 
@@ -294,7 +297,7 @@ export function PlateDocumentEditor({
         }]);
 
         setHasUnsavedChanges(true);
-        
+
         // Complete upload successfully
         completeOperation(uploadId, true, 'Image uploaded successfully');
       } else {
@@ -382,159 +385,16 @@ export function PlateDocumentEditor({
   }
 
   return (
-    <div className={cn("h-full flex flex-col bg-background", className)}>
-      {/* Header */}
-      <div className="flex-shrink-0 border-b bg-card">
-        <div className="p-4 space-y-4">
-          {/* Title and Controls */}
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              {isEditing && !isReadOnly ? (
-                <Input
-                  value={localTitle}
-                  onChange={(e) => setLocalTitle(e.target.value)}
-                  className="text-xl font-semibold border-none shadow-none p-0 h-auto bg-transparent focus-visible:ring-0"
-                  placeholder="Document title..."
-                />
-              ) : (
-                <h1 className="text-xl font-semibold text-foreground truncate">
-                  {document.title}
-                </h1>
-              )}
-
-              {/* Document Info */}
-              <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <User className="w-3 h-3" />
-                  <span>Version {document.version}</span>
-                </div>
-                <Separator orientation="vertical" className="h-3" />
-                <div className="flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  <span>
-                    {lastSaved
-                      ? `Saved ${formatDistanceToNow(lastSaved, { addSuffix: true })}`
-                      : `Updated ${formatDistanceToNow(new Date(document.updatedAt), { addSuffix: true })}`
-                    }
-                  </span>
-                </div>
-                {projectName && (
-                  <>
-                    <Separator orientation="vertical" className="h-3" />
-                    <span>{projectName}</span>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex items-center gap-2">
-              {/* Save Status */}
-              {isSaving ? (
-                <Badge variant="secondary" className="gap-1">
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                  Saving...
-                </Badge>
-              ) : hasUnsavedChanges ? (
-                <Badge variant="outline" className="gap-1">
-                  <AlertCircle className="w-3 h-3" />
-                  Unsaved
-                </Badge>
-              ) : lastSaved ? (
-                <Badge variant="secondary" className="gap-1">
-                  <CheckCircle2 className="w-3 h-3" />
-                  Saved
-                </Badge>
-              ) : null}
-
-              {/* Mode Toggle */}
-              {!isReadOnly && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-2">
-                      {isEditing ? (
-                        <>
-                          <Edit3 className="w-4 h-4" />
-                          Edit Mode
-                        </>
-                      ) : (
-                        <>
-                          <Eye className="w-4 h-4" />
-                          View Mode
-                        </>
-                      )}
-                      <ChevronDown className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      onClick={() => setIsEditing(true)}
-                      disabled={isEditing}
-                    >
-                      <Edit3 className="w-4 h-4 mr-2" />
-                      Edit Mode
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => setIsEditing(false)}
-                      disabled={!isEditing}
-                    >
-                      <Eye className="w-4 h-4 mr-2" />
-                      View Mode
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-
-              {/* Full Screen Toggle */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  const documentElement = window.document.documentElement;
-                  if (!window.document.fullscreenElement) {
-                    documentElement.requestFullscreen().catch(err => {
-                      console.error(`Error attempting to enable full-screen mode: ${err.message}`);
-                    });
-                  } else {
-                    window.document.exitFullscreen();
-                  }
-                }}
-                className="gap-2"
-              >
-                <Maximize2 className="w-4 h-4" />
-              </Button>
-
-
-
-              {/* Manual Save */}
-              {isEditing && !isReadOnly && (
-                <Button
-                  size="sm"
-                  onClick={handleManualSave}
-                  disabled={isSaving}
-                  className="gap-2"
-                >
-                  <Save className="w-4 h-4" />
-                  Save
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Editor Content */}
-      <div className="flex-1 overflow-hidden">
-        <Plate editor={editor}>
-          <EditorContainer className="h-full">
-            <Editor
-              variant="demo"
-              readOnly={!isEditing || isReadOnly}
-              className="h-full"
-            />
-          </EditorContainer>
-        </Plate>
-      </div>
+    <div className={cn("h-full bg-background", className)}>
+      <Plate editor={editor}>
+        <EditorContainer className="h-full">
+          <Editor
+            variant="demo"
+            readOnly={!isEditing || isReadOnly}
+            className="h-full"
+          />
+        </EditorContainer>
+      </Plate>
     </div>
   );
 }

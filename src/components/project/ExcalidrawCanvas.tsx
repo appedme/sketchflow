@@ -75,6 +75,29 @@ function ExcalidrawCanvasContent({
     isLoading
   } = useCanvas();
 
+  // Handle custom events from navigation
+  useEffect(() => {
+    const handleFitToContent = () => {
+      if (excalidrawAPIRef.current) {
+        excalidrawAPIRef.current.scrollToContent();
+      }
+    };
+
+    const handleResetZoom = () => {
+      if (excalidrawAPIRef.current) {
+        excalidrawAPIRef.current.resetZoom();
+      }
+    };
+
+    window.addEventListener('canvas-fit-to-content', handleFitToContent);
+    window.addEventListener('canvas-reset-zoom', handleResetZoom);
+
+    return () => {
+      window.removeEventListener('canvas-fit-to-content', handleFitToContent);
+      window.removeEventListener('canvas-reset-zoom', handleResetZoom);
+    };
+  }, []);
+
   // Handle changes from Excalidraw
   const handleChange = useCallback((
     newElements: readonly ExcalidrawElement[],
@@ -159,93 +182,7 @@ function ExcalidrawCanvasContent({
           },
         }}
       >
-        <MainMenu>
-          {/* File Operations */}
-          <MainMenu.DefaultItems.LoadScene />
-          <MainMenu.DefaultItems.SaveToActiveFile />
-          <MainMenu.DefaultItems.SaveAsImage />
-          <MainMenu.DefaultItems.Export />
-          <MainMenu.Separator />
 
-          {/* Canvas Operations */}
-          <MainMenu.DefaultItems.ClearCanvas />
-          <MainMenu.Item
-            icon={<FileText size={14} />}
-            onClick={() => {
-              if (excalidrawAPIRef.current) {
-                const elements = excalidrawAPIRef.current.getSceneElements();
-                const hasElements = elements && elements.length > 0;
-                if (hasElements && confirm('Are you sure you want to clear the canvas? This action cannot be undone.')) {
-                  excalidrawAPIRef.current.updateScene({
-                    elements: [],
-                  });
-                }
-              }
-            }}
-          >
-            Clear All
-          </MainMenu.Item>
-
-          {/* View Options */}
-          <MainMenu.Separator />
-          <MainMenu.Item
-            icon={<Camera size={14} />}
-            onClick={() => {
-              if (excalidrawAPIRef.current) {
-                excalidrawAPIRef.current.scrollToContent();
-              }
-            }}
-          >
-            Fit to Content
-          </MainMenu.Item>
-
-          <MainMenu.Item
-            icon={<Smile size={14} />}
-            onClick={() => {
-              if (excalidrawAPIRef.current) {
-                excalidrawAPIRef.current.resetZoom();
-              }
-            }}
-          >
-            Reset Zoom
-          </MainMenu.Item>
-
-          {/* Project Navigation */}
-          <MainMenu.Separator />
-          <MainMenu.Item
-            icon={<FileTextIcon size={14} />}
-            onClick={() => {
-              router.push(`/project/${projectId}`);
-            }}
-          >
-            Back to Project
-          </MainMenu.Item>
-
-          <MainMenu.Item
-            icon={<CanvasIcon size={14} />}
-            onClick={() => {
-              router.push('/dashboard');
-            }}
-          >
-            Dashboard
-          </MainMenu.Item>
-
-          {/* Settings & Help */}
-          <MainMenu.Separator />
-          <MainMenu.DefaultItems.ToggleTheme />
-          <MainMenu.DefaultItems.Help />
-
-          {/* Project Info */}
-          <MainMenu.Separator />
-          <MainMenu.Item
-            icon={<FileText size={14} />}
-            onClick={() => {
-              alert(`Project: ${projectName}\nCanvas ID: ${canvasId || 'Main Canvas'}`);
-            }}
-          >
-            Canvas Info
-          </MainMenu.Item>
-        </MainMenu>
 
         <WelcomeScreen>
           <CanvasWelcomeScreen
