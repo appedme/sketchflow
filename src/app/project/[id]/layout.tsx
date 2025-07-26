@@ -26,6 +26,10 @@ export default function ProjectLayout({ children }: ProjectLayoutProps) {
     const user = useUser();
     const { data: project } = useCachedApi<any>(projectId ? `/api/projects/${projectId}` : null);
 
+    // Determine if this is a public view - moved before mobile check
+    const isPublicView = !user || (project && project.ownerId !== user.id && project.visibility === 'public');
+    const isReadOnly = isPublicView || (project && project.ownerId !== user.id && !['owner', 'editor'].includes(project.userRole || 'viewer'));
+
     // Check if we're on mobile
     useEffect(() => {
         const checkMobile = () => {
@@ -36,47 +40,6 @@ export default function ProjectLayout({ children }: ProjectLayoutProps) {
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
-
-    // Don't show unified navigation on settings page
-    const shouldShowUnifiedNav = !pathname.includes('/settings');
-    const shouldShowPanel = !pathname.includes('/settings');
-
-    // Mobile view - show navigation but simplified
-    if (isMobile) {
-        return (
-            <div className="h-screen flex flex-col bg-background">
-                {/* Mobile Navigation */}
-                <ProjectNavigation
-                    projectId={projectId}
-                    projectName={project?.name || 'Project'}
-                    currentUser={user}
-                    project={project}
-                    isReadOnly={isReadOnly}
-                    isPublicView={isPublicView}
-                    showDocumentPanel={false} // Always hide panel on mobile
-                    onToggleDocumentPanel={() => { }} // No-op on mobile
-                    onSave={handleSave}
-                    onCreateDocument={handleCreateDocument}
-                    onCreateCanvas={handleCreateCanvas}
-                    onExport={handleExport}
-                    saving={saving}
-                    isCreatingDocument={isCreatingDocument}
-                    isCreatingCanvas={isCreatingCanvas}
-                    isExporting={isExporting}
-                />
-
-                {/* Mobile Content - full width */}
-                <div className="flex-1 overflow-hidden">
-                    {children}
-                </div>
-            </div>
-        );
-    }
-
-    // Settings page - no unified navigation
-    if (!shouldShowUnifiedNav) {
-        return <>{children}</>;
-    }
 
     // Handle save all
     const handleSave = async () => {
@@ -174,9 +137,48 @@ export default function ProjectLayout({ children }: ProjectLayoutProps) {
         }
     };
 
-    // Determine if this is a public view
-    const isPublicView = !user || (project && project.ownerId !== user.id && project.visibility === 'public');
-    const isReadOnly = isPublicView || (project && project.ownerId !== user.id && !['owner', 'editor'].includes(project.userRole || 'viewer'));
+
+
+    // Don't show unified navigation on settings page
+    const shouldShowUnifiedNav = !pathname.includes('/settings');
+    const shouldShowPanel = !pathname.includes('/settings');
+
+    // Mobile view - show navigation but simplified
+    if (isMobile) {
+        return (
+            <div className="h-screen flex flex-col bg-background">
+                {/* Mobile Navigation */}
+                <ProjectNavigation
+                    projectId={projectId}
+                    projectName={project?.name || 'Project'}
+                    currentUser={user}
+                    project={project}
+                    isReadOnly={isReadOnly}
+                    isPublicView={isPublicView}
+                    showDocumentPanel={false} // Always hide panel on mobile
+                    onToggleDocumentPanel={() => { }} // No-op on mobile
+                    onSave={handleSave}
+                    onCreateDocument={handleCreateDocument}
+                    onCreateCanvas={handleCreateCanvas}
+                    onExport={handleExport}
+                    saving={saving}
+                    isCreatingDocument={isCreatingDocument}
+                    isCreatingCanvas={isCreatingCanvas}
+                    isExporting={isExporting}
+                />
+
+                {/* Mobile Content - full width */}
+                <div className="flex-1 overflow-hidden">
+                    {children}
+                </div>
+            </div>
+        );
+    }
+
+    // Settings page - no unified navigation
+    if (!shouldShowUnifiedNav) {
+        return <>{children}</>;
+    }
 
     return (
         <div className="h-screen flex flex-col bg-background">

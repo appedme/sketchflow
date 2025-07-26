@@ -284,7 +284,7 @@ export function ProjectNavigation({
                             ) : (
                                 <PanelLeftOpen className="w-4 h-4" />
                             )}
-                            Files
+                            {/* Files */}
                         </Button>
 
                         {/* View Options */}
@@ -292,7 +292,7 @@ export function ProjectNavigation({
                             <DropdownMenuTrigger asChild>
                                 <Button size="sm" variant="outline" className="gap-2">
                                     <Eye className="w-4 h-4" />
-                                    View
+                                    {/* View */}
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48">
