@@ -32,11 +32,13 @@ import {
     ArrowLeft,
     RefreshCw,
     Maximize,
-    SplitSquareHorizontal
+    SplitSquareHorizontal,
+    MessageCircle
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { ViewTracker } from './ViewTracker';
 import { ShareDialog } from './ShareDialog';
+import { ProjectDetailsModal } from './ProjectDetailsModal';
 
 interface ProjectNavigationProps {
     projectId: string;
@@ -132,15 +134,14 @@ export function ProjectNavigation({
             {/* Left Section */}
             <div className="flex items-center gap-3">
                 {/* Back to Dashboard */}
-                {/* <Button
+                <Button
                     variant="ghost"
                     size="sm"
                     onClick={goToDashboard}
                     className="gap-2 text-muted-foreground hover:text-foreground"
                 >
-                    <ArrowLeft className="w-4 h-4" />
                     <Home className="w-4 h-4" />
-                </Button> */}
+                </Button>
 
 
 
@@ -209,7 +210,7 @@ export function ProjectNavigation({
                         {currentUser && (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button size="sm" variant="outline" className="gap-2">
+                                    <Button size="sm" variant="" className="gap-2">
                                         <Plus className="w-4 h-4" />
                                         New
                                     </Button>
@@ -259,19 +260,24 @@ export function ProjectNavigation({
                             {saving ? 'Saving...' : 'Save'}
                         </Button>
 
-                        {/* Share Dialog */}
+                        {/* Share Button */}
                         <ShareDialog
                             projectId={projectId}
                             projectName={projectName}
                             projectVisibility={project?.visibility}
-                        />
+                        >
+                            <Button size="sm" variant="outline" className="gap-2">
+                                <Share className="w-4 h-4" />
+                                {/* Share */}
+                            </Button>
+                        </ShareDialog>
 
-                        {/* Files Panel Toggle */}
+                        {/* Files Panel Toggle - Hidden on mobile */}
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={onToggleDocumentPanel}
-                            className="gap-2"
+                            className="gap-2 hidden md:flex"
                         >
                             {showDocumentPanel ? (
                                 <PanelLeftClose className="w-4 h-4" />
@@ -368,17 +374,31 @@ export function ProjectNavigation({
                                 <DropdownMenuSeparator />
 
                                 {/* Navigation */}
-                                <DropdownMenuItem
-                                    onClick={() => router.push(`/project/${projectId}`)}
-                                    className="gap-2"
+                                <ProjectDetailsModal
+                                    projectId={projectId}
+                                    projectName={project?.name || 'Project'}
                                 >
-                                    <Eye className="h-4 w-4" />
-                                    Project Overview
-                                </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        onSelect={(e) => e.preventDefault()}
+                                        className="gap-2"
+                                    >
+                                        <Eye className="h-4 w-4" />
+                                        Project Overview
+                                    </DropdownMenuItem>
+                                </ProjectDetailsModal>
                                 <DropdownMenuItem onClick={goToSettings} className="gap-2">
                                     <Settings className="h-4 w-4" />
                                     Project Settings
                                 </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                    onClick={() => window.open('https://x.com/SH20RAJ/status/1947957536659054848', '_blank')}
+                                    className="gap-2"
+                                >
+                                    <MessageCircle className="h-4 w-4" />
+                                    Give Feedback
+                                </DropdownMenuItem>
+
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </>

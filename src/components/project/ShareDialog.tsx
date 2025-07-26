@@ -48,8 +48,9 @@ export function ShareDialog({
   itemId,
   isOpen: externalIsOpen,
   onOpenChange: externalOnOpenChange,
-  projectVisibility = 'private'
-}: ShareDialogProps) {
+  projectVisibility = 'private',
+  children
+}: ShareDialogProps & { children?: React.ReactNode }) {
   const [internalIsOpen, setInternalIsOpen] = useState(false);
 
   // Use external state if provided, otherwise use internal state
@@ -211,6 +212,11 @@ export function ShareDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      {children && (
+        <DialogTrigger asChild>
+          {children}
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

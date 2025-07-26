@@ -41,9 +41,36 @@ export default function ProjectLayout({ children }: ProjectLayoutProps) {
     const shouldShowUnifiedNav = !pathname.includes('/settings');
     const shouldShowPanel = !pathname.includes('/settings');
 
-    // Mobile view - simplified layout
+    // Mobile view - show navigation but simplified
     if (isMobile) {
-        return <>{children}</>;
+        return (
+            <div className="h-screen flex flex-col bg-background">
+                {/* Mobile Navigation */}
+                <ProjectNavigation
+                    projectId={projectId}
+                    projectName={project?.name || 'Project'}
+                    currentUser={user}
+                    project={project}
+                    isReadOnly={isReadOnly}
+                    isPublicView={isPublicView}
+                    showDocumentPanel={false} // Always hide panel on mobile
+                    onToggleDocumentPanel={() => { }} // No-op on mobile
+                    onSave={handleSave}
+                    onCreateDocument={handleCreateDocument}
+                    onCreateCanvas={handleCreateCanvas}
+                    onExport={handleExport}
+                    saving={saving}
+                    isCreatingDocument={isCreatingDocument}
+                    isCreatingCanvas={isCreatingCanvas}
+                    isExporting={isExporting}
+                />
+
+                {/* Mobile Content - full width */}
+                <div className="flex-1 overflow-hidden">
+                    {children}
+                </div>
+            </div>
+        );
     }
 
     // Settings page - no unified navigation

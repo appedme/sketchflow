@@ -234,10 +234,10 @@ export function PlateDocumentEditor({
     };
 
     const handleFullScreen = () => {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen();
+      if (!window.document.fullscreenElement) {
+        window.document.documentElement.requestFullscreen();
       } else {
-        document.exitFullscreen();
+        window.document.exitFullscreen();
       }
     };
 
