@@ -207,14 +207,14 @@ export default function ProjectLayout({ children }: ProjectLayoutProps) {
                 {/* Document Panel */}
                 {shouldShowPanel && (
                     <div className={cn(
-                        "border-r bg-card flex-shrink-0 overflow-hidden transition-all duration-300",
+                        "bg-card flex-shrink-0 overflow-hidden transition-all duration-300",
                         showDocumentPanel ? "w-80" : "w-0"
                     )}>
                         {showDocumentPanel && (
                             <DocumentationPanel
                                 projectId={projectId}
                                 projectName={project?.name || 'Project'}
-                                className="h-full"
+                                className="h-full bg-background"
                             />
                         )}
                     </div>

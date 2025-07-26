@@ -130,7 +130,7 @@ export function ProjectNavigation({
     };
 
     return (
-        <div className="h-12 border-b bg-background/80 backdrop-blur-sm flex items-center justify-between px-2 sm:px-4 z-10 overflow-x-auto">
+        <div className="h-12 bg-background/80 backdrop-blur-sm flex items-center justify-between px-2 sm:px-4 z-10 overflow-x-auto">
             {/* Left Section */}
             <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
                 {/* Files Panel Toggle */}
@@ -151,9 +151,10 @@ export function ProjectNavigation({
                 {/* Project Name */}
                 <div className="flex items-center gap-1 sm:gap-2 min-w-0">
                     <h1 className="font-medium text-sm truncate max-w-[120px] sm:max-w-[200px]">{projectName}</h1>
+                    <title>{projectName} | SketchFlow</title>
 
                     {/* View Tracker - Hidden on mobile */}
-                    <div className="hidden sm:block">
+                    <div className="hidden ">
                         <ViewTracker
                             projectId={projectId}
                             userId={currentUser?.id}
@@ -277,27 +278,14 @@ export function ProjectNavigation({
                             </Button>
                         </ShareDialog>
 
-                        {/* Files Panel Toggle - Hidden on mobile */}
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={onToggleDocumentPanel}
-                            className="gap-2 hidden md:flex"
-                        >
-                            {showDocumentPanel ? (
-                                <PanelLeftClose className="w-4 h-4" />
-                            ) : (
-                                <PanelLeftOpen className="w-4 h-4" />
-                            )}
-                            <span className="hidden lg:inline">Files</span>
-                        </Button>
+                       
 
                         {/* View Options - Hidden on mobile */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button size="sm" variant="outline" className="gap-2 hidden md:flex">
+                                <Button size="sm" variant=" " className="gap-2 hidden md:flex">
                                     <Eye className="w-4 h-4" />
-                                    <span className="hidden lg:inline">View</span>
+                                    {/* <span className="hidden lg:inline">View</span> */}
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48">
@@ -419,6 +407,17 @@ export function ProjectNavigation({
 
                             </DropdownMenuContent>
                         </DropdownMenu>
+
+                         {/* Back to Dashboard */}
+                         <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={goToDashboard}
+                            className="gap-1 sm:gap-2 text-muted-foreground hover:text-foreground p-1 sm:p-2"
+                        >
+                            <Home className="w-4 h-4" />
+                            {/* <span className="hidden md:inline">Dashboard</span> */}
+                        </Button>
                     </>
                 )}
 
