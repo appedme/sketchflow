@@ -3,13 +3,9 @@ import { useCallback, useRef, useEffect, useState, useMemo } from "react";
 import { useRouter } from 'next/navigation';
 import {
   Excalidraw,
-  MainMenu,
   WelcomeScreen,
   Sidebar,
   convertToExcalidrawElements,
-  exportToCanvas,
-  exportToSvg,
-  exportToBlob
 } from "@excalidraw/excalidraw";
 import type {
   ExcalidrawImperativeAPI,
@@ -21,16 +17,13 @@ import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import "@excalidraw/excalidraw/index.css";
 import "../../styles/excalidraw-custom.css";
 import { CanvasProvider, useCanvas } from '@/contexts/CanvasContext';
-import { uploadImageFromDataURL } from '@/lib/imageUpload';
 import { LibraryPanel } from '@/components/canvas/LibraryPanel';
-import type { LibraryItem } from '@/lib/excalidraw-libraries';
 import { CanvasWelcomeScreen } from '@/components/canvas/CanvasWelcomeScreen';
 import { OpenMojiSidebar } from '@/components/canvas/OpenMojiSidebar';
 import { OpenMojiService, OpenMojiIcon } from '@/lib/services/openmoji';
 import { PexelsSidebar } from '@/components/canvas/PexelsSidebar';
 import { PexelsService, PexelsPhoto } from '@/lib/services/pexels';
 import Image from "next/image";
-import { FileText, PencilRuler as CanvasIcon, Smile, Camera, FileTextIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
 interface ExcalidrawCanvasProps {

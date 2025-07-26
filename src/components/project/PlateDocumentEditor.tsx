@@ -12,6 +12,7 @@ import {
   AlertCircle,
   FileText,
 } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 import { useDebounce } from '@/hooks/use-debounce';
 import { cn } from '@/lib/utils';
 import { uploadImageToImgBB } from '@/lib/imageUpload';
@@ -87,9 +88,13 @@ export function PlateDocumentEditor({
     value: document?.content || defaultContent,
   });
 
-  // Debounce editor content changes
-  const debouncedContent = useDebounce((editor as any)?.children || [], 2000);
-  const debouncedTitle = useDebounce(localTitle, 1000);
+  // Debounce editor content changes for autosave
+  const debouncedContent = useDebounce((editor as any)?.children || [], 1500);
+  const debouncedTitle = useDebounce(localTitle, 800);
+
+  // Autosave state
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
+  const [autoSaveError, setAutoSaveError] = useState<string | null>(null);
 
   // Load document data
   const loadDocument = useCallback(async () => {
@@ -129,18 +134,22 @@ export function PlateDocumentEditor({
     }
   }, [documentId, editor, startLoading, completeLoading]);
 
-  // Save document changes
-  const saveDocument = useCallback(async (title?: string, content?: any[]) => {
+  // Save document changes with autosave support
+  const saveDocument = useCallback(async (title?: string, content?: any[], isAutoSave = false) => {
     if (!document || isSaving || shareToken) return; // Don't save if using shareToken (public mode)
 
     const operationId = `save-doc-${documentId}-${Date.now()}`;
 
     try {
-      setIsSaving(true);
-      setError(null);
-
-      // Start file operation
-      startOperation(operationId, 'saving', `Document: ${document.title}`, 'Saving document...');
+      if (isAutoSave) {
+        setIsAutoSaving(true);
+        setAutoSaveError(null);
+      } else {
+        setIsSaving(true);
+        setError(null);
+        // Start file operation for manual saves
+        startOperation(operationId, 'saving', `Document: ${document.title}`, 'Saving document...');
+      }
 
       const updateData: any = {};
 
@@ -155,7 +164,11 @@ export function PlateDocumentEditor({
       }
 
       if (Object.keys(updateData).length === 0) {
-        setIsSaving(false);
+        if (isAutoSave) {
+          setIsAutoSaving(false);
+        } else {
+          setIsSaving(false);
+        }
         return;
       }
 
@@ -176,23 +189,34 @@ export function PlateDocumentEditor({
       setLastSaved(new Date());
       setHasUnsavedChanges(false);
 
-      // Complete operation successfully
-      completeOperation(operationId, true, 'Document saved successfully');
+      if (!isAutoSave) {
+        // Complete operation successfully for manual saves
+        completeOperation(operationId, true, 'Document saved successfully');
+      }
 
     } catch (err) {
       console.error('Error saving document:', err);
-      setError(err instanceof Error ? err.message : 'Failed to save document');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save document';
 
-      // Complete operation with error
-      completeOperation(operationId, false, 'Failed to save document');
+      if (isAutoSave) {
+        setAutoSaveError(errorMessage);
+      } else {
+        setError(errorMessage);
+        // Complete operation with error
+        completeOperation(operationId, false, 'Failed to save document');
+      }
     } finally {
-      setIsSaving(false);
+      if (isAutoSave) {
+        setIsAutoSaving(false);
+      } else {
+        setIsSaving(false);
+      }
     }
   }, [document, documentId, isSaving, startOperation, completeOperation]);
 
   // Auto-save on content changes
   useEffect(() => {
-    if (!document || isReadOnly || shareToken) return; // Don't auto-save in public mode
+    if (!document || isReadOnly || shareToken || isAutoSaving) return; // Don't auto-save in public mode or if already saving
 
     if (!editor) return;
 
@@ -201,24 +225,24 @@ export function PlateDocumentEditor({
 
     if (hasContentChanged) {
       setHasUnsavedChanges(true);
-      saveDocument(undefined, currentContent);
+      saveDocument(undefined, currentContent, true); // true for autosave
     }
-  }, [debouncedContent, document, editor, isReadOnly, saveDocument]);
+  }, [debouncedContent, document, editor, isReadOnly, saveDocument, isAutoSaving]);
 
   // Auto-save on title changes
   useEffect(() => {
-    if (!document || isReadOnly || shareToken || !localTitle.trim()) return; // Don't auto-save in public mode
+    if (!document || isReadOnly || shareToken || !localTitle.trim() || isAutoSaving) return; // Don't auto-save in public mode or if already saving
 
     if (localTitle !== document.title) {
       setHasUnsavedChanges(true);
-      saveDocument(localTitle);
+      saveDocument(localTitle, undefined, true); // true for autosave
     }
-  }, [debouncedTitle, document, localTitle, isReadOnly, saveDocument]);
+  }, [debouncedTitle, document, localTitle, isReadOnly, saveDocument, isAutoSaving]);
 
   // Handle manual save
   const handleManualSave = useCallback(() => {
     if (document && editor) {
-      saveDocument(localTitle, (editor as any).children);
+      saveDocument(localTitle, (editor as any).children, false); // false for manual save
     }
   }, [document, editor, localTitle, saveDocument]);
 
@@ -385,7 +409,37 @@ export function PlateDocumentEditor({
   }
 
   return (
-    <div className={cn("h-full bg-background", className)}>
+    <div className={cn("h-full bg-background relative", className)}>
+      {/* Autosave Status Indicator */}
+      {(isAutoSaving || hasUnsavedChanges || lastSaved || autoSaveError) && !isReadOnly && !shareToken && (
+        <div className="absolute top-4 right-4 z-10 flex items-center gap-2 text-xs text-muted-foreground bg-background/80 backdrop-blur-sm px-2 py-1 rounded-md border">
+          {isAutoSaving && (
+            <>
+              <Loader2 className="w-3 h-3 animate-spin" />
+              <span>Saving...</span>
+            </>
+          )}
+          {!isAutoSaving && hasUnsavedChanges && !autoSaveError && (
+            <>
+              <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
+              <span>Unsaved changes</span>
+            </>
+          )}
+          {!isAutoSaving && !hasUnsavedChanges && lastSaved && !autoSaveError && (
+            <>
+              <div className="w-2 h-2 bg-green-500 rounded-full" />
+              <span>Saved {formatDistanceToNow(lastSaved, { addSuffix: true })}</span>
+            </>
+          )}
+          {autoSaveError && (
+            <>
+              <AlertCircle className="w-3 h-3 text-red-500" />
+              <span className="text-red-500">Save failed</span>
+            </>
+          )}
+        </div>
+      )}
+
       <Plate editor={editor}>
         <EditorContainer className="h-full">
           <Editor

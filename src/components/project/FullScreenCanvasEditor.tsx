@@ -2,10 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { PanelLeftOpen, SplitSquareHorizontal, Save, ArrowLeft, Maximize, Minimize, PencilRuler } from 'lucide-react';
-import dynamic from 'next/dynamic';
 import { DocumentationPanel } from './DocumentationPanel';
 import {
   ResizableHandle,
