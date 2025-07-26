@@ -208,87 +208,16 @@ export function ProjectWorkspace({
 
   return (
     <div className="h-full flex flex-col bg-background">
-      {/* Clean Top Bar */}
-      <div className="h-12 border-b flex items-center justify-between px-4">
-        <div className="flex items-center gap-3">
-          {isMobile && (
-            <DocumentationPanel
-              projectId={projectId}
-              projectName={projectName}
-              isMobile={true}
-            />
-          )}
-          <h1 className="font-medium text-sm truncate">{projectName}</h1>
-          <ViewTracker
+      {/* Mobile Documentation Panel */}
+      {isMobile && (
+        <div className="border-b p-2">
+          <DocumentationPanel
             projectId={projectId}
-            userId={currentUser?.id}
-            isOwner={isOwner}
-            showLiveCount={true}
-            className="text-xs"
+            projectName={projectName}
+            isMobile={true}
           />
         </div>
-        <div className="flex items-center gap-2">
-          {isPublicView ? (
-            <>
-              {/* Public view controls */}
-              <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs">
-                {project?.visibility === 'public' ? <Globe className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                {project?.visibility === 'public' ? 'Public' : 'View Only'}
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleCopyUrl}
-                className="gap-2"
-              >
-                <Copy className="w-4 h-4" />
-                Copy Link
-              </Button>
-              {currentUser && (
-                <Button
-                  size="sm"
-                  variant="default"
-                  onClick={handleCloneProject}
-                  disabled={isCloning}
-                  className="gap-2"
-                >
-                  <Copy className="w-4 h-4" />
-                  {isCloning ? 'Cloning...' : 'Clone Project'}
-                </Button>
-              )}
-              {!currentUser && (
-                <Button
-                  size="sm"
-                  variant="default"
-                  onClick={() => window.location.href = `/handler/sign-in?after_auth_return_to=${encodeURIComponent(window.location.pathname + window.location.search)}`}
-                  className="gap-2"
-                >
-                  Sign In to Clone
-                </Button>
-              )}
-            </>
-          ) : (
-            <>
-              {/* Edit mode controls */}
-              <ShareDialog
-                projectId={projectId}
-                projectName={projectName}
-                projectVisibility={project?.visibility}
-              />
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleSave}
-                disabled={saving}
-                className="gap-2"
-              >
-                <Save className="w-4 h-4" />
-                {saving ? 'Saving...' : 'Save'}
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
+      )}
 
       {/* Main Content Area with Resizable Panels */}
       <div className="flex-1 overflow-hidden">

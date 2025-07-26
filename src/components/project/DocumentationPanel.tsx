@@ -11,18 +11,11 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ShareDialog } from './ShareDialog';
-import { ProjectSettingsModal } from './ProjectSettingsModal';
+
+
 import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import {
-  Plus,
   FileText,
   PencilRuler as CanvasIcon,
-  Search,
   Menu,
   Loader2,
   MoreHorizontal,
@@ -30,30 +23,11 @@ import {
   SplitSquareHorizontal,
   Maximize,
   Trash2,
-  Share,
-  Download,
-  Settings,
-  FolderOpen,
-  Home,
-  Moon,
-  Sun,
-  ExternalLink,
-  Clock,
-  Filter,
-  SortAsc,
-  Grid3X3,
-  List,
-  CheckCircle2,
-  Save,
-  RefreshCw,
-  UserPlus,
-  LogIn
+  Clock
 } from 'lucide-react';
-import { FeedbackThread } from '@/components/ui/feedback-thread';
 import { mutate } from 'swr';
 import { cn } from '@/lib/utils';
 import { useApi } from '@/hooks/useApi';
-import { useTheme } from 'next-themes';
 
 interface Document {
   id: string;
@@ -80,29 +54,19 @@ export function DocumentationPanel({
   className,
   isMobile = false
 }: DocumentationPanelProps) {
-  const { theme, setTheme } = useTheme();
   const router = useRouter();
   const user = useUser();
   const [searchTerm, setSearchTerm] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
   const [loadingFileId, setLoadingFileId] = useState<string | null>(null);
-  const [shareDialogOpen, setShareDialogOpen] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
-  const [sortBy, setSortBy] = useState<'name' | 'updated'>('updated');
-  const [filterType, setFilterType] = useState<'all' | 'documents' | 'canvases'>('all');
-  const [isSavingAll, setIsSavingAll] = useState(false);
-  const [isRevalidating, setIsRevalidating] = useState(false);
-  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
-  
-  // Optimistic updates state
+
+  // Optimistic updates state (managed by parent layout now)
   const [optimisticItems, setOptimisticItems] = useState<{
     documents: Document[];
     canvases: Canvas[];
   }>({ documents: [], canvases: [] });
-  const [isCreatingDocument, setIsCreatingDocument] = useState(false);
-  const [isCreatingCanvas, setIsCreatingCanvas] = useState(false);
 
   // Clear optimistic states when project changes
   useEffect(() => {
@@ -112,8 +76,6 @@ export function DocumentationPanel({
   const resetOptimisticState = () => {
     setOptimisticItems({ documents: [], canvases: [] });
     setLoadingFileId(null);
-    setIsCreatingDocument(false);
-    setIsCreatingCanvas(false);
   };
 
   // Get current file ID from URL
@@ -142,142 +104,16 @@ export function DocumentationPanel({
   const allDocuments = [...documents, ...optimisticItems.documents];
   const allCanvases = [...canvases, ...optimisticItems.canvases];
 
-  // Filter and sort items
-  const filteredDocs = allDocuments
+  // Filter items by search term
+  const displayDocs = allDocuments
     .filter(doc => doc.title.toLowerCase().includes(searchTerm.toLowerCase()))
-    .sort((a, b) => {
-      if (sortBy === 'name') {
-        return a.title.localeCompare(b.title);
-      }
-      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-    });
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
-  const filteredCanvases = allCanvases
+  const displayCanvases = allCanvases
     .filter(canvas => canvas.title.toLowerCase().includes(searchTerm.toLowerCase()))
-    .sort((a, b) => {
-      if (sortBy === 'name') {
-        return a.title.localeCompare(b.title);
-      }
-      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-    });
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
-  // Apply type filter
-  const displayDocs = filterType === 'canvases' ? [] : filteredDocs;
-  const displayCanvases = filterType === 'documents' ? [] : filteredCanvases;
 
-  const totalFiles = displayDocs.length + displayCanvases.length;
-
-  const createNewDocument = async () => {
-    if (isCreatingDocument) return;
-    
-    setIsCreatingDocument(true);
-    
-    // Generate optimistic document
-    const optimisticId = `temp-doc-${Date.now()}`;
-    const optimisticDoc: Document = {
-      id: optimisticId,
-      title: 'New Document',
-      updatedAt: new Date().toISOString()
-    };
-
-    // Add optimistic document immediately
-    setOptimisticItems(prev => ({
-      ...prev,
-      documents: [optimisticDoc, ...prev.documents]
-    }));
-
-    try {
-      const response = await fetch(`/api/projects/${projectId}/documents`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: 'New Document', contentText: '' }),
-      });
-      
-      if (!response.ok) throw new Error('Failed to create document');
-      
-      const newDoc = await response.json() as { id: string };
-      
-      // Remove optimistic item and refresh data
-      setOptimisticItems(prev => ({
-        ...prev,
-        documents: prev.documents.filter(doc => doc.id !== optimisticId)
-      }));
-      
-      // Update SWR cache
-      mutate(`/api/projects/${projectId}/documents`);
-      
-      // Navigate to new document
-      router.push(`/project/${projectId}/document/${newDoc.id}`);
-    } catch (error) {
-      console.error('Failed to create document:', error);
-      
-      // Remove optimistic item on error
-      setOptimisticItems(prev => ({
-        ...prev,
-        documents: prev.documents.filter(doc => doc.id !== optimisticId)
-      }));
-      
-      alert('Failed to create document. Please try again.');
-    } finally {
-      setIsCreatingDocument(false);
-    }
-  };
-
-  const createNewCanvas = async () => {
-    if (isCreatingCanvas) return;
-    
-    setIsCreatingCanvas(true);
-    
-    // Generate optimistic canvas
-    const optimisticId = `temp-canvas-${Date.now()}`;
-    const optimisticCanvas: Canvas = {
-      id: optimisticId,
-      title: 'New Canvas',
-      updatedAt: new Date().toISOString()
-    };
-
-    // Add optimistic canvas immediately
-    setOptimisticItems(prev => ({
-      ...prev,
-      canvases: [optimisticCanvas, ...prev.canvases]
-    }));
-
-    try {
-      const response = await fetch(`/api/projects/${projectId}/canvases`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: 'New Canvas', elements: [] }),
-      });
-      
-      if (!response.ok) throw new Error('Failed to create canvas');
-      
-      const newCanvas = await response.json() as { id: string };
-      
-      // Remove optimistic item and refresh data
-      setOptimisticItems(prev => ({
-        ...prev,
-        canvases: prev.canvases.filter(canvas => canvas.id !== optimisticId)
-      }));
-      
-      // Update SWR cache
-      mutate(`/api/projects/${projectId}/canvases`);
-      
-      // Navigate to new canvas
-      router.push(`/project/${projectId}/canvas/${newCanvas.id}`);
-    } catch (error) {
-      console.error('Failed to create canvas:', error);
-      
-      // Remove optimistic item on error
-      setOptimisticItems(prev => ({
-        ...prev,
-        canvases: prev.canvases.filter(canvas => canvas.id !== optimisticId)
-      }));
-      
-      alert('Failed to create canvas. Please try again.');
-    } finally {
-      setIsCreatingCanvas(false);
-    }
-  };
 
   const startRename = (id: string, currentTitle: string) => {
     setEditingId(id);
@@ -288,7 +124,7 @@ export function DocumentationPanel({
     if (!editingTitle.trim()) return;
 
     const newTitle = editingTitle.trim();
-    
+
     // Clear editing state immediately
     setEditingId(null);
     setEditingTitle('');
@@ -316,7 +152,7 @@ export function DocumentationPanel({
     } catch (error) {
       console.error('Failed to rename:', error);
       alert('Failed to rename. Please try again.');
-      
+
       // Restore editing state on error
       setEditingId(id);
       setEditingTitle(newTitle);
@@ -331,14 +167,14 @@ export function DocumentationPanel({
   const handleFileClick = (id: string, type: 'document' | 'canvas') => {
     // Don't navigate to temporary items
     if (id.startsWith('temp-')) return;
-    
+
     // Show loading state immediately
     setLoadingFileId(id);
-    
+
     // Navigate to the file
     const path = `/project/${projectId}/${type}/${id}`;
     router.push(path);
-    
+
     // Clear loading state after a short delay (the page will change anyway)
     setTimeout(() => setLoadingFileId(null), 1000);
   };
@@ -372,139 +208,15 @@ export function DocumentationPanel({
     }
   };
 
-  const shareProject = () => {
-    setShareDialogOpen(true);
-  };
-
-  const handleShareDialogClose = (open: boolean) => {
-    setShareDialogOpen(open);
-    if (!open) {
-      // Refresh project data when dialog closes to get updated visibility
-      mutate(`/api/projects/${projectId}`);
-    }
-  };
-
-  const exportProject = async () => {
-    setIsExporting(true);
-    try {
-      // First try the project export endpoint
-      const response = await fetch(`/api/projects/${projectId}/export`);
-
-      // If that fails, try a fallback approach
-      if (!response.ok) {
-        // Create a simple export with project data
-        const exportData = {
-          projectId,
-          projectName,
-          documents: documents.map(doc => ({ id: doc.id, title: doc.title, updatedAt: doc.updatedAt })),
-          canvases: canvases.map(canvas => ({ id: canvas.id, title: canvas.title, updatedAt: canvas.updatedAt })),
-          exportedAt: new Date().toISOString()
-        };
-
-        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = `${projectName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}-export.json`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        return;
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = `${projectName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}-export.json`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error('Error exporting project:', error);
-      alert('Failed to export project. Please try again.');
-    } finally {
-      setIsExporting(false);
-    }
-  };
 
 
 
-  const openProjectSettings = () => {
-    setSettingsModalOpen(true);
-  };
 
 
 
-  const goToDashboard = () => {
-    router.push('/dashboard');
-  };
 
-  const createOwnProject = () => {
-    if (user) {
-      router.push('/dashboard?create=true');
-    } else {
-      router.push('/handler/sign-in?after_auth_return_to=' + encodeURIComponent('/dashboard?create=true'));
-    }
-  };
 
-  const signIn = () => {
-    router.push('/handler/sign-in?after_auth_return_to=' + encodeURIComponent(window.location.pathname + window.location.search));
-  };
 
-  const saveAll = async () => {
-    setIsSavingAll(true);
-    try {
-      // Trigger save for all open editors
-      const saveEvent = new CustomEvent('excalidraw-save-all');
-      window.dispatchEvent(saveEvent);
-
-      // Also trigger save for any document editors
-      const docSaveEvent = new CustomEvent('document-save-all');
-      window.dispatchEvent(docSaveEvent);
-
-      // Update project timestamp
-      await fetch(`/api/projects/${projectId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lastActivity: new Date().toISOString() }),
-      });
-
-      // Show success feedback
-      setTimeout(() => setIsSavingAll(false), 1000);
-    } catch (error) {
-      console.error('Save all failed:', error);
-      setIsSavingAll(false);
-    }
-  };
-
-  const revalidateAll = async () => {
-    setIsRevalidating(true);
-    try {
-      // Revalidate all SWR caches for this project
-      await mutate(`/api/projects/${projectId}/documents`);
-      await mutate(`/api/projects/${projectId}/canvases`);
-      await mutate(`/api/projects/${projectId}`);
-
-      // Revalidate individual document and canvas caches
-      documents.forEach(doc => {
-        mutate(`/api/documents/${doc.id}`);
-      });
-      canvases.forEach(canvas => {
-        mutate(`/api/canvas/${canvas.id}`);
-      });
-
-      // Show success feedback
-      setTimeout(() => setIsRevalidating(false), 1000);
-    } catch (error) {
-      console.error('Revalidate all failed:', error);
-      setIsRevalidating(false);
-    }
-  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -524,652 +236,285 @@ export function DocumentationPanel({
 
   const PanelContent = () => (
     <div className={cn("h-full flex flex-col", className)}>
-      {/* Header */}
-      <div className="p-4 border-b space-y-3 bg-muted/30 flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0 hover:bg-primary/10"
-              onClick={goToDashboard}
-              title="Back to Dashboard"
-            >
-              <Home className="w-3 h-3" />
-            </Button>
-            <div className="w-5 h-5 rounded bg-primary/10 flex items-center justify-center">
-              <FileText className="w-3 h-3 text-primary" />
-            </div>
-            <div className="flex flex-col">
-              <h2 className="font-medium text-sm">Files</h2>
-              <span className="text-xs text-muted-foreground">{totalFiles} items</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-1">
-            {user && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="sm" variant="ghost" className="h-7 w-7 p-0 hover:bg-primary/10">
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem 
-                    onClick={createNewDocument} 
-                    className="gap-2"
-                    disabled={isCreatingDocument}
-                  >
-                    {isCreatingDocument ? (
-                      <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
-                    ) : (
-                      <FileText className="h-4 w-4 text-blue-500" />
-                    )}
-                    {isCreatingDocument ? 'Creating Document...' : 'New Document'}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={createNewCanvas} 
-                    className="gap-2"
-                    disabled={isCreatingCanvas}
-                  >
-                    {isCreatingCanvas ? (
-                      <Loader2 className="h-4 w-4 text-purple-500 animate-spin" />
-                    ) : (
-                      <CanvasIcon className="h-4 w-4 text-purple-500" />
-                    )}
-                    {isCreatingCanvas ? 'Creating Canvas...' : 'New Canvas'}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-            {user && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="sm" variant="ghost" className="h-7 w-7 p-0 hover:bg-primary/10">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem
-                    onClick={saveAll}
-                    className="gap-2"
-                    disabled={isSavingAll}
-                  >
-                    {isSavingAll ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Save className="h-4 w-4" />
-                    )}
-                    {isSavingAll ? 'Saving All...' : 'Save All'}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={revalidateAll}
-                    className="gap-2"
-                    disabled={isRevalidating}
-                  >
-                    {isRevalidating ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <RefreshCw className="h-4 w-4" />
-                    )}
-                    {isRevalidating ? 'Refreshing...' : 'Refresh All'}
-                  </DropdownMenuItem>
 
-                  <DropdownMenuSeparator />
-
-                  <DropdownMenuItem onClick={shareProject} className="gap-2">
-                    <Share className="h-4 w-4" />
-                    Share Project
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={exportProject}
-                    className="gap-2"
-                    disabled={isExporting}
-                  >
-                    {isExporting ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Download className="h-4 w-4" />
-                    )}
-                    {isExporting ? 'Exporting...' : 'Export Project'}
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => router.push(`/project/${projectId}`)} className="gap-2">
-                    <FolderOpen className="h-4 w-4" />
-                    Open Project
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={openProjectSettings} className="gap-2">
-                    <Settings className="h-4 w-4" />
-                    Project Settings
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </div>
-        </div>
-
-        <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search files..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8 h-8 text-sm bg-background"
-          />
-        </div>
-
-        {/* Filters and View Controls */}
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs">
-                  <Filter className="h-3 w-3" />
-                  {filterType === 'all' ? 'All' : filterType === 'documents' ? 'Docs' : 'Canvas'}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                <DropdownMenuItem onClick={() => setFilterType('all')} className="gap-2">
-                  {filterType === 'all' && <CheckCircle2 className="h-4 w-4" />}
-                  All Files
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilterType('documents')} className="gap-2">
-                  {filterType === 'documents' && <CheckCircle2 className="h-4 w-4" />}
-                  Documents Only
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilterType('canvases')} className="gap-2">
-                  {filterType === 'canvases' && <CheckCircle2 className="h-4 w-4" />}
-                  Canvases Only
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs">
-                  <SortAsc className="h-3 w-3" />
-                  {sortBy === 'name' ? 'Name' : 'Updated'}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                <DropdownMenuItem onClick={() => setSortBy('updated')} className="gap-2">
-                  {sortBy === 'updated' && <CheckCircle2 className="h-4 w-4" />}
-                  Last Updated
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy('name')} className="gap-2">
-                  {sortBy === 'name' && <CheckCircle2 className="h-4 w-4" />}
-                  Name A-Z
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          <div className="flex items-center gap-1">
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'ghost'}
-              size="sm"
-              className="h-7 w-7 p-0"
-              onClick={() => setViewMode('list')}
-            >
-              <List className="h-3 w-3" />
-            </Button>
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
-              size="sm"
-              className="h-7 w-7 p-0"
-              onClick={() => setViewMode('grid')}
-            >
-              <Grid3X3 className="h-3 w-3" />
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Resizable Content Area */}
+      {/* File List */}
       <div className="flex-1 overflow-hidden">
-        <ResizablePanelGroup direction="vertical" className="h-full">
-          {/* File List Panel */}
-          <ResizablePanel defaultSize={75} minSize={40} maxSize={90}>
-            <ScrollArea className="h-full">
-              <div className="p-2">
-                {isLoading ? (
-                  <div className="space-y-2">
-                    {Array.from({ length: 4 }).map((_, i) => (
-                      <div key={i} className="flex items-center gap-2 p-2 rounded animate-pulse">
-                        <div className="w-4 h-4 bg-muted rounded" />
-                        <div className="h-4 bg-muted rounded flex-1" />
-                      </div>
-                    ))}
+        <ScrollArea className="h-full">
+          <div className="p-2">
+            {isLoading ? (
+              <div className="space-y-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-2 p-2 rounded animate-pulse">
+                    <div className="w-4 h-4 bg-muted rounded" />
+                    <div className="h-4 bg-muted rounded flex-1" />
                   </div>
-                ) : (
-                  <div className={cn(
-                    viewMode === 'grid' ? 'grid grid-cols-2 gap-2' : 'space-y-1'
+                ))}
+              </div>
+            ) : (
+              <div className={cn(
+                viewMode === 'grid' ? 'grid grid-cols-2 gap-2' : 'space-y-1'
+              )}>
+                {/* Documents */}
+                {displayDocs.map((doc) => (
+                  <div key={doc.id} className={cn(
+                    "group rounded hover:bg-accent transition-colors",
+                    currentFileId === doc.id && "bg-primary/10 border border-primary/20",
+                    viewMode === 'grid' ? 'p-3 flex flex-col gap-2' : 'flex items-center gap-2 p-2'
                   )}>
-                    {/* Documents */}
-                    {displayDocs.map((doc) => (
-                      <div key={doc.id} className={cn(
-                        "group rounded hover:bg-accent transition-colors",
-                        currentFileId === doc.id && "bg-primary/10 border border-primary/20",
-                        viewMode === 'grid' ? 'p-3 flex flex-col gap-2' : 'flex items-center gap-2 p-2'
-                      )}>
-                        {editingId === doc.id ? (
-                          <>
-                            <FileText className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                            <Input
-                              value={editingTitle}
-                              onChange={(e) => setEditingTitle(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') saveRename(doc.id, 'document');
-                                if (e.key === 'Escape') cancelRename();
-                              }}
-                              onBlur={() => saveRename(doc.id, 'document')}
-                              className="h-6 text-sm flex-1"
-                              autoFocus
-                            />
-                          </>
+                    {editingId === doc.id ? (
+                      <>
+                        <FileText className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                        <Input
+                          value={editingTitle}
+                          onChange={(e) => setEditingTitle(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') saveRename(doc.id, 'document');
+                            if (e.key === 'Escape') cancelRename();
+                          }}
+                          onBlur={() => saveRename(doc.id, 'document')}
+                          className="h-6 text-sm flex-1"
+                          autoFocus
+                        />
+                      </>
+                    ) : (
+                      <>
+                        {loadingFileId === doc.id ? (
+                          <div className="flex items-center gap-2 flex-1">
+                            <div className="relative">
+                              <FileText className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                              <div className="absolute inset-0 animate-pulse bg-blue-500/20 rounded" />
+                            </div>
+                            <div className="flex items-center gap-2 flex-1">
+                              <Loader2 className="h-3 w-3 animate-spin text-blue-500" />
+                              <span className="text-sm text-blue-600 font-medium">Opening...</span>
+                            </div>
+                          </div>
                         ) : (
                           <>
-                            {loadingFileId === doc.id ? (
-                              <div className="flex items-center gap-2 flex-1">
-                                <div className="relative">
-                                  <FileText className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                                  <div className="absolute inset-0 animate-pulse bg-blue-500/20 rounded" />
+                            <FileText className={cn(
+                              "h-4 w-4 flex-shrink-0",
+                              currentFileId === doc.id ? "text-primary" : "text-blue-500"
+                            )} />
+                            <div className={cn(
+                              "flex-1",
+                              viewMode === 'grid' ? 'flex flex-col gap-1' : 'flex items-center gap-2'
+                            )}>
+                              <button
+                                onClick={() => handleFileClick(doc.id, 'document')}
+                                className={cn(
+                                  "text-sm truncate text-left transition-colors hover:text-primary",
+                                  currentFileId === doc.id && "text-primary font-medium",
+                                  viewMode === 'grid' ? 'font-medium' : 'flex-1',
+                                  doc.id.startsWith('temp-') && "opacity-60 cursor-not-allowed"
+                                )}
+                                disabled={doc.id.startsWith('temp-')}
+                              >
+                                {doc.title}
+                                {doc.id.startsWith('temp-') && (
+                                  <Badge variant="secondary" className="ml-2 text-xs">New</Badge>
+                                )}
+                              </button>
+                              {viewMode === 'grid' && (
+                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <Clock className="h-3 w-3" />
+                                  {formatDate(doc.updatedAt)}
                                 </div>
-                                <div className="flex items-center gap-2 flex-1">
-                                  <Loader2 className="h-3 w-3 animate-spin text-blue-500" />
-                                  <span className="text-sm text-blue-600 font-medium">Opening...</span>
-                                </div>
-                              </div>
-                            ) : (
-                              <>
-                                <FileText className={cn(
-                                  "h-4 w-4 flex-shrink-0",
-                                  currentFileId === doc.id ? "text-primary" : "text-blue-500"
-                                )} />
-                                <div className={cn(
-                                  "flex-1",
-                                  viewMode === 'grid' ? 'flex flex-col gap-1' : 'flex items-center gap-2'
-                                )}>
-                                  <button
-                                    onClick={() => handleFileClick(doc.id, 'document')}
-                                    className={cn(
-                                      "text-sm truncate text-left transition-colors hover:text-primary",
-                                      currentFileId === doc.id && "text-primary font-medium",
-                                      viewMode === 'grid' ? 'font-medium' : 'flex-1',
-                                      doc.id.startsWith('temp-') && "opacity-60 cursor-not-allowed"
-                                    )}
-                                    disabled={doc.id.startsWith('temp-')}
-                                  >
-                                    {doc.title}
-                                    {doc.id.startsWith('temp-') && (
-                                      <Badge variant="secondary" className="ml-2 text-xs">New</Badge>
-                                    )}
-                                  </button>
-                                  {viewMode === 'grid' && (
-                                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                      <Clock className="h-3 w-3" />
-                                      {formatDate(doc.updatedAt)}
-                                    </div>
-                                  )}
-                                </div>
-                              </>
-                            )}
-                            {user && (
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                                  >
-                                    <MoreHorizontal className="h-3 w-3" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem 
-                                    onClick={() => startRename(doc.id, doc.title)} 
-                                    className="gap-2"
-                                    disabled={doc.id.startsWith('temp-')}
-                                  >
-                                    <Edit2 className="h-4 w-4" />
-                                    Rename
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => handleFileClick(doc.id, 'document')}
-                                    className="gap-2"
-                                    disabled={doc.id.startsWith('temp-')}
-                                  >
-                                    <Maximize className="h-4 w-4" />
-                                    Full Screen
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => router.push(`/project/${projectId}/split?left=${doc.id}&leftType=document`)}
-                                    className="gap-2"
-                                    disabled={doc.id.startsWith('temp-')}
-                                  >
-                                    <SplitSquareHorizontal className="h-4 w-4" />
-                                    Split View
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    onClick={() => deleteItem(doc.id, 'document', doc.title)}
-                                    className="gap-2 text-red-600 focus:text-red-600"
-                                    disabled={doc.id.startsWith('temp-')}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                    Delete
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            )}
+                              )}
+                            </div>
                           </>
                         )}
-                      </div>
-                    ))}
+                        {user && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <MoreHorizontal className="h-3 w-3" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => startRename(doc.id, doc.title)}
+                                className="gap-2"
+                                disabled={doc.id.startsWith('temp-')}
+                              >
+                                <Edit2 className="h-4 w-4" />
+                                Rename
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleFileClick(doc.id, 'document')}
+                                className="gap-2"
+                                disabled={doc.id.startsWith('temp-')}
+                              >
+                                <Maximize className="h-4 w-4" />
+                                Full Screen
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => router.push(`/project/${projectId}/split?left=${doc.id}&leftType=document`)}
+                                className="gap-2"
+                                disabled={doc.id.startsWith('temp-')}
+                              >
+                                <SplitSquareHorizontal className="h-4 w-4" />
+                                Split View
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => deleteItem(doc.id, 'document', doc.title)}
+                                className="gap-2 text-red-600 focus:text-red-600"
+                                disabled={doc.id.startsWith('temp-')}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
+                      </>
+                    )}
+                  </div>
+                ))}
 
-                    {/* Canvases */}
-                    {displayCanvases.map((canvas) => (
-                      <div key={canvas.id} className={cn(
-                        "group rounded hover:bg-accent transition-colors",
-                        currentFileId === canvas.id && "bg-primary/10 border border-primary/20",
-                        viewMode === 'grid' ? 'p-3 flex flex-col gap-2' : 'flex items-center gap-2 p-2'
-                      )}>
-                        {editingId === canvas.id ? (
-                          <>
-                            <CanvasIcon className="h-4 w-4 text-purple-500 flex-shrink-0" />
-                            <Input
-                              value={editingTitle}
-                              onChange={(e) => setEditingTitle(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') saveRename(canvas.id, 'canvas');
-                                if (e.key === 'Escape') cancelRename();
-                              }}
-                              onBlur={() => saveRename(canvas.id, 'canvas')}
-                              className="h-6 text-sm flex-1"
-                              autoFocus
-                            />
-                          </>
+                {/* Canvases */}
+                {displayCanvases.map((canvas) => (
+                  <div key={canvas.id} className={cn(
+                    "group rounded hover:bg-accent transition-colors",
+                    currentFileId === canvas.id && "bg-primary/10 border border-primary/20",
+                    viewMode === 'grid' ? 'p-3 flex flex-col gap-2' : 'flex items-center gap-2 p-2'
+                  )}>
+                    {editingId === canvas.id ? (
+                      <>
+                        <CanvasIcon className="h-4 w-4 text-purple-500 flex-shrink-0" />
+                        <Input
+                          value={editingTitle}
+                          onChange={(e) => setEditingTitle(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') saveRename(canvas.id, 'canvas');
+                            if (e.key === 'Escape') cancelRename();
+                          }}
+                          onBlur={() => saveRename(canvas.id, 'canvas')}
+                          className="h-6 text-sm flex-1"
+                          autoFocus
+                        />
+                      </>
+                    ) : (
+                      <>
+                        {loadingFileId === canvas.id ? (
+                          <div className="flex items-center gap-2 flex-1">
+                            <div className="relative">
+                              <CanvasIcon className="h-4 w-4 text-purple-500 flex-shrink-0" />
+                              <div className="absolute inset-0 animate-pulse bg-purple-500/20 rounded" />
+                            </div>
+                            <div className="flex items-center gap-2 flex-1">
+                              <Loader2 className="h-3 w-3 animate-spin text-purple-500" />
+                              <span className="text-sm text-purple-600 font-medium">Opening...</span>
+                            </div>
+                          </div>
                         ) : (
                           <>
-                            {loadingFileId === canvas.id ? (
-                              <div className="flex items-center gap-2 flex-1">
-                                <div className="relative">
-                                  <CanvasIcon className="h-4 w-4 text-purple-500 flex-shrink-0" />
-                                  <div className="absolute inset-0 animate-pulse bg-purple-500/20 rounded" />
+                            <CanvasIcon className={cn(
+                              "h-4 w-4 flex-shrink-0",
+                              currentFileId === canvas.id ? "text-primary" : "text-purple-500"
+                            )} />
+                            <div className={cn(
+                              "flex-1",
+                              viewMode === 'grid' ? 'flex flex-col gap-1' : 'flex items-center gap-2'
+                            )}>
+                              <button
+                                onClick={() => handleFileClick(canvas.id, 'canvas')}
+                                className={cn(
+                                  "text-sm truncate text-left transition-colors hover:text-primary",
+                                  currentFileId === canvas.id && "text-primary font-medium",
+                                  viewMode === 'grid' ? 'font-medium' : 'flex-1',
+                                  canvas.id.startsWith('temp-') && "opacity-60 cursor-not-allowed"
+                                )}
+                                disabled={canvas.id.startsWith('temp-')}
+                              >
+                                {canvas.title}
+                                {canvas.id.startsWith('temp-') && (
+                                  <Badge variant="secondary" className="ml-2 text-xs">New</Badge>
+                                )}
+                              </button>
+                              {viewMode === 'grid' && (
+                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <Clock className="h-3 w-3" />
+                                  {formatDate(canvas.updatedAt)}
                                 </div>
-                                <div className="flex items-center gap-2 flex-1">
-                                  <Loader2 className="h-3 w-3 animate-spin text-purple-500" />
-                                  <span className="text-sm text-purple-600 font-medium">Opening...</span>
-                                </div>
-                              </div>
-                            ) : (
-                              <>
-                                <CanvasIcon className={cn(
-                                  "h-4 w-4 flex-shrink-0",
-                                  currentFileId === canvas.id ? "text-primary" : "text-purple-500"
-                                )} />
-                                <div className={cn(
-                                  "flex-1",
-                                  viewMode === 'grid' ? 'flex flex-col gap-1' : 'flex items-center gap-2'
-                                )}>
-                                  <button
-                                    onClick={() => handleFileClick(canvas.id, 'canvas')}
-                                    className={cn(
-                                      "text-sm truncate text-left transition-colors hover:text-primary",
-                                      currentFileId === canvas.id && "text-primary font-medium",
-                                      viewMode === 'grid' ? 'font-medium' : 'flex-1',
-                                      canvas.id.startsWith('temp-') && "opacity-60 cursor-not-allowed"
-                                    )}
-                                    disabled={canvas.id.startsWith('temp-')}
-                                  >
-                                    {canvas.title}
-                                    {canvas.id.startsWith('temp-') && (
-                                      <Badge variant="secondary" className="ml-2 text-xs">New</Badge>
-                                    )}
-                                  </button>
-                                  {viewMode === 'grid' && (
-                                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                      <Clock className="h-3 w-3" />
-                                      {formatDate(canvas.updatedAt)}
-                                    </div>
-                                  )}
-                                </div>
-                              </>
-                            )}
-                            {user && (
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                                  >
-                                    <MoreHorizontal className="h-3 w-3" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem 
-                                    onClick={() => startRename(canvas.id, canvas.title)} 
-                                    className="gap-2"
-                                    disabled={canvas.id.startsWith('temp-')}
-                                  >
-                                    <Edit2 className="h-4 w-4" />
-                                    Rename
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => handleFileClick(canvas.id, 'canvas')}
-                                    className="gap-2"
-                                    disabled={canvas.id.startsWith('temp-')}
-                                  >
-                                    <Maximize className="h-4 w-4" />
-                                    Full Screen
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => router.push(`/project/${projectId}/split?left=${canvas.id}&leftType=canvas`)}
-                                    className="gap-2"
-                                    disabled={canvas.id.startsWith('temp-')}
-                                  >
-                                    <SplitSquareHorizontal className="h-4 w-4" />
-                                    Split View
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    onClick={() => deleteItem(canvas.id, 'canvas', canvas.title)}
-                                    className="gap-2 text-red-600 focus:text-red-600"
-                                    disabled={canvas.id.startsWith('temp-')}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                    Delete
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            )}
+                              )}
+                            </div>
                           </>
                         )}
-                      </div>
-                    ))}
+                        {user && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <MoreHorizontal className="h-3 w-3" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => startRename(canvas.id, canvas.title)}
+                                className="gap-2"
+                                disabled={canvas.id.startsWith('temp-')}
+                              >
+                                <Edit2 className="h-4 w-4" />
+                                Rename
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleFileClick(canvas.id, 'canvas')}
+                                className="gap-2"
+                                disabled={canvas.id.startsWith('temp-')}
+                              >
+                                <Maximize className="h-4 w-4" />
+                                Full Screen
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => router.push(`/project/${projectId}/split?left=${canvas.id}&leftType=canvas`)}
+                                className="gap-2"
+                                disabled={canvas.id.startsWith('temp-')}
+                              >
+                                <SplitSquareHorizontal className="h-4 w-4" />
+                                Split View
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => deleteItem(canvas.id, 'canvas', canvas.title)}
+                                className="gap-2 text-red-600 focus:text-red-600"
+                                disabled={canvas.id.startsWith('temp-')}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
+                      </>
+                    )}
+                  </div>
+                ))}
 
-                    {/* Empty state */}
-                    {!isLoading && displayDocs.length === 0 && displayCanvases.length === 0 && (
-                      <div className="text-center py-8">
-                        <p className="text-sm text-muted-foreground mb-3">
-                          {searchTerm ? 'No files found' : 'No files yet'}
-                        </p>
-                        {!searchTerm && user && (
-                          <div className="space-y-2">
-                            <Button 
-                              size="sm" 
-                              onClick={createNewDocument} 
-                              className="w-full"
-                              disabled={isCreatingDocument}
-                            >
-                              {isCreatingDocument ? (
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              ) : (
-                                <FileText className="h-4 w-4 mr-2" />
-                              )}
-                              {isCreatingDocument ? 'Creating...' : 'New Document'}
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              onClick={createNewCanvas} 
-                              className="w-full"
-                              disabled={isCreatingCanvas}
-                            >
-                              {isCreatingCanvas ? (
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              ) : (
-                                <CanvasIcon className="h-4 w-4 mr-2" />
-                              )}
-                              {isCreatingCanvas ? 'Creating...' : 'New Canvas'}
-                            </Button>
-                          </div>
-                        )}
-                        {!searchTerm && !user && (
-                          <div className="space-y-2">
-                            <p className="text-xs text-muted-foreground mb-2">
-                              This project appears to be empty
-                            </p>
-                            <Button size="sm" onClick={createOwnProject} className="w-full">
-                              <UserPlus className="h-4 w-4 mr-2" />
-                              Create Your Own Project
-                            </Button>
-                          </div>
-                        )}
-                      </div>
+                {/* Empty state */}
+                {!isLoading && displayDocs.length === 0 && displayCanvases.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-sm text-muted-foreground mb-3">
+                      {searchTerm ? 'No files found' : 'No files yet'}
+                    </p>
+                    {!searchTerm && (
+                      <p className="text-xs text-muted-foreground">
+                        Use the "New" button in the top navigation to create files
+                      </p>
                     )}
                   </div>
                 )}
               </div>
-            </ScrollArea>
-          </ResizablePanel>
-
-          {/* Resizable Handle */}
-          <ResizableHandle withHandle />
-
-          {/* Bottom Controls Panel */}
-          <ResizablePanel defaultSize={25} minSize={10} maxSize={60}>
-            <div className="h-full p-3 bg-muted/30 space-y-2 overflow-y-auto">
-              {/* Theme Toggle */}
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-muted-foreground">Theme</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  className="h-7 w-7 p-0"
-                >
-                  {theme === 'dark' ? (
-                    <Sun className="h-4 w-4" />
-                  ) : (
-                    <Moon className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-
-              {/* Quick Action Buttons - Only show for authenticated users */}
-              {user && (
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={saveAll}
-                    className="gap-2 h-8"
-                    disabled={isSavingAll}
-                  >
-                    {isSavingAll ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : (
-                      <Save className="h-3 w-3" />
-                    )}
-                    {isSavingAll ? 'Saving...' : 'Save All'}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={revalidateAll}
-                    className="gap-2 h-8"
-                    disabled={isRevalidating}
-                  >
-                    {isRevalidating ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : (
-                      <RefreshCw className="h-3 w-3" />
-                    )}
-                    {isRevalidating ? 'Refresh' : 'Refresh'}
-                  </Button>
-                </div>
-              )}
-
-              {/* Action Buttons - Different for authenticated vs unauthenticated users */}
-              <div className="flex gap-2">
-                {user ? (
-                  // Authenticated user - show Share & Export
-                  <>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={shareProject}
-                      className="flex-1 gap-2 h-8"
-                    >
-                      <Share className="h-3 w-3" />
-                      Share
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={exportProject}
-                      className="flex-1 gap-2 h-8"
-                      disabled={isExporting}
-                    >
-                      {isExporting ? (
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                      ) : (
-                        <Download className="h-3 w-3" />
-                      )}
-                      {isExporting ? 'Export...' : 'Export'}
-                    </Button>
-                  </>
-                ) : (
-                  // Unauthenticated user - show Create Your Own & Sign In
-                  <>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={createOwnProject}
-                      className="flex-1 gap-2 h-8"
-                    >
-                      <UserPlus className="h-3 w-3" />
-                      Create Your Own
-                    </Button>
-                    <Button
-                      variant="default"
-                      size="sm"
-                      onClick={signIn}
-                      className="flex-1 gap-2 h-8"
-                    >
-                      <LogIn className="h-3 w-3" />
-                      Sign In
-                    </Button>
-                  </>
-                )}
-              </div>
-
-              
-
-              {/* Feedback Thread */}
-              <div className="pt-2">
-                <FeedbackThread
-                  title="💡 Share Your Ideas"
-                  description="Help us improve:"
-                  variant="compact"
-                  className="bg-muted/50 border-border"
-                />
-              </div>
-            </div>
-          </ResizablePanel>
-        </ResizablePanelGroup>
+            )}
+          </div>
+        </ScrollArea>
       </div>
     </div>
   );
@@ -1188,39 +533,10 @@ export function DocumentationPanel({
             <PanelContent />
           </SheetContent>
         </Sheet>
-        <ShareDialog
-          projectId={projectId}
-          projectName={projectName}
-          isOpen={shareDialogOpen}
-          onOpenChange={handleShareDialogClose}
-          projectVisibility={project?.visibility}
-        />
-        <ProjectSettingsModal
-          projectId={projectId}
-          projectName={projectName}
-          isOpen={settingsModalOpen}
-          onOpenChange={setSettingsModalOpen}
-        />
+
       </>
     );
   }
 
-  return (
-    <>
-      <PanelContent />
-      <ShareDialog
-        projectId={projectId}
-        projectName={projectName}
-        isOpen={shareDialogOpen}
-        onOpenChange={handleShareDialogClose}
-        projectVisibility={project?.visibility}
-      />
-      <ProjectSettingsModal
-        projectId={projectId}
-        projectName={projectName}
-        isOpen={settingsModalOpen}
-        onOpenChange={setSettingsModalOpen}
-      />
-    </>
-  );
+  return <PanelContent />;
 }
