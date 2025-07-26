@@ -209,7 +209,7 @@ export function ProjectWorkspace({
   return (
     <div className="h-full flex flex-col bg-background">
       {/* Mobile Documentation Panel */}
-      {isMobile && (
+      {/* {isMobile && (
         <div className="border-b p-2">
           <DocumentationPanel
             projectId={projectId}
@@ -217,7 +217,7 @@ export function ProjectWorkspace({
             isMobile={true}
           />
         </div>
-      )}
+      )} */}
 
       {/* Main Content Area with Resizable Panels */}
       <div className="flex-1 overflow-hidden">

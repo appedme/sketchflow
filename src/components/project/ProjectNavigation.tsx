@@ -210,7 +210,7 @@ export function ProjectNavigation({
                         {currentUser && (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button size="sm" variant="" className="gap-2">
+                                    <Button size="sm" variant="outline" className="gap-2">
                                         <Plus className="w-4 h-4" />
                                         New
                                     </Button>
@@ -268,7 +268,7 @@ export function ProjectNavigation({
                         >
                             <Button size="sm" variant="outline" className="gap-2">
                                 <Share className="w-4 h-4" />
-                                {/* Share */}
+                                <span className="hidden sm:inline">Share</span>
                             </Button>
                         </ShareDialog>
 
