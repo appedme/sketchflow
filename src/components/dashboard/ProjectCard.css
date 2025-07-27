@@ -411,8 +411,8 @@
   left: 0;
   width: 4px;
   height: 100%;
-  background: var(--project-card-active-color);
-  border-radius: var(--project-card-radius) 0 0 var(--project-card-radius);
+  /* background: var(--project-card-active-color);
+  border-radius: var(--project-card-radius) 0 0 var(--project-card-radius); */
 }
 
 /* Status Indicators */

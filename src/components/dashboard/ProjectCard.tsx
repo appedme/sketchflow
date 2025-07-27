@@ -422,7 +422,7 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
         <>
             <Card className={cn(
                 "project-card project-card--grid",
-                project.visibility === 'public' && "project-card--public",
+                // project.visibility === 'public' && "project-card--public",
                 project.status === 'active' && "project-card--active"
             )}>
                 <CardHeader className="project-card__header">
