@@ -18,6 +18,7 @@ import "@excalidraw/excalidraw/index.css";
 import "../../styles/excalidraw-custom.css";
 import { CanvasProvider, useCanvas } from '@/contexts/CanvasContext';
 import { LibraryPanel } from '@/components/canvas/LibraryPanel';
+import { ExcalidrawLibrarySystem } from '@/components/canvas/ExcalidrawLibrarySystem';
 import { CanvasWelcomeScreen } from '@/components/canvas/CanvasWelcomeScreen';
 import { OpenMojiSidebar } from '@/components/canvas/OpenMojiSidebar';
 import { OpenMojiService, OpenMojiIcon } from '@/lib/services/openmoji';
@@ -187,7 +188,57 @@ function ExcalidrawCanvasContent({
         {!isReadOnly && !shareToken && (
           <>
             <Sidebar name="library" tab="library">
-              <LibraryPanel />
+              <div className="p-4 space-y-4">
+                <div className="flex flex-col gap-2">
+                  <ExcalidrawLibrarySystem excalidrawAPI={excalidrawAPIRef.current} />
+                  <LibraryPanel
+                    onAddLibraryItems={(items) => {
+                      if (excalidrawAPIRef.current) {
+                        // Convert library items to Excalidraw elements and add to canvas
+                        const elements = items.map(item => ({
+                          ...item,
+                          x: Math.random() * 200 + 100,
+                          y: Math.random() * 200 + 100,
+                        }));
+
+                        excalidrawAPIRef.current.updateScene({
+                          elements: [...(excalidrawAPIRef.current.getSceneElements() || []), ...elements],
+                        });
+                      }
+                    }}
+                  />
+                </div>
+
+                <div className="border-t pt-4">
+                  <h3 className="text-sm font-medium mb-2">Quick Actions</h3>
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => {
+                        if (excalidrawAPIRef.current) {
+                          const library = excalidrawAPIRef.current.getLibrary();
+                          console.log('Current library:', library);
+                        }
+                      }}
+                      className="w-full text-left text-xs text-muted-foreground hover:text-foreground p-2 rounded hover:bg-muted transition-colors"
+                    >
+                      View Library in Console
+                    </button>
+                    <button
+                      onClick={() => {
+                        const url = prompt('Enter library URL:');
+                        if (url) {
+                          const currentUrl = new URL(window.location.href);
+                          currentUrl.hash = `addLibrary=${encodeURIComponent(url)}`;
+                          window.location.href = currentUrl.toString();
+                        }
+                      }}
+                      className="w-full text-left text-xs text-muted-foreground hover:text-foreground p-2 rounded hover:bg-muted transition-colors"
+                    >
+                      Quick Import from URL
+                    </button>
+                  </div>
+                </div>
+              </div>
             </Sidebar>
 
             <Sidebar name="openmoji" tab="openmoji">

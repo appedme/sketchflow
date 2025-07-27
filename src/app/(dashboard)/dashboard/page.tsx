@@ -240,7 +240,7 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
-            <div>
+            <div className='hidden sm:block'>
               <h1 className="text-3xl font-bold text-foreground">
                 Welcome back, {user?.displayName?.split(' ')[0] || 'there'}
               </h1>

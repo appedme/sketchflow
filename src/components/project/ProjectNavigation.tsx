@@ -151,8 +151,7 @@ export function ProjectNavigation({
                 {/* Project Name */}
                 <div className="flex items-center gap-1 sm:gap-2 min-w-0">
                     <h1 className="font-medium text-sm truncate max-w-[120px] sm:max-w-[200px]">{projectName}</h1>
-                    <title>{projectName} | SketchFlow</title>
-
+                    {/* {projectName && <title>{projectId} | SketchFlow</title>} */}
                     {/* View Tracker - Hidden on mobile */}
                     <div className="hidden ">
                         <ViewTracker

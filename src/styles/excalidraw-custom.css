@@ -222,7 +222,7 @@
 } */
 
 
-.excalidraw {
+.excalidraw, .dark  {
   --theme-filter: invert(100%) hue-rotate(180deg);
   --button-destructive-bg-color: #1a0000;
   --button-destructive-color: #ff4444;
@@ -249,9 +249,9 @@
   --popup-text-color: #cccccc;
   --popup-text-inverted-color: #333333;
   --select-highlight-color: #ffaa00;
-  --shadow-island: 0px 0px 20px 0px rgba(255, 170, 0, 0.3),
+  /* --shadow-island: 0px 0px 20px 0px rgba(255, 170, 0, 0.3),
     0px 0px 40px 0px rgba(255, 170, 0, 0.1),
-    0px 10px 30px 0px rgba(0, 0, 0, 0.8);
+    0px 10px 30px 0px rgba(0, 0, 0, 0.8); */
 
   --button-hover-bg: #222222;
   --button-active-bg: #333333;

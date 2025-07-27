@@ -53,10 +53,9 @@ function CanvasLoadingFallback() {
   }, []);
 
   return (
-    <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="h-full w-full flex items-center justify-center  ">
       <div className="text-center space-y-6 max-w-md">
         <Loading size="lg" text="Loading Canvas Editor..." />
-        
         {/* Progress bar */}
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div 
