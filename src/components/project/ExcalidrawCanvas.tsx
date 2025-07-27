@@ -1,11 +1,8 @@
 'use client';
-import { useCallback, useRef, useEffect, useState, useMemo } from "react";
-import { useRouter } from 'next/navigation';
+import { useCallback, useRef, useEffect } from "react";
 import {
   Excalidraw,
   WelcomeScreen,
-  Sidebar,
-  convertToExcalidrawElements,
 } from "@excalidraw/excalidraw";
 import type {
   ExcalidrawImperativeAPI,
@@ -17,14 +14,7 @@ import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import "@excalidraw/excalidraw/index.css";
 import "../../styles/excalidraw-custom.css";
 import { CanvasProvider, useCanvas } from '@/contexts/CanvasContext';
-import { LibraryPanel } from '@/components/canvas/LibraryPanel';
-import { ExcalidrawLibrarySystem } from '@/components/canvas/ExcalidrawLibrarySystem';
 import { CanvasWelcomeScreen } from '@/components/canvas/CanvasWelcomeScreen';
-import { OpenMojiSidebar } from '@/components/canvas/OpenMojiSidebar';
-import { OpenMojiService, OpenMojiIcon } from '@/lib/services/openmoji';
-import { PexelsSidebar } from '@/components/canvas/PexelsSidebar';
-import { PexelsService, PexelsPhoto } from '@/lib/services/pexels';
-import Image from "next/image";
 import { useTheme } from 'next-themes';
 
 interface ExcalidrawCanvasProps {
@@ -36,25 +26,11 @@ interface ExcalidrawCanvasProps {
 }
 
 function ExcalidrawCanvasContent({
-  projectId,
   projectName,
-  canvasId,
   isReadOnly = false,
   shareToken
 }: ExcalidrawCanvasProps) {
-  const router = useRouter();
   const excalidrawAPIRef = useRef<ExcalidrawImperativeAPI | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const sceneFileInputRef = useRef<HTMLInputElement>(null);
-
-  // OpenMoji sidebar state
-  const [isOpenMojiSidebarOpen, setIsOpenMojiSidebarOpen] = useState(false);
-  const openMojiService = useMemo(() => OpenMojiService.getInstance(), []);
-
-  // Pexels sidebar state
-  const [isPexelsSidebarOpen, setIsPexelsSidebarOpen] = useState(false);
-  const pexelsService = useMemo(() => PexelsService.getInstance(), []);
-
   const { theme } = useTheme();
 
   const {
@@ -65,7 +41,6 @@ function ExcalidrawCanvasContent({
     updateElements,
     updateAppState,
     updateFiles,
-    saveCanvas,
     isLoading
   } = useCanvas();
 
@@ -77,18 +52,10 @@ function ExcalidrawCanvasContent({
       }
     };
 
-    const handleResetZoom = () => {
-      if (excalidrawAPIRef.current) {
-        excalidrawAPIRef.current.resetZoom();
-      }
-    };
-
     window.addEventListener('canvas-fit-to-content', handleFitToContent);
-    window.addEventListener('canvas-reset-zoom', handleResetZoom);
 
     return () => {
       window.removeEventListener('canvas-fit-to-content', handleFitToContent);
-      window.removeEventListener('canvas-reset-zoom', handleResetZoom);
     };
   }, []);
 
@@ -119,7 +86,7 @@ function ExcalidrawCanvasContent({
   }, [elements, appState, files, updateElements, updateAppState, updateFiles, isReadOnly, shareToken]);
 
   // Handle library items
-  const handleLibraryChange = useCallback((libraryItems: LibraryItems) => {
+  const handleLibraryChange = useCallback((_libraryItems: LibraryItems) => {
     // Handle library changes if needed
   }, []);
 
@@ -169,165 +136,18 @@ function ExcalidrawCanvasContent({
         name={projectName}
         UIOptions={{
           canvasActions: {
-            loadScene: (!isReadOnly && !shareToken) ? {} : false,
-            saveScene: (!isReadOnly && !shareToken) ? {} : false,
-            export: {},
-            saveAsImage: {},
+            loadScene: !isReadOnly && !shareToken,
+            saveScene: !isReadOnly && !shareToken,
+            export: true,
+            saveAsImage: true,
           },
         }}
       >
 
 
         <WelcomeScreen>
-          <CanvasWelcomeScreen
-            projectName={projectName}
-            isReadOnly={isReadOnly || !!shareToken}
-          />
+          <CanvasWelcomeScreen projectName={projectName} />
         </WelcomeScreen>
-
-        {!isReadOnly && !shareToken && (
-          <>
-            <Sidebar name="library" tab="library">
-              <div className="p-4 space-y-4">
-                <div className="flex flex-col gap-2">
-                  <ExcalidrawLibrarySystem excalidrawAPI={excalidrawAPIRef.current} />
-                  <LibraryPanel
-                    onAddLibraryItems={(items) => {
-                      if (excalidrawAPIRef.current) {
-                        // Convert library items to Excalidraw elements and add to canvas
-                        const elements = items.map(item => ({
-                          ...item,
-                          x: Math.random() * 200 + 100,
-                          y: Math.random() * 200 + 100,
-                        }));
-
-                        excalidrawAPIRef.current.updateScene({
-                          elements: [...(excalidrawAPIRef.current.getSceneElements() || []), ...elements],
-                        });
-                      }
-                    }}
-                  />
-                </div>
-
-                <div className="border-t pt-4">
-                  <h3 className="text-sm font-medium mb-2">Quick Actions</h3>
-                  <div className="space-y-2">
-                    <button
-                      onClick={() => {
-                        if (excalidrawAPIRef.current) {
-                          const library = excalidrawAPIRef.current.getLibrary();
-                          console.log('Current library:', library);
-                        }
-                      }}
-                      className="w-full text-left text-xs text-muted-foreground hover:text-foreground p-2 rounded hover:bg-muted transition-colors"
-                    >
-                      View Library in Console
-                    </button>
-                    <button
-                      onClick={() => {
-                        const url = prompt('Enter library URL:');
-                        if (url) {
-                          const currentUrl = new URL(window.location.href);
-                          currentUrl.hash = `addLibrary=${encodeURIComponent(url)}`;
-                          window.location.href = currentUrl.toString();
-                        }
-                      }}
-                      className="w-full text-left text-xs text-muted-foreground hover:text-foreground p-2 rounded hover:bg-muted transition-colors"
-                    >
-                      Quick Import from URL
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </Sidebar>
-
-            <Sidebar name="openmoji" tab="openmoji">
-              <OpenMojiSidebar
-                isOpen={isOpenMojiSidebarOpen}
-                onClose={() => setIsOpenMojiSidebarOpen(false)}
-                onEmojiSelect={(emoji: OpenMojiIcon) => {
-                  if (excalidrawAPIRef.current) {
-                    // Add emoji to canvas
-                    const newElement = {
-                      type: "text" as const,
-                      x: 100,
-                      y: 100,
-                      width: 50,
-                      height: 50,
-                      text: emoji.emoji,
-                      fontSize: 40,
-                      fontFamily: 1,
-                      textAlign: "center" as const,
-                      verticalAlign: "middle" as const,
-                    };
-
-                    const elements = convertToExcalidrawElements([newElement]);
-                    excalidrawAPIRef.current.updateScene({
-                      elements: [...(excalidrawAPIRef.current.getSceneElements() || []), ...elements],
-                    });
-                  }
-                }}
-              />
-            </Sidebar>
-
-            <Sidebar name="pexels" tab="pexels">
-              <PexelsSidebar
-                isOpen={isPexelsSidebarOpen}
-                onClose={() => setIsPexelsSidebarOpen(false)}
-                onImageSelect={async (photo: PexelsPhoto) => {
-                  if (excalidrawAPIRef.current) {
-                    try {
-                      // Create image element
-                      const img = new Image();
-                      img.crossOrigin = "anonymous";
-                      img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        if (ctx) {
-                          canvas.width = img.width;
-                          canvas.height = img.height;
-                          ctx.drawImage(img, 0, 0);
-
-                          const dataURL = canvas.toDataURL('image/png');
-
-                          const newElement = {
-                            type: "image" as const,
-                            x: 100,
-                            y: 100,
-                            width: Math.min(img.width, 400),
-                            height: Math.min(img.height, 300),
-                            fileId: `pexels-${photo.id}`,
-                          };
-
-                          const elements = convertToExcalidrawElements([newElement]);
-                          const files = {
-                            [`pexels-${photo.id}`]: {
-                              mimeType: "image/png",
-                              id: `pexels-${photo.id}`,
-                              dataURL: dataURL,
-                              created: Date.now(),
-                            }
-                          };
-
-                          excalidrawAPIRef.current?.updateScene({
-                            elements: [...(excalidrawAPIRef.current.getSceneElements() || []), ...elements],
-                            files: {
-                              ...excalidrawAPIRef.current.getFiles(),
-                              ...files
-                            }
-                          });
-                        }
-                      };
-                      img.src = photo.src.medium;
-                    } catch (error) {
-                      console.error('Error adding Pexels image:', error);
-                    }
-                  }
-                }}
-              />
-            </Sidebar>
-          </>
-        )}
       </Excalidraw>
 
       {/* Saving indicator */}
