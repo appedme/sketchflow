@@ -3,6 +3,7 @@ import { useCallback, useRef, useEffect } from "react";
 import {
   Excalidraw,
   WelcomeScreen,
+  Sidebar,
 } from "@excalidraw/excalidraw";
 import type {
   ExcalidrawImperativeAPI,
@@ -15,6 +16,7 @@ import "@excalidraw/excalidraw/index.css";
 import "../../styles/excalidraw-custom.css";
 import { CanvasProvider, useCanvas } from '@/contexts/CanvasContext';
 import { CanvasWelcomeScreen } from '@/components/canvas/CanvasWelcomeScreen';
+import { ExcalidrawLibrarySystem } from '@/components/canvas/ExcalidrawLibrarySystem';
 import { useTheme } from 'next-themes';
 
 interface ExcalidrawCanvasProps {
@@ -136,10 +138,10 @@ function ExcalidrawCanvasContent({
         name={projectName}
         UIOptions={{
           canvasActions: {
-            loadScene: !isReadOnly && !shareToken,
-            saveScene: !isReadOnly && !shareToken,
-            export: true,
-            saveAsImage: true,
+            loadScene: (!isReadOnly && !shareToken) ? {} : false,
+            saveScene: (!isReadOnly && !shareToken) ? {} : false,
+            export: {},
+            saveAsImage: {},
           },
         }}
       >
@@ -148,6 +150,14 @@ function ExcalidrawCanvasContent({
         <WelcomeScreen>
           <CanvasWelcomeScreen projectName={projectName} />
         </WelcomeScreen>
+
+        {!isReadOnly && !shareToken && (
+          <Sidebar name="library" tab="library">
+            <div className="p-4 space-y-4">
+              <ExcalidrawLibrarySystem excalidrawAPI={excalidrawAPIRef.current} />
+            </div>
+          </Sidebar>
+        )}
       </Excalidraw>
 
       {/* Saving indicator */}
