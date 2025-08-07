@@ -57,7 +57,7 @@ const pricingPlans = [
     cta: "Get Started Free",
     ctaVariant: "outline" as const,
     limits: {
-      projects: 3,
+      projects: "Unlimited",
       collaborators: 1,
       storage: "1GB",
       exports: "Unlimited"
@@ -356,6 +356,11 @@ export default function PricingPage() {
                         )}
                         variant={plan.ctaVariant}
                         size="lg"
+                        onClick={() => {
+                          if (plan.id === "pro") {
+                            alert("Free unlimited for public preview");
+                          }
+                        }}
                       >
                         {plan.cta}
                         <ArrowRight className="w-4 h-4 ml-2" />
@@ -393,13 +398,21 @@ export default function PricingPage() {
                             ) : (
                               <X className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                             )}
-                            <span className={cn(
-                              "text-sm",
-                              !feature.included && "text-muted-foreground",
-                              feature.highlight && "font-semibold text-primary"
-                            )}>
-                              {feature.name}
-                            </span>
+                            {plan.id === "free" && feature.name === "Up to 3 projects" ? (
+                              <span className={cn(
+                                "text-sm font-semibold text-primary"
+                              )}>
+                                <s>Up to 3 projects</s> Unlimited projects
+                              </span>
+                            ) : (
+                              <span className={cn(
+                                "text-sm",
+                                !feature.included && "text-muted-foreground",
+                                feature.highlight && "font-semibold text-primary"
+                              )}>
+                                {feature.name}
+                              </span>
+                            )}
                           </li>
                         ))}
                       </ul>
