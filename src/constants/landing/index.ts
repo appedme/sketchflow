@@ -4,7 +4,7 @@ export const LANDING_CONTENT = {
     badge: "BETA",
     title: "Sketch. Document. Collaborate.",
     subtitle: "All in one place",
-    // description: "Transform your ideas into visual stories with powerful diagramming and seamless documentation. Enhanced with unlimited AI text completions and AI-powered diagram generation. Community sharing, commenting, and blog publishing features coming soon.",
+    description: " ",
     announcement: "Welcome to Sketchflow 👋",
     cta: {
       primary: "Start Creating",
@@ -23,6 +23,11 @@ export const LANDING_CONTENT = {
       title: "Unlimited AI Text Completions",
       description: "Generate unlimited text content with AI-powered writing assistance. Free text generation, smart completions, and context-aware suggestions for your documents.",
       icon: "Brain"
+    },
+    {
+      title: "Advanced Sharing (Coming Soon)",
+      description: "Future features: Community sharing, real-time commenting, collaborative editing, and blog publishing capabilities",
+      icon: "Share"
     }
   ],
   useCases: [

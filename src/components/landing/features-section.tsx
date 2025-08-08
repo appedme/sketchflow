@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Users, Share, Brain } from "lucide-react";
 import { LANDING_CONTENT } from "@/constants/landing";
-import { BorderBeam } from "../magicui/border-beam";
+// import { BorderBeam } from "../magicui/border-beam";
 
 const iconMap = {
   FileText,
@@ -43,7 +43,7 @@ export function FeaturesSection() {
                     {feature.description}
                   </CardDescription>
                 </CardContent>
-                <BorderBeam duration={8} size={100} />
+                {/* <BorderBeam duration={8} size={100} /> */}
 
               </Card>
             );

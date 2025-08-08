@@ -1,10 +1,11 @@
+'use client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Code, Building, GraduationCap, Calendar, Palette, Search, PenTool, User, Image, FileImage, Kanban, Network, Paintbrush, ExternalLink, Brain } from "lucide-react";
+import { Code, Building, GraduationCap, Calendar, Palette, Search, PenTool, User, Image, FileImage, Kanban, Network, Paintbrush, ExternalLink, Brain, Layout, FilePlus } from "lucide-react";
 import { LANDING_CONTENT } from "@/constants/landing";
 import Link from "next/link";
 
-import { BorderBeam } from "../magicui/border-beam";
+// import { BorderBeam } from "../magicui/border-beam";
 
 const iconMap = {
   Code,
@@ -21,6 +22,8 @@ const iconMap = {
   Network,
   Paintbrush,
   Brain,
+  Layout,
+  FilePlus,
 } as const;
 
 export function UseCasesSection() {
@@ -54,7 +57,7 @@ export function UseCasesSection() {
                   <CardDescription className="text-sm">
                     {useCase.description}
                   </CardDescription>
-                  <BorderBeam duration={8} size={100} />
+                  {/* <BorderBeam duration={8} size={100} /> */}
                 </CardContent>
               </Card>
             );
