@@ -120,7 +120,9 @@ export function WorkspaceBottomBar({
                         {/* Status indicator */}
                         <div className="text-xs text-muted-foreground">
                             {hasUnsavedChanges ? (
-                                <span className="text-orange-600">Unsaved changes</span>
+                                <span className="text-orange-600">
+                                    {/* Unsaved changes */}
+                                </span>
                             ) : (
                                 <span className="flex items-center gap-1">
                                     <span className="w-2 h-2 bg-green-500 rounded-full"></span>
