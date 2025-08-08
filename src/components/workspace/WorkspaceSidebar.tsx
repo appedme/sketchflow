@@ -5,6 +5,7 @@ import { useProjectFiles } from '@/lib/hooks/useProjectData';
 import { useWorkspaceStore } from '@/lib/stores/useWorkspaceStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
     FileText,
@@ -13,7 +14,11 @@ import {
     Plus,
     MoreHorizontal,
     Clock,
-    Folder
+    Folder,
+    Edit2,
+    Check,
+    X,
+    Maximize
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -34,6 +39,11 @@ export function WorkspaceSidebar({ projectId, project }: WorkspaceSidebarProps) 
     const [searchTerm, setSearchTerm] = useState('');
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editingTitle, setEditingTitle] = useState('');
+
+    // Project editing states
+    const [editingProject, setEditingProject] = useState(false);
+    const [projectName, setProjectName] = useState(project?.name || '');
+    const [projectDescription, setProjectDescription] = useState(project?.description || '');
 
     const { files, isLoading, mutateAll } = useProjectFiles(projectId);
     const { openFile, activeFileId, setActiveFile } = useWorkspaceStore();
@@ -106,10 +116,28 @@ export function WorkspaceSidebar({ projectId, project }: WorkspaceSidebarProps) 
         if (!editingTitle.trim()) return;
 
         const newTitle = editingTitle.trim();
+        const oldTitle = file.title;
+
+        // Clear editing state immediately
         setEditingId(null);
         setEditingTitle('');
 
         try {
+            // Optimistic update - update the files list immediately
+            const updatedFiles = files.map(f =>
+                f.id === file.id ? { ...f, title: newTitle } : f
+            );
+
+            // Update cache optimistically
+            mutate(`/api/projects/${projectId}/documents`,
+                files.filter(f => f.type === 'document').map(f =>
+                    f.id === file.id ? { ...f, title: newTitle } : f
+                ), false);
+            mutate(`/api/projects/${projectId}/canvases`,
+                files.filter(f => f.type === 'canvas').map(f =>
+                    f.id === file.id ? { ...f, title: newTitle } : f
+                ), false);
+
             const endpoint = file.type === 'document'
                 ? `/api/documents/${file.id}`
                 : `/api/canvas/${file.id}`;
@@ -122,12 +150,19 @@ export function WorkspaceSidebar({ projectId, project }: WorkspaceSidebarProps) 
 
             if (!response.ok) throw new Error('Failed to rename');
 
-            // Update SWR cache
-            mutate(`/api/projects/${projectId}/documents`);
-            mutate(`/api/projects/${projectId}/canvases`);
+            // Revalidate to get fresh data
             mutateAll();
         } catch (error) {
             console.error('Failed to rename:', error);
+            // Revert optimistic update
+            mutate(`/api/projects/${projectId}/documents`,
+                files.filter(f => f.type === 'document').map(f =>
+                    f.id === file.id ? { ...f, title: oldTitle } : f
+                ), false);
+            mutate(`/api/projects/${projectId}/canvases`,
+                files.filter(f => f.type === 'canvas').map(f =>
+                    f.id === file.id ? { ...f, title: oldTitle } : f
+                ), false);
             alert('Failed to rename. Please try again.');
         }
     };
@@ -163,6 +198,63 @@ export function WorkspaceSidebar({ projectId, project }: WorkspaceSidebarProps) 
         }
     };
 
+    // Project editing functions
+    const startEditingProject = () => {
+        setEditingProject(true);
+        setProjectName(project?.name || '');
+        setProjectDescription(project?.description || '');
+    };
+
+    const saveProjectChanges = async () => {
+        if (!projectName.trim()) return;
+
+        const oldName = project?.name;
+        const oldDescription = project?.description;
+
+        // Optimistic update
+        setEditingProject(false);
+
+        try {
+            // Update cache optimistically
+            mutate(`/api/projects/${projectId}`, {
+                ...project,
+                name: projectName.trim(),
+                description: projectDescription.trim()
+            }, false);
+
+            const response = await fetch(`/api/projects/${projectId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: projectName.trim(),
+                    description: projectDescription.trim()
+                }),
+            });
+
+            if (!response.ok) throw new Error('Failed to update project');
+
+            // Revalidate to get fresh data
+            mutate(`/api/projects/${projectId}`);
+        } catch (error) {
+            console.error('Failed to update project:', error);
+            // Revert optimistic update
+            mutate(`/api/projects/${projectId}`, {
+                ...project,
+                name: oldName,
+                description: oldDescription
+            }, false);
+            setProjectName(oldName || '');
+            setProjectDescription(oldDescription || '');
+            alert('Failed to update project. Please try again.');
+        }
+    };
+
+    const cancelProjectEdit = () => {
+        setEditingProject(false);
+        setProjectName(project?.name || '');
+        setProjectDescription(project?.description || '');
+    };
+
     const FileItem = ({ file }: { file: any }) => {
         const Icon = file.type === 'canvas' ? PencilRuler : FileText;
         const isActive = activeFileId === file.id;
@@ -190,11 +282,11 @@ export function WorkspaceSidebar({ projectId, project }: WorkspaceSidebarProps) 
         return (
             <div
                 className={cn(
-                    "group flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors",
-                    "hover:bg-muted/50",
-                    isActive && "bg-primary/10 border border-primary/20"
+                    "group flex items-center gap-3 p-2 rounded-md cursor-pointer",
+                    "hover:bg-muted/30",
+                    isActive && "bg-primary/5 border-l-2 border-primary"
                 )}
-                onClick={() => handleFileClick(file)}
+                onClick={() => !isEditing && handleFileClick(file)}
             >
                 <Icon className={cn(
                     "w-4 h-4 flex-shrink-0",
@@ -230,8 +322,23 @@ export function WorkspaceSidebar({ projectId, project }: WorkspaceSidebarProps) 
                         <DropdownMenuItem onClick={() => handleFileClick(file)}>
                             Open
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => startRename(file)}>
+                        <DropdownMenuItem onClick={(e) => {
+                            e.stopPropagation();
+                            startRename(file);
+                        }}>
                             Rename
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {
+                            // Open file in fullscreen mode
+                            handleFileClick(file);
+                            // Toggle fullscreen after opening
+                            setTimeout(() => {
+                                const { toggleFullscreen } = useWorkspaceStore.getState();
+                                toggleFullscreen();
+                            }, 100);
+                        }}>
+                            <Maximize className="w-4 h-4 mr-2" />
+                            Open Fullscreen
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -250,16 +357,77 @@ export function WorkspaceSidebar({ projectId, project }: WorkspaceSidebarProps) 
         <div className="h-full flex flex-col bg-card">
             {/* Header */}
             <div className="p-4 border-b">
-                <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                        <Folder className="w-4 h-4 text-primary" />
-                        <h2 className="font-semibold truncate">{project.name}</h2>
-                    </div>
+                {/* Project Info */}
+                <div className="mb-4">
+                    {editingProject ? (
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                                <Input
+                                    value={projectName}
+                                    onChange={(e) => setProjectName(e.target.value)}
+                                    className="h-8 font-semibold"
+                                    placeholder="Project name"
+                                    autoFocus
+                                />
+                            </div>
+                            <Textarea
+                                value={projectDescription}
+                                onChange={(e) => setProjectDescription(e.target.value)}
+                                className="min-h-[60px] text-sm resize-none"
+                                placeholder="Project description (optional)"
+                            />
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    size="sm"
+                                    onClick={saveProjectChanges}
+                                    className="h-7 px-2"
+                                >
+                                    <Check className="w-3 h-3" />
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={cancelProjectEdit}
+                                    className="h-7 px-2"
+                                >
+                                    <X className="w-3 h-3" />
+                                </Button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="group">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                    <Folder className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                                    <h2 className="font-semibold truncate text-sm">{project?.name}</h2>
+                                </div>
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={startEditingProject}
+                                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
+                                >
+                                    <Edit2 className="w-3 h-3" />
+                                </Button>
+                            </div>
+                            {project?.description && (
+                                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                    {project.description}
+                                </p>
+                            )}
+                        </div>
+                    )}
+                </div>
 
+                {/* Create File Button */}
+                <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Files
+                    </span>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0">
-                                <Plus className="w-4 h-4" />
+                            <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                                <Plus className="w-3 h-3" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -294,43 +462,22 @@ export function WorkspaceSidebar({ projectId, project }: WorkspaceSidebarProps) 
                         <div className="space-y-2">
                             {Array.from({ length: 4 }).map((_, i) => (
                                 <div key={i} className="flex items-center gap-3 p-2">
-                                    <div className="w-4 h-4 bg-muted rounded animate-pulse" />
+                                    <div className="w-4 h-4 bg-muted/50 rounded" />
                                     <div className="flex-1 space-y-1">
-                                        <div className="h-4 bg-muted rounded animate-pulse" />
-                                        <div className="h-3 bg-muted rounded animate-pulse w-2/3" />
+                                        <div className="h-3 bg-muted/50 rounded" />
+                                        <div className="h-2 bg-muted/30 rounded w-2/3" />
                                     </div>
                                 </div>
                             ))}
                         </div>
                     ) : (
                         <>
-                            {/* Documents */}
-                            {documents.length > 0 && (
-                                <div>
-                                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                                        Documents ({documents.length})
-                                    </h3>
-                                    <div className="space-y-1">
-                                        {documents.map((file) => (
-                                            <FileItem key={file.id} file={file} />
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Canvases */}
-                            {canvases.length > 0 && (
-                                <div>
-                                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                                        Canvases ({canvases.length})
-                                    </h3>
-                                    <div className="space-y-1">
-                                        {canvases.map((file) => (
-                                            <FileItem key={file.id} file={file} />
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
+                            {/* All Files - Simplified */}
+                            <div className="space-y-1">
+                                {filteredFiles.map((file) => (
+                                    <FileItem key={file.id} file={file} />
+                                ))}
+                            </div>
 
                             {/* Empty state */}
                             {filteredFiles.length === 0 && !isLoading && (

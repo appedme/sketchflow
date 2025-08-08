@@ -23,6 +23,7 @@ interface WorkspaceState {
     // UI State
     sidebarVisible: boolean;
     sidebarWidth: number;
+    fullscreenMode: boolean;
 
     // File management
     openFiles: Record<string, FileTab>;
@@ -41,6 +42,7 @@ interface WorkspaceState {
     // Sidebar actions
     toggleSidebar: () => void;
     setSidebarWidth: (width: number) => void;
+    toggleFullscreen: () => void;
 
     // File actions
     openFile: (fileId: string, type: 'canvas' | 'document', title: string) => void;
@@ -68,6 +70,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 projectId: null,
                 sidebarVisible: true,
                 sidebarWidth: 25,
+                fullscreenMode: false,
                 openFiles: {},
                 panels: [],
                 activeFileId: null,
@@ -100,6 +103,12 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     set({
                         sidebarWidth: Math.max(15, Math.min(40, width)),
                     });
+                },
+
+                toggleFullscreen: () => {
+                    set((state) => ({
+                        fullscreenMode: !state.fullscreenMode,
+                    }));
                 },
 
                 // File actions
@@ -255,6 +264,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     sidebarVisible: state.sidebarVisible,
                     sidebarWidth: state.sidebarWidth,
                     layout: state.layout,
+                    fullscreenMode: state.fullscreenMode,
                 }),
             }
         ),

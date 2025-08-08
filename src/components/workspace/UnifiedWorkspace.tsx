@@ -5,16 +5,14 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useProjectFiles } from '@/lib/hooks/useProjectData';
 import { useWorkspaceStore } from '@/lib/stores/useWorkspaceStore';
 import { WorkspaceEditor } from './WorkspaceEditor';
-
 import { WorkspaceBottomBar } from './WorkspaceBottomBar';
 import { Button } from '@/components/ui/button';
 import {
     FileText,
     PencilRuler,
-    Plus,
     FolderOpen,
-    Clock,
-    ArrowRight
+    Minimize,
+    X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -41,13 +39,35 @@ export function UnifiedWorkspace({
         activeFileId,
         openFile,
         setActiveFile,
-        initializeWorkspace
+        initializeWorkspace,
+        fullscreenMode,
+        toggleFullscreen
     } = useWorkspaceStore();
 
     // Initialize workspace
     useEffect(() => {
         initializeWorkspace(projectId);
     }, [projectId, initializeWorkspace]);
+
+    // Keyboard shortcuts for fullscreen
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            // F11 or Cmd/Ctrl + Shift + F for fullscreen toggle
+            if (event.key === 'F11' ||
+                ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'F')) {
+                event.preventDefault();
+                toggleFullscreen();
+            }
+            // Escape to exit fullscreen
+            if (event.key === 'Escape' && fullscreenMode) {
+                event.preventDefault();
+                toggleFullscreen();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [toggleFullscreen, fullscreenMode]);
 
     // Handle URL file parameter and auto-open files
     useEffect(() => {
@@ -222,8 +242,22 @@ export function UnifiedWorkspace({
 
     // Show workspace with files - no sidebar since layout handles it
     return (
-        <div className="h-full flex flex-col">
-
+        <div className="h-full flex flex-col relative">
+            {/* Fullscreen Exit Button - Only visible in fullscreen mode */}
+            {fullscreenMode && (
+                <div className="absolute top-4 right-4 z-50 flex gap-2">
+                    <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={toggleFullscreen}
+                        className="gap-2 shadow-lg"
+                        title="Exit fullscreen (Esc or F11)"
+                    >
+                        <Minimize className="w-4 h-4" />
+                        {/* Exit Fullscreen */}
+                    </Button>
+                </div>
+            )}
 
             {/* Editor */}
             <div className="flex-1 overflow-hidden">
@@ -244,17 +278,31 @@ export function UnifiedWorkspace({
                                 <FileText className="w-12 h-12 mx-auto mb-2" />
                                 <p>Select a file to start editing</p>
                             </div>
+                            {fullscreenMode && (
+                                <div className="mt-4">
+                                    <Button
+                                        variant="outline"
+                                        onClick={toggleFullscreen}
+                                        className="gap-2"
+                                    >
+                                        <X className="w-4 h-4" />
+                                        {/* Exit Fullscreen */}
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* Bottom Bar */}
-            <WorkspaceBottomBar
-                projectId={projectId}
-                project={project}
-                isReadOnly={isReadOnly}
-            />
+            {/* Bottom Bar - Hide in fullscreen mode */}
+            {!fullscreenMode && (
+                <WorkspaceBottomBar
+                    projectId={projectId}
+                    project={project}
+                    isReadOnly={isReadOnly}
+                />
+            )}
         </div>
     );
 }

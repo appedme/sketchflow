@@ -10,7 +10,11 @@ import {
     PanelLeftClose,
     Save,
     Settings,
-    MoreHorizontal
+    MoreHorizontal,
+    Maximize,
+    Minimize,
+    EyeOff,
+    Eye
 } from 'lucide-react';
 import {
     DropdownMenu,
@@ -31,7 +35,9 @@ export function WorkspaceHeader({ project, isMobile }: WorkspaceHeaderProps) {
         sidebarVisible,
         toggleSidebar,
         openFiles,
-        activeFileId
+        activeFileId,
+        fullscreenMode,
+        toggleFullscreen
     } = useWorkspaceStore();
 
     const activeFile = activeFileId ? openFiles[activeFileId] : null;
@@ -114,7 +120,19 @@ export function WorkspaceHeader({ project, isMobile }: WorkspaceHeaderProps) {
                     </Button>
                 )}
 
-
+                {/* Fullscreen Toggle */}
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={toggleFullscreen}
+                    title={fullscreenMode ? 'Exit fullscreen (Esc, F11, or Ctrl+Shift+F)' : 'Enter fullscreen (F11 or Ctrl+Shift+F)'}
+                >
+                    {fullscreenMode ? (
+                        <Minimize className="w-4 h-4" />
+                    ) : (
+                        <Maximize className="w-4 h-4" />
+                    )}
+                </Button>
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -123,6 +141,22 @@ export function WorkspaceHeader({ project, isMobile }: WorkspaceHeaderProps) {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={toggleFullscreen}>
+                            {fullscreenMode ? (
+                                <>
+                                    <Eye className="w-4 h-4 mr-2" />
+                                    Show All UI
+                                    <span className="ml-auto text-xs text-muted-foreground">Esc</span>
+                                </>
+                            ) : (
+                                <>
+                                    <EyeOff className="w-4 h-4 mr-2" />
+                                    Hide All UI
+                                    <span className="ml-auto text-xs text-muted-foreground">F11</span>
+                                </>
+                            )}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={handleSettings}>
                             <Settings className="w-4 h-4 mr-2" />
                             Project Settings

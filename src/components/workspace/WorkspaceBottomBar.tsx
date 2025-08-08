@@ -59,6 +59,28 @@ export function WorkspaceBottomBar({
         setShareDialogOpen(true);
     };
 
+    const handleExport = async () => {
+        try {
+            const response = await fetch(`/api/projects/${projectId}/export`, {
+                method: 'GET',
+            });
+
+            if (!response.ok) throw new Error('Export failed');
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${project?.name || 'project'}-export.zip`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Export failed:', error);
+            alert('Failed to export project. Please try again.');
+        }
+    };
 
     const toggleTheme = () => {
         setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -107,14 +129,14 @@ export function WorkspaceBottomBar({
                                                 const saveEvent = new CustomEvent('workspace-save-current');
                                                 window.dispatchEvent(saveEvent);
                                             }}
-                                            disabled={!hasUnsavedChanges}
+                                            // disabled={!hasUnsavedChanges}
                                         >
                                             <Save className="w-4 h-4 mr-2" />
                                             Save Current File
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                             onClick={handleSaveAll}
-                                            disabled={!hasUnsavedChanges || saving}
+                                            disabled={  saving}
                                         >
                                             <Save className="w-4 h-4 mr-2" />
                                             {saving ? 'Saving All...' : 'Save All Files'}
@@ -126,7 +148,7 @@ export function WorkspaceBottomBar({
                                     <Share className="w-4 h-4 mr-2" />
                                     Share Project
                                 </DropdownMenuItem>
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onClick={handleExport}>
                                     <Download className="w-4 h-4 mr-2" />
                                     Export Project
                                 </DropdownMenuItem>

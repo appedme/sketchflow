@@ -23,7 +23,8 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
         sidebarVisible,
         sidebarWidth,
         setSidebarWidth,
-        initializeWorkspace
+        initializeWorkspace,
+        fullscreenMode
     } = useWorkspaceStore();
 
     const { data: project, isLoading: projectLoading } = useProjectData(projectId);
@@ -42,6 +43,28 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
+
+    // Global keyboard shortcuts for fullscreen
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            // F11 or Cmd/Ctrl + Shift + F for fullscreen toggle
+            if (event.key === 'F11' ||
+                ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'F')) {
+                event.preventDefault();
+                const { toggleFullscreen } = useWorkspaceStore.getState();
+                toggleFullscreen();
+            }
+            // Escape to exit fullscreen
+            if (event.key === 'Escape' && fullscreenMode) {
+                event.preventDefault();
+                const { toggleFullscreen } = useWorkspaceStore.getState();
+                toggleFullscreen();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [fullscreenMode]);
 
     if (projectLoading) {
         return (
@@ -79,6 +102,15 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
                 <div className="flex-1 overflow-hidden">
                     {children}
                 </div>
+            </div>
+        );
+    }
+
+    // Fullscreen mode - hide all UI
+    if (fullscreenMode) {
+        return (
+            <div className="h-screen bg-background">
+                {children}
             </div>
         );
     }
