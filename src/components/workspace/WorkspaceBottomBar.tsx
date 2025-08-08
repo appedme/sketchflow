@@ -8,7 +8,6 @@ import {
     Sun,
     Moon,
     Save,
-    Users,
     Settings,
     Download,
     MoreHorizontal
@@ -72,29 +71,16 @@ export function WorkspaceBottomBar({
 
                 {/* Bottom Bar */}
                 <div className="h-10 flex items-center justify-between px-4">
-                    {/* File Tabs */}
-                    {Object.keys(openFiles).length > 0 && (
-                        <div className="h-10 flex items-center px-4 border-b">
-                            <div className="flex-1 overflow-hidden">
-                                <WorkspaceTabs />
-                            </div>
-                        </div>
-                    )}
                     {/* Left side - Save status */}
                     <div className="flex items-center gap-3">
-                        {hasUnsavedChanges && !isReadOnly && (
-                            <Button size="sm" variant="outline" onClick={handleSaveAll} disabled={saving} className="gap-2 h-7">
-                                <Save className="w-3 h-3" />
-                                {saving ? 'Saving...' : 'Save All'}
-                            </Button>
+                        {/* File Tabs */}
+                        {Object.keys(openFiles).length > 0 && (
+                            <div className="h-10 flex items-center px-4 border-b">
+                                <div className="flex-1 overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+                                    <WorkspaceTabs />
+                                </div>
+                            </div>
                         )}
-                        <div className="text-xs text-muted-foreground">
-                            {hasUnsavedChanges ? (
-                                <span className="text-orange-600">Unsaved changes</span>
-                            ) : (
-                                <span>All changes saved</span>
-                            )}
-                        </div>
                     </div>
 
                     {/* Right side - Actions */}
@@ -113,6 +99,29 @@ export function WorkspaceBottomBar({
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
+                                {!isReadOnly && (
+                                    <>
+                                        <DropdownMenuItem
+                                            onClick={() => {
+                                                // Trigger save for current active file
+                                                const saveEvent = new CustomEvent('workspace-save-current');
+                                                window.dispatchEvent(saveEvent);
+                                            }}
+                                            disabled={!hasUnsavedChanges}
+                                        >
+                                            <Save className="w-4 h-4 mr-2" />
+                                            Save Current File
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={handleSaveAll}
+                                            disabled={!hasUnsavedChanges || saving}
+                                        >
+                                            <Save className="w-4 h-4 mr-2" />
+                                            {saving ? 'Saving All...' : 'Save All Files'}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                    </>
+                                )}
                                 <DropdownMenuItem onClick={handleShare}>
                                     <Share className="w-4 h-4 mr-2" />
                                     Share Project
