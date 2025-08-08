@@ -4,7 +4,7 @@ export const LANDING_CONTENT = {
     badge: "BETA",
     title: "Sketch. Document. Collaborate.",
     subtitle: "All in one place",
-    description: " " || "Transform your ideas into visual stories with powerful diagramming and seamless documentation. Community sharing, commenting, and blog publishing features coming soon.",
+    // description: "Transform your ideas into visual stories with powerful diagramming and seamless documentation. Enhanced with unlimited AI text completions and AI-powered diagram generation. Community sharing, commenting, and blog publishing features coming soon.",
     announcement: "Welcome to Sketchflow 👋",
     cta: {
       primary: "Start Creating",
@@ -20,12 +20,17 @@ export const LANDING_CONTENT = {
       icon: "FileText"
     },
     {
-      title: "Advanced Sharing (Coming Soon)",
-      description: "Future features: Community sharing, real-time commenting, collaborative editing, and blog publishing capabilities",
-      icon: "Share"
+      title: "Unlimited AI Text Completions",
+      description: "Generate unlimited text content with AI-powered writing assistance. Free text generation, smart completions, and context-aware suggestions for your documents.",
+      icon: "Brain"
     }
   ],
   useCases: [
+    {
+      title: "AI-Powered Documentation",
+      description: "Generate technical documentation, diagrams, and content using AI. Create Mermaid charts, ERDs, and flowcharts from simple text descriptions.",
+      icon: "Brain"
+    },
     {
       title: "Software Development",
       description: "Create system architecture diagrams, flowcharts, and technical documentation for your development projects.",
@@ -85,6 +90,16 @@ export const LANDING_CONTENT = {
       title: "Kids Drawing",
       description: "Fun and creative drawing space for children with colorful tools and simple interface for artistic expression.",
       icon: "Paintbrush"
+    },
+    {
+      title: "Create Canvas Files",
+      description: "Start a new visual canvas to sketch diagrams, mind maps, or flowcharts. Save and organize your canvases for future editing and collaboration.",
+      icon: "Layout"
+    },
+    {
+      title: "Create Docs Files",
+      description: "Create rich documentation files with markdown and AI assistance. Organize your notes, technical docs, and project wikis in one place.",
+      icon: "FilePlus"
     }
   ],
   navigation: {

@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Code, Building, GraduationCap, Calendar, Palette, Search, PenTool, User, Image, FileImage, Kanban, Network, Paintbrush, ExternalLink } from "lucide-react";
+import { Code, Building, GraduationCap, Calendar, Palette, Search, PenTool, User, Image, FileImage, Kanban, Network, Paintbrush, ExternalLink, Brain } from "lucide-react";
 import { LANDING_CONTENT } from "@/constants/landing";
 import Link from "next/link";
 
@@ -20,6 +20,7 @@ const iconMap = {
   Kanban,
   Network,
   Paintbrush,
+  Brain,
 } as const;
 
 export function UseCasesSection() {

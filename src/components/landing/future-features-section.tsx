@@ -1,9 +1,15 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, MessageSquare, BookOpen, Share2, Zap, Globe } from "lucide-react";
+import { Users, MessageSquare, BookOpen, Share2, Zap, Globe, Network } from "lucide-react";
 
 export function FutureFeaturesSection() {
   const futureFeatures = [
+    {
+      title: "AI Diagram Creator",
+      description: "Generate professional diagrams, Mermaid charts, and ERDs using AI. Simply describe what you need and let AI create complex visual diagrams automatically.",
+      icon: Network,
+      status: "In Development"
+    },
     {
       title: "Community Sharing",
       description: "Share your projects with the community, discover inspiring work from others, and build your professional portfolio.",
