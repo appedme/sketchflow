@@ -6,12 +6,12 @@ import { Button } from '@/components/ui/button';
 import { RefreshCw, FileText } from 'lucide-react';
 
 // Lazy load Plate editor with chunked loading
-const PlateDocumentEditor = lazy(() => 
+const PlateDocumentEditor = lazy(() =>
   import('@/components/project/PlateDocumentEditor')
     .then(mod => ({ default: mod.PlateDocumentEditor }))
     .catch(error => {
       console.error('Failed to load PlateDocumentEditor:', error);
-      return { 
+      return {
         default: () => (
           <div className="h-full w-full flex items-center justify-center bg-background">
             <div className="text-center space-y-4">
@@ -34,13 +34,15 @@ interface LazyPlateEditorProps {
   isReadOnly?: boolean;
   className?: string;
   shareToken?: string;
+  onContentChange?: (updates: any) => () => void;
+  onSave?: (updates: any) => Promise<void>;
 }
 
 // Enhanced loading component for document editor
 function DocumentLoadingFallback() {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingStage, setLoadingStage] = useState('Initializing...');
-  
+
   useEffect(() => {
     const stages = [
       'Initializing editor...',
@@ -49,23 +51,23 @@ function DocumentLoadingFallback() {
       'Preparing document...',
       'Almost ready...'
     ];
-    
+
     let stageIndex = 0;
     const interval = setInterval(() => {
       setLoadingProgress(prev => {
         const newProgress = prev + Math.random() * 12;
-        
+
         // Update stage based on progress
         const targetStage = Math.floor((newProgress / 100) * stages.length);
         if (targetStage !== stageIndex && targetStage < stages.length) {
           stageIndex = targetStage;
           setLoadingStage(stages[stageIndex]);
         }
-        
+
         return newProgress >= 90 ? 90 : newProgress;
       });
     }, 150);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -81,15 +83,15 @@ function DocumentLoadingFallback() {
             <p className="text-sm text-muted-foreground">Loading rich text editor...</p>
           </div>
         </div>
-        
+
         {/* Progress bar */}
         <div className="w-full bg-muted rounded-full h-2">
-          <div 
+          <div
             className="bg-primary h-2 rounded-full transition-all duration-300 ease-out"
             style={{ width: `${loadingProgress}%` }}
           />
         </div>
-        
+
         <div className="space-y-2 text-sm text-muted-foreground">
           <p>{loadingStage}</p>
           <p className="text-xs">This may take a moment on first load</p>
@@ -127,7 +129,7 @@ class DocumentErrorBoundary extends React.Component<
               <p className="text-sm">The document editor failed to load properly.</p>
             </div>
             <div className="space-x-2">
-              <Button 
+              <Button
                 onClick={() => {
                   this.setState({ hasError: false });
                   this.props.onRetry?.();
@@ -157,7 +159,12 @@ export function LazyPlateEditor(props: LazyPlateEditorProps) {
     <div className={`h-full w-full ${props.className || ''}`}>
       <DocumentErrorBoundary onRetry={() => setRetryKey(prev => prev + 1)}>
         <Suspense fallback={<DocumentLoadingFallback />}>
-          <PlateDocumentEditor key={retryKey} {...props} />
+          <PlateDocumentEditor
+            key={retryKey}
+            {...props}
+            onContentChange={props.onContentChange}
+            onSave={props.onSave}
+          />
         </Suspense>
       </DocumentErrorBoundary>
     </div>

@@ -91,24 +91,33 @@ export function WorkspaceBottomBar({
             <div className="bg-card border-t">
                 {/* File Tabs */}
 
-
                 {/* Bottom Bar */}
                 <div className="h-10 flex items-center justify-between px-4">
-                    {/* Left side - Save status */}
+                    {/* Left side - Save status and button */}
                     <div className="flex items-center gap-3">
-                        {/* {hasUnsavedChanges && !isReadOnly && (
+                        {Object.keys(openFiles).length > 0 && (
+                            <div className="h-10 flex items-center px-4 border-b">
+                                <div className="flex-1 overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+                                    <WorkspaceTabs />
+                                </div>
+                            </div>
+                        )}
+                        {/* Save Button */}
+                        {!isReadOnly && (
                             <Button
                                 size="sm"
-                                variant="outline"
+                                variant={hasUnsavedChanges ? "outline" : "ghost"}
                                 onClick={handleSaveAll}
                                 disabled={saving}
                                 className="gap-2 h-7"
+                                title="Save all files (Ctrl+S)"
                             >
                                 <Save className="w-3 h-3" />
-                                {saving ? 'Saving...' : 'Save All'}
+                                {saving ? 'Saving...' : hasUnsavedChanges ? 'Save All' : 'Save'}
                             </Button>
                         )}
 
+                        {/* Status indicator */}
                         <div className="text-xs text-muted-foreground">
                             {hasUnsavedChanges ? (
                                 <span className="text-orange-600">Unsaved changes</span>
@@ -118,15 +127,7 @@ export function WorkspaceBottomBar({
                                     Auto-saved
                                 </span>
                             )}
-                        </div> */}
-
-                        {Object.keys(openFiles).length > 0 && (
-                            <div className="h-10 flex items-center px-4 border-b">
-                                <div className="flex-1 overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
-                                    <WorkspaceTabs />
-                                </div>
-                            </div>
-                        )}
+                        </div>
                     </div>
 
                     {/* Right side - Actions */}
@@ -156,6 +157,7 @@ export function WorkspaceBottomBar({
                                         >
                                             <Save className="w-4 h-4 mr-2" />
                                             Save Current File
+                                            <span className="ml-auto text-xs text-muted-foreground">Ctrl+S</span>
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                             onClick={handleSaveAll}

@@ -49,6 +49,19 @@ export function WorkspaceHeader({ project, isMobile }: WorkspaceHeaderProps) {
         window.dispatchEvent(saveEvent);
     };
 
+    // Add Ctrl+S keyboard shortcut
+    React.useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+                event.preventDefault();
+                handleSaveAll();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [handleSaveAll]);
+
 
 
     const handleSettings = () => {
@@ -108,17 +121,17 @@ export function WorkspaceHeader({ project, isMobile }: WorkspaceHeaderProps) {
 
             {/* Right side */}
             <div className="flex items-center gap-2">
-                {hasUnsavedChanges && (
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleSaveAll}
-                        className="gap-2"
-                    >
-                        <Save className="w-4 h-4" />
-                        {!isMobile && 'Save All'}
-                    </Button>
-                )}
+                {/* Save Button - Always visible */}
+                <Button
+                    variant={hasUnsavedChanges ? "outline" : "ghost"}
+                    size="sm"
+                    onClick={handleSaveAll}
+                    className="gap-2"
+                    title="Save all files (Ctrl+S)"
+                >
+                    <Save className="w-4 h-4" />
+                    {!isMobile && (hasUnsavedChanges ? 'Save All' : 'Save')}
+                </Button>
 
                 {/* Fullscreen Toggle */}
                 <Button

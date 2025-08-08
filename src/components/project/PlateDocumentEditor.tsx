@@ -26,6 +26,8 @@ interface PlateDocumentEditorProps {
   isReadOnly?: boolean;
   className?: string;
   shareToken?: string; // For public access
+  onContentChange?: (updates: any) => () => void;
+  onSave?: (updates: any) => Promise<void>;
 }
 
 interface DocumentData {
@@ -67,6 +69,8 @@ export function PlateDocumentEditor({
   isReadOnly = false,
   className,
   shareToken,
+  onContentChange,
+  onSave,
 }: PlateDocumentEditorProps) {
   const [document, setDocument] = useState<DocumentData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -225,9 +229,18 @@ export function PlateDocumentEditor({
 
     if (hasContentChanged) {
       setHasUnsavedChanges(true);
-      saveDocument(undefined, currentContent, true); // true for autosave
+
+      // Notify workspace of content change
+      const cleanup = onContentChange?.({ content: currentContent });
+
+      // Auto-save the document
+      saveDocument(undefined, currentContent, true).then(() => {
+        cleanup?.(); // Clean up after successful save
+      }).catch(() => {
+        cleanup?.(); // Clean up even on error
+      });
     }
-  }, [debouncedContent, document, editor, isReadOnly, saveDocument, isAutoSaving]);
+  }, [debouncedContent, document, editor, isReadOnly, saveDocument, isAutoSaving, onContentChange]);
 
   // Auto-save on title changes
   useEffect(() => {
@@ -235,9 +248,18 @@ export function PlateDocumentEditor({
 
     if (localTitle !== document.title) {
       setHasUnsavedChanges(true);
-      saveDocument(localTitle, undefined, true); // true for autosave
+
+      // Notify workspace of title change
+      const cleanup = onContentChange?.({ title: localTitle });
+
+      // Auto-save the title
+      saveDocument(localTitle, undefined, true).then(() => {
+        cleanup?.(); // Clean up after successful save
+      }).catch(() => {
+        cleanup?.(); // Clean up even on error
+      });
     }
-  }, [debouncedTitle, document, localTitle, isReadOnly, saveDocument, isAutoSaving]);
+  }, [debouncedTitle, document, localTitle, isReadOnly, saveDocument, isAutoSaving, onContentChange]);
 
   // Handle manual save
   const handleManualSave = useCallback(() => {
