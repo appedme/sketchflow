@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useProjectFiles } from '@/lib/hooks/useProjectData';
 import { useWorkspaceStore } from '@/lib/stores/useWorkspaceStore';
 import { WorkspaceEditor } from './WorkspaceEditor';
 import { WorkspaceTabs } from './WorkspaceTabs';
+import { WorkspaceBottomBar } from './WorkspaceBottomBar';
 import { Button } from '@/components/ui/button';
 import {
     FileText,
@@ -31,6 +33,8 @@ export function UnifiedWorkspace({
     isReadOnly = false,
     isPublicView = false,
 }: UnifiedWorkspaceProps) {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const { files, isLoading, mutateAll } = useProjectFiles(projectId);
     const {
         openFiles,
@@ -45,17 +49,34 @@ export function UnifiedWorkspace({
         initializeWorkspace(projectId);
     }, [projectId, initializeWorkspace]);
 
-    // Auto-open most recent file if no files are open
+    // Handle URL file parameter and auto-open files
     useEffect(() => {
-        if (!isLoading && files.length > 0 && Object.keys(openFiles).length === 0) {
-            const mostRecentFile = files[0]; // Already sorted by updatedAt
-            handleFileClick(mostRecentFile);
+        if (!isLoading && files.length > 0) {
+            const fileParam = searchParams.get('file');
+
+            if (fileParam) {
+                // Open file from URL parameter
+                const fileFromUrl = files.find(f => f.id === fileParam);
+                if (fileFromUrl && !openFiles[fileParam]) {
+                    openFile(fileFromUrl.id, fileFromUrl.type, fileFromUrl.title);
+                    setActiveFile(fileFromUrl.id);
+                }
+            } else if (Object.keys(openFiles).length === 0) {
+                // Auto-open most recent file if no files are open and no URL param
+                const mostRecentFile = files[0]; // Already sorted by updatedAt
+                handleFileClick(mostRecentFile);
+            }
         }
-    }, [isLoading, files, openFiles]);
+    }, [isLoading, files, openFiles, searchParams]);
 
     const handleFileClick = (file: any) => {
         openFile(file.id, file.type, file.title);
         setActiveFile(file.id);
+
+        // Update URL parameter without reloading
+        const params = new URLSearchParams(searchParams);
+        params.set('file', file.id);
+        router.replace(`?${params.toString()}`, { scroll: false });
     };
 
     const handleCreateFile = async (type: 'document' | 'canvas') => {
@@ -213,6 +234,7 @@ export function UnifiedWorkspace({
             <div className="flex-1 overflow-hidden">
                 {activeFileId && openFiles[activeFileId] ? (
                     <WorkspaceEditor
+                        key={activeFileId} // This ensures each file gets its own editor instance
                         fileId={activeFileId}
                         fileType={openFiles[activeFileId].type}
                         projectId={projectId}
@@ -231,6 +253,13 @@ export function UnifiedWorkspace({
                     </div>
                 )}
             </div>
+
+            {/* Bottom Bar */}
+            <WorkspaceBottomBar
+                projectId={projectId}
+                project={project}
+                isReadOnly={isReadOnly}
+            />
         </div>
     );
 }

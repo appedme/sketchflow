@@ -23,6 +23,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { mutate } from 'swr';
 
 interface WorkspaceSidebarProps {
     projectId: string;
@@ -31,6 +32,8 @@ interface WorkspaceSidebarProps {
 
 export function WorkspaceSidebar({ projectId, project }: WorkspaceSidebarProps) {
     const [searchTerm, setSearchTerm] = useState('');
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editingTitle, setEditingTitle] = useState('');
 
     const { files, isLoading, mutateAll } = useProjectFiles(projectId);
     const { openFile, activeFileId, setActiveFile } = useWorkspaceStore();
@@ -94,9 +97,95 @@ export function WorkspaceSidebar({ projectId, project }: WorkspaceSidebarProps) 
         return date.toLocaleDateString();
     };
 
+    const startRename = (file: any) => {
+        setEditingId(file.id);
+        setEditingTitle(file.title);
+    };
+
+    const saveRename = async (file: any) => {
+        if (!editingTitle.trim()) return;
+
+        const newTitle = editingTitle.trim();
+        setEditingId(null);
+        setEditingTitle('');
+
+        try {
+            const endpoint = file.type === 'document'
+                ? `/api/documents/${file.id}`
+                : `/api/canvas/${file.id}`;
+
+            const response = await fetch(endpoint, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: newTitle }),
+            });
+
+            if (!response.ok) throw new Error('Failed to rename');
+
+            // Update SWR cache
+            mutate(`/api/projects/${projectId}/documents`);
+            mutate(`/api/projects/${projectId}/canvases`);
+            mutateAll();
+        } catch (error) {
+            console.error('Failed to rename:', error);
+            alert('Failed to rename. Please try again.');
+        }
+    };
+
+    const cancelRename = () => {
+        setEditingId(null);
+        setEditingTitle('');
+    };
+
+    const deleteFile = async (file: any) => {
+        if (!confirm(`Are you sure you want to delete "${file.title}"? This action cannot be undone.`)) {
+            return;
+        }
+
+        try {
+            const endpoint = file.type === 'document'
+                ? `/api/documents/${file.id}`
+                : `/api/canvas/${file.id}`;
+
+            const response = await fetch(endpoint, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) throw new Error('Failed to delete');
+
+            // Update SWR cache
+            mutate(`/api/projects/${projectId}/documents`);
+            mutate(`/api/projects/${projectId}/canvases`);
+            mutateAll();
+        } catch (error) {
+            console.error('Failed to delete:', error);
+            alert('Failed to delete. Please try again.');
+        }
+    };
+
     const FileItem = ({ file }: { file: any }) => {
         const Icon = file.type === 'canvas' ? PencilRuler : FileText;
         const isActive = activeFileId === file.id;
+        const isEditing = editingId === file.id;
+
+        if (isEditing) {
+            return (
+                <div className="flex items-center gap-3 p-2 rounded-lg border border-primary/20">
+                    <Icon className="w-4 h-4 flex-shrink-0 text-primary" />
+                    <Input
+                        value={editingTitle}
+                        onChange={(e) => setEditingTitle(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') saveRename(file);
+                            if (e.key === 'Escape') cancelRename();
+                        }}
+                        onBlur={() => saveRename(file)}
+                        className="h-6 text-sm flex-1"
+                        autoFocus
+                    />
+                </div>
+            );
+        }
 
         return (
             <div
@@ -132,6 +221,7 @@ export function WorkspaceSidebar({ projectId, project }: WorkspaceSidebarProps) 
                             size="sm"
                             variant="ghost"
                             className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
+                            onClick={(e) => e.stopPropagation()}
                         >
                             <MoreHorizontal className="w-3 h-3" />
                         </Button>
@@ -140,11 +230,14 @@ export function WorkspaceSidebar({ projectId, project }: WorkspaceSidebarProps) 
                         <DropdownMenuItem onClick={() => handleFileClick(file)}>
                             Open
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => startRename(file)}>
                             Rename
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive">
+                        <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => deleteFile(file)}
+                        >
                             Delete
                         </DropdownMenuItem>
                     </DropdownMenuContent>

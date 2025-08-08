@@ -1,12 +1,17 @@
 "use client";
 
 import React from 'react';
+import { useRouter, useSearchParams, useParams } from 'next/navigation';
 import { useWorkspaceStore } from '@/lib/stores/useWorkspaceStore';
 import { Button } from '@/components/ui/button';
 import { X, FileText, PencilRuler, Circle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function WorkspaceTabs() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const params = useParams();
+    const projectId = params.projectId as string;
 
     const {
         openFiles,
@@ -19,7 +24,11 @@ export function WorkspaceTabs() {
 
     const handleTabClick = (fileId: string) => {
         setActiveFile(fileId);
-        // No URL change - everything stays on the same route
+
+        // Update URL parameter without reloading
+        const params = new URLSearchParams(searchParams);
+        params.set('file', fileId);
+        router.replace(`?${params.toString()}`, { scroll: false });
     };
 
     const handleCloseTab = (e: React.MouseEvent, fileId: string) => {
