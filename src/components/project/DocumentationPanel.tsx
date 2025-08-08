@@ -60,7 +60,12 @@ export function DocumentationPanel({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
   const [loadingFileId, setLoadingFileId] = useState<string | null>(null);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renamingToTitle, setRenamingToTitle] = useState<string>('');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+
+  // State to manage display filenames (overrides server data until SWR updates)
+  const [displayFilenames, setDisplayFilenames] = useState<Record<string, string>>({});
 
   // Optimistic updates state (managed by parent layout now)
   const [optimisticItems, setOptimisticItems] = useState<{
@@ -76,6 +81,9 @@ export function DocumentationPanel({
   const resetOptimisticState = () => {
     setOptimisticItems({ documents: [], canvases: [] });
     setLoadingFileId(null);
+    setRenamingId(null);
+    setRenamingToTitle('');
+    setDisplayFilenames({});
   };
 
   // Get current file ID from URL
@@ -101,17 +109,22 @@ export function DocumentationPanel({
 
   const isLoading = docsLoading || canvasLoading;
 
+  // Helper function to get the display title (uses override if available)
+  const getDisplayTitle = (id: string, originalTitle: string) => {
+    return displayFilenames[id] || originalTitle;
+  };
+
   // Merge optimistic items with real data
   const allDocuments = [...documents, ...optimisticItems.documents];
   const allCanvases = [...canvases, ...optimisticItems.canvases];
 
-  // Filter items by search term
+  // Filter items by search term (using display titles)
   const displayDocs = allDocuments
-    .filter(doc => doc.title.toLowerCase().includes(searchTerm.toLowerCase()))
+    .filter(doc => getDisplayTitle(doc.id, doc.title).toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
   const displayCanvases = allCanvases
-    .filter(canvas => canvas.title.toLowerCase().includes(searchTerm.toLowerCase()))
+    .filter(canvas => getDisplayTitle(canvas.id, canvas.title).toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
 
@@ -126,9 +139,11 @@ export function DocumentationPanel({
 
     const newTitle = editingTitle.trim();
 
-    // Clear editing state immediately
+    // Clear editing state and show renaming status
     setEditingId(null);
     setEditingTitle('');
+    setRenamingId(id);
+    setRenamingToTitle(newTitle);
 
     try {
       const endpoint = type === 'document' ? `/api/documents/${id}` : `/api/canvas/${id}`;
@@ -150,11 +165,18 @@ export function DocumentationPanel({
       } else {
         mutate(`/api/canvas/${id}`);
       }
+
+      // Update display filename and clear renaming state
+      setDisplayFilenames(prev => ({ ...prev, [id]: newTitle }));
+      setRenamingId(null);
+      setRenamingToTitle('');
     } catch (error) {
       console.error('Failed to rename:', error);
       alert('Failed to rename. Please try again.');
 
-      // Restore editing state on error
+      // Clear renaming state and restore editing state on error
+      setRenamingId(null);
+      setRenamingToTitle('');
       setEditingId(id);
       setEditingTitle(newTitle);
     }
@@ -290,6 +312,19 @@ export function DocumentationPanel({
                               <span className="text-sm text-blue-600 font-medium">Opening...</span>
                             </div>
                           </div>
+                        ) : renamingId === doc.id ? (
+                          <div className="flex items-center gap-2 flex-1">
+                            <div className="relative">
+                              <FileText className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                              <div className="absolute inset-0 animate-pulse bg-blue-500/20 rounded" />
+                            </div>
+                            <div className="flex items-center gap-2 flex-1">
+                              <Loader2 className="h-3 w-3 animate-spin text-blue-500" />
+                              <span className="text-sm text-blue-600 font-medium">
+                                {renamingToTitle}
+                              </span>
+                            </div>
+                          </div>
                         ) : (
                           <>
                             <FileText className={cn(
@@ -310,7 +345,7 @@ export function DocumentationPanel({
                                 )}
                                 disabled={doc.id.startsWith('temp-')}
                               >
-                                {doc.title}
+                                {getDisplayTitle(doc.id, doc.title)}
                                 {doc.id.startsWith('temp-') && (
                                   <Badge variant="secondary" className="ml-2 text-xs">New</Badge>
                                 )}
@@ -337,7 +372,7 @@ export function DocumentationPanel({
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
-                                onClick={() => startRename(doc.id, doc.title)}
+                                onClick={() => startRename(doc.id, getDisplayTitle(doc.id, doc.title))}
                                 className="gap-2"
                                 disabled={doc.id.startsWith('temp-')}
                               >
@@ -362,7 +397,7 @@ export function DocumentationPanel({
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
-                                onClick={() => deleteItem(doc.id, 'document', doc.title)}
+                                onClick={() => deleteItem(doc.id, 'document', getDisplayTitle(doc.id, doc.title))}
                                 className="gap-2 text-red-600 focus:text-red-600"
                                 disabled={doc.id.startsWith('temp-')}
                               >
@@ -412,6 +447,19 @@ export function DocumentationPanel({
                               <span className="text-sm text-purple-600 font-medium">Opening...</span>
                             </div>
                           </div>
+                        ) : renamingId === canvas.id ? (
+                          <div className="flex items-center gap-2 flex-1">
+                            <div className="relative">
+                              <CanvasIcon className="h-4 w-4 text-purple-500 flex-shrink-0" />
+                              <div className="absolute inset-0 animate-pulse bg-purple-500/20 rounded" />
+                            </div>
+                            <div className="flex items-center gap-2 flex-1">
+                              <Loader2 className="h-3 w-3 animate-spin text-purple-500" />
+                              <span className="text-sm text-purple-600 font-medium">
+                                {renamingToTitle}
+                              </span>
+                            </div>
+                          </div>
                         ) : (
                           <>
                             <CanvasIcon className={cn(
@@ -432,7 +480,7 @@ export function DocumentationPanel({
                                 )}
                                 disabled={canvas.id.startsWith('temp-')}
                               >
-                                {canvas.title}
+                                {getDisplayTitle(canvas.id, canvas.title)}
                                 {canvas.id.startsWith('temp-') && (
                                   <Badge variant="secondary" className="ml-2 text-xs">New</Badge>
                                 )}
@@ -459,7 +507,7 @@ export function DocumentationPanel({
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
-                                onClick={() => startRename(canvas.id, canvas.title)}
+                                onClick={() => startRename(canvas.id, getDisplayTitle(canvas.id, canvas.title))}
                                 className="gap-2"
                                 disabled={canvas.id.startsWith('temp-')}
                               >
@@ -484,7 +532,7 @@ export function DocumentationPanel({
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
-                                onClick={() => deleteItem(canvas.id, 'canvas', canvas.title)}
+                                onClick={() => deleteItem(canvas.id, 'canvas', getDisplayTitle(canvas.id, canvas.title))}
                                 className="gap-2 text-red-600 focus:text-red-600"
                                 disabled={canvas.id.startsWith('temp-')}
                               >
