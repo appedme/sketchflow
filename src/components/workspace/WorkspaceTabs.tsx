@@ -1,16 +1,12 @@
 "use client";
 
 import React from 'react';
-import { useRouter, useParams } from 'next/navigation';
 import { useWorkspaceStore } from '@/lib/stores/useWorkspaceStore';
 import { Button } from '@/components/ui/button';
 import { X, FileText, PencilRuler, Circle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function WorkspaceTabs() {
-    const router = useRouter();
-    const params = useParams();
-    const projectId = params.projectId as string;
 
     const {
         openFiles,
@@ -23,22 +19,20 @@ export function WorkspaceTabs() {
 
     const handleTabClick = (fileId: string) => {
         setActiveFile(fileId);
-        router.push(`/workspace/${projectId}/${fileId}`, { scroll: false });
+        // No URL change - everything stays on the same route
     };
 
     const handleCloseTab = (e: React.MouseEvent, fileId: string) => {
         e.stopPropagation();
         closeFile(fileId);
 
-        // Navigate to another open file or back to project
+        // Just switch to another open file, no URL navigation
         const remainingFiles = Object.keys(openFiles).filter(id => id !== fileId);
         if (remainingFiles.length > 0) {
             const nextFileId = remainingFiles[0];
             setActiveFile(nextFileId);
-            router.push(`/workspace/${projectId}/${nextFileId}`, { scroll: false });
-        } else {
-            router.push(`/project/${projectId}`, { scroll: false });
         }
+        // If no files remain, the workspace will show the empty state
     };
 
     if (openFilesList.length === 0) {

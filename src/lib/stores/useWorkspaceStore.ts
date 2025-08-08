@@ -118,34 +118,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         };
                     }
 
-                    // Add panel if no panels exist or if this file isn't in any panel
-                    const hasPanel = state.panels.some(panel => panel.fileId === fileId);
-                    let newPanels = [...state.panels];
-
-                    if (state.panels.length === 0 || !hasPanel) {
-                        const newPanel: WorkspacePanel = {
-                            id: `panel-${fileId}-${Date.now()}`,
-                            fileId,
-                            type,
-                            size: state.panels.length === 0 ? 100 : 50,
-                        };
-
-                        // Adjust existing panels if adding a new one
-                        if (state.panels.length > 0) {
-                            const newSize = 100 / (state.panels.length + 1);
-                            newPanels = state.panels.map(panel => ({
-                                ...panel,
-                                size: newSize,
-                            }));
-                            newPanel.size = newSize;
-                        }
-
-                        newPanels.push(newPanel);
-                    }
-
                     set({
                         openFiles: newOpenFiles,
-                        panels: newPanels,
                         activeFileId: fileId,
                     });
                 },
@@ -154,17 +128,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     const state = get();
                     const newOpenFiles = { ...state.openFiles };
                     delete newOpenFiles[fileId];
-
-                    // Remove panels with this file
-                    const newPanels = state.panels.filter(panel => panel.fileId !== fileId);
-
-                    // Redistribute panel sizes
-                    if (newPanels.length > 0) {
-                        const sizePerPanel = 100 / newPanels.length;
-                        newPanels.forEach(panel => {
-                            panel.size = sizePerPanel;
-                        });
-                    }
 
                     // Update active file
                     let newActiveFileId = state.activeFileId;
@@ -179,7 +142,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
                     set({
                         openFiles: newOpenFiles,
-                        panels: newPanels,
                         activeFileId: newActiveFileId,
                         fileCache: newFileCache,
                     });

@@ -1,7 +1,7 @@
 import { stackServerApp } from '@/lib/stack';
 import { redirect, notFound } from 'next/navigation';
 import { getProject } from '@/lib/actions/projects';
-import { WorkspaceProjectLanding } from '@/components/workspace/WorkspaceProjectLanding';
+import { UnifiedWorkspace } from '@/components/workspace/UnifiedWorkspace';
 
 interface WorkspaceProjectPageProps {
     params: Promise<{
@@ -39,7 +39,7 @@ export default async function WorkspaceProjectPage({ params }: WorkspaceProjectP
     } : null;
 
     return (
-        <WorkspaceProjectLanding
+        <UnifiedWorkspace
             projectId={projectId}
             project={project}
             currentUser={serializedUser}

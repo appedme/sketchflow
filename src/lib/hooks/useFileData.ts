@@ -39,12 +39,12 @@ export function useFileData(fileId: string | null, fileType: 'canvas' | 'documen
             // Use cached data as fallback
             fallbackData: cachedData,
 
-            // Aggressive caching
-            dedupingInterval: 5000,
+            // Aggressive caching for instant switching
+            dedupingInterval: 10000, // 10 seconds
             revalidateOnFocus: false,
             revalidateOnReconnect: true,
 
-            // Keep previous data while loading
+            // Keep previous data while loading - this is key for smooth switching
             keepPreviousData: true,
 
             // Error handling
@@ -53,6 +53,9 @@ export function useFileData(fileId: string | null, fileType: 'canvas' | 'documen
 
             // Custom revalidation
             revalidateIfStale: true,
+
+            // Faster loading timeout
+            loadingTimeout: 100,
         }
     );
 

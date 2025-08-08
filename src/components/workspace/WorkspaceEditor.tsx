@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useMemo, useCallback } from 'react';
+import React, { Suspense, useMemo, useCallback, memo } from 'react';
 import { useFileData } from '@/lib/hooks/useFileData';
 import { useWorkspaceStore } from '@/lib/stores/useWorkspaceStore';
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
@@ -72,7 +72,7 @@ function EditorError({
     );
 }
 
-export function WorkspaceEditor({
+const WorkspaceEditorComponent = memo(function WorkspaceEditor({
     fileId,
     fileType,
     projectId,
@@ -119,7 +119,13 @@ export function WorkspaceEditor({
             );
         }
 
-        if (isLoading || !fileData) {
+        // Only show loading for initial load, not when switching files
+        if (!fileData && isLoading) {
+            return <EditorLoading fileType={fileType} />;
+        }
+
+        // If we have cached data, show it immediately even while loading fresh data
+        if (!fileData) {
             return <EditorLoading fileType={fileType} />;
         }
 
@@ -170,4 +176,6 @@ export function WorkspaceEditor({
             {EditorComponent}
         </div>
     );
-}
+});
+
+export const WorkspaceEditor = WorkspaceEditorComponent;
