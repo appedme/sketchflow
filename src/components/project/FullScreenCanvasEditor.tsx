@@ -98,7 +98,7 @@ export function FullScreenCanvasEditor({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push(`/project/${projectId}`)}
+            onClick={() => router.push(`/workspace/${projectId}`)}
             className="gap-2"
           >
             <ArrowLeft className="w-4 h-4" />

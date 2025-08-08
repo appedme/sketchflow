@@ -68,7 +68,7 @@ export function ProjectDropdown({ project }: ProjectDropdownProps) {
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem asChild>
             <Link
-              href={`/project/${project.id}`}
+              href={`/workspace/${project.id}`}
               className="flex items-center gap-2"
             >
               <Edit className="w-4 h-4" />

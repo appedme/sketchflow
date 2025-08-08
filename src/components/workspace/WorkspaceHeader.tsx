@@ -9,7 +9,6 @@ import {
     PanelLeftOpen,
     PanelLeftClose,
     Save,
-    Share,
     Settings,
     MoreHorizontal
 } from 'lucide-react';
@@ -44,10 +43,7 @@ export function WorkspaceHeader({ project, isMobile }: WorkspaceHeaderProps) {
         window.dispatchEvent(saveEvent);
     };
 
-    const handleShare = () => {
-        // Open share dialog
-        console.log('Share project');
-    };
+
 
     const handleSettings = () => {
         router.push(`/project/${project.id}/settings`);
@@ -118,15 +114,7 @@ export function WorkspaceHeader({ project, isMobile }: WorkspaceHeaderProps) {
                     </Button>
                 )}
 
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleShare}
-                    className="gap-2"
-                >
-                    <Share className="w-4 h-4" />
-                    {!isMobile && 'Share'}
-                </Button>
+
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

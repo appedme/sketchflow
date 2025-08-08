@@ -10,7 +10,8 @@ import {
     Save,
     Users,
     Settings,
-    Download
+    Download,
+    MoreHorizontal
 } from 'lucide-react';
 import {
     DropdownMenu,
@@ -19,17 +20,8 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useWorkspaceStore } from '@/lib/stores/useWorkspaceStore';
+import { ShareDialog } from '@/components/project/ShareDialog';
 
 interface WorkspaceBottomBarProps {
     projectId: string;
@@ -67,10 +59,6 @@ export function WorkspaceBottomBar({
         setShareDialogOpen(true);
     };
 
-    const copyShareLink = () => {
-        const shareUrl = `${window.location.origin}/workspace/${projectId}`;
-        navigator.clipboard.writeText(shareUrl);
-    };
 
     const toggleTheme = () => {
         setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -108,16 +96,6 @@ export function WorkspaceBottomBar({
                     <Button
                         size="sm"
                         variant="ghost"
-                        onClick={handleShare}
-                        className="gap-2 h-7"
-                    >
-                        <Share className="w-3 h-3" />
-                        Share
-                    </Button>
-
-                    <Button
-                        size="sm"
-                        variant="ghost"
                         onClick={toggleTheme}
                         className="h-7 w-7 p-0"
                         title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
@@ -135,8 +113,9 @@ export function WorkspaceBottomBar({
                                 size="sm"
                                 variant="ghost"
                                 className="h-7 w-7 p-0"
+                                title="More options"
                             >
-                                <Settings className="w-3 h-3" />
+                                <MoreHorizontal className="w-3 h-3" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -153,48 +132,32 @@ export function WorkspaceBottomBar({
                                 <Settings className="w-4 h-4 mr-2" />
                                 Project Settings
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={toggleTheme}>
+                                {theme === 'dark' ? (
+                                    <>
+                                        <Sun className="w-4 h-4 mr-2" />
+                                        Switch to Light Mode
+                                    </>
+                                ) : (
+                                    <>
+                                        <Moon className="w-4 h-4 mr-2" />
+                                        Switch to Dark Mode
+                                    </>
+                                )}
+                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
             </div>
 
             {/* Share Dialog */}
-            <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Share Project</DialogTitle>
-                        <DialogDescription>
-                            Share this project with others by copying the link below.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <div className="space-y-4">
-                        <div>
-                            <Label htmlFor="share-link">Project Link</Label>
-                            <div className="flex gap-2 mt-1">
-                                <Input
-                                    id="share-link"
-                                    value={`${typeof window !== 'undefined' ? window.location.origin : ''}/workspace/${projectId}`}
-                                    readOnly
-                                    className="flex-1"
-                                />
-                                <Button onClick={copyShareLink} size="sm">
-                                    Copy
-                                </Button>
-                            </div>
-                        </div>
-
-                        <div className="text-sm text-muted-foreground">
-                            <p>Anyone with this link can view this project.</p>
-                            {project.visibility === 'private' && (
-                                <p className="text-orange-600 mt-1">
-                                    Note: This project is private. Only team members can access it.
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
+            <ShareDialog
+                projectId={projectId}
+                projectName={project?.name || 'Untitled Project'}
+                isOpen={shareDialogOpen}
+                onOpenChange={setShareDialogOpen}
+                projectVisibility={project?.visibility || 'private'}
+            />
         </>
     );
 }

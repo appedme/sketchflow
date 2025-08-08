@@ -149,7 +149,7 @@ export default function DashboardPage() {
 
       const newProject = await response.json() as { id: string };
       refreshProjects();
-      router.push(`/project/${newProject.id}`);
+      router.push(`/workspace/${newProject.id}`);
     } catch (error) {
       console.error('Failed to create project:', error);
       setIsLoading(false);

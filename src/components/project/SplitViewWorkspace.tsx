@@ -109,7 +109,7 @@ export function SplitViewWorkspace({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push(`/project/${projectId}`)}
+            onClick={() => router.push(`/workspace/${projectId}`)}
           >
             <X className="w-4 h-4" />
           </Button>

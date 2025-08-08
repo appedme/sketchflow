@@ -186,7 +186,7 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                             <div className="project-card__header">
                                 <div className="project-card__title-section">
                                     <Link
-                                        href={`/project/${project.id}`}
+                                        href={`/workspace/${project.id}`}
                                         className="project-card__title-link"
                                     >
                                         <h3 className="project-card__title">{project.name}</h3>
@@ -507,7 +507,7 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                     </div>
 
                     <Link
-                        href={`/project/${project.id}`}
+                        href={`/workspace/${project.id}`}
                         className="project-card__title-link"
                     >
                         <h3 className="project-card__title">{project.name}</h3>
