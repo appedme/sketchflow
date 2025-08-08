@@ -328,14 +328,15 @@ export function WorkspaceSidebar({ projectId, project }: WorkspaceSidebarProps) 
                         }}>
                             Rename
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => {
-                            // Open file in fullscreen mode
+                        <DropdownMenuItem onClick={(e) => {
+                            e.stopPropagation();
+                            // Open file first
                             handleFileClick(file);
-                            // Toggle fullscreen after opening
+                            // Then toggle fullscreen after a brief delay
                             setTimeout(() => {
                                 const { toggleFullscreen } = useWorkspaceStore.getState();
                                 toggleFullscreen();
-                            }, 100);
+                            }, 50);
                         }}>
                             <Maximize className="w-4 h-4 mr-2" />
                             Open Fullscreen

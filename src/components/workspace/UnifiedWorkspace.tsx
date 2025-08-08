@@ -250,7 +250,7 @@ export function UnifiedWorkspace({
                         size="sm"
                         variant="secondary"
                         onClick={toggleFullscreen}
-                        className="gap-2 shadow-lg"
+                        className="gap-2 shadow-lg z-[99]"
                         title="Exit fullscreen (Esc or F11)"
                     >
                         <Minimize className="w-4 h-4" />

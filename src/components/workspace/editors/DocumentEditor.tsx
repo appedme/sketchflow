@@ -106,6 +106,29 @@ export function DocumentEditor({
         }
     }, [isActive, onActivate]);
 
+    // Handle workspace save events
+    useEffect(() => {
+        const handleWorkspaceSave = () => {
+            // Trigger document save event that PlateDocumentEditor listens to
+            const saveEvent = new CustomEvent('document-save-all');
+            window.dispatchEvent(saveEvent);
+        };
+
+        const handleWorkspaceSaveCurrent = () => {
+            if (isActive) {
+                handleWorkspaceSave();
+            }
+        };
+
+        window.addEventListener('workspace-save-all', handleWorkspaceSave);
+        window.addEventListener('workspace-save-current', handleWorkspaceSaveCurrent);
+
+        return () => {
+            window.removeEventListener('workspace-save-all', handleWorkspaceSave);
+            window.removeEventListener('workspace-save-current', handleWorkspaceSaveCurrent);
+        };
+    }, [isActive]);
+
     return (
         <div
             className="h-full w-full"
@@ -114,7 +137,7 @@ export function DocumentEditor({
             <LazyPlateEditor
                 documentId={fileId}
                 projectId={projectId}
-                projectName={fileData.title}
+                projectName={fileData?.title || 'Untitled Document'}
                 isReadOnly={isReadOnly}
                 className="h-full"
             />

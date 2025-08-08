@@ -93,21 +93,21 @@ export function DocumentationPanel({
   const router = useRouter();
   const pathname = usePathname();
   const user = useUser();
-
+  
   // Core state
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [sortType, setSortType] = useState<SortType>('updated');
   const [showFilters, setShowFilters] = useState(false);
-
+  
   // Interaction state
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
   const [loadingFileId, setLoadingFileId] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [draggingItem, setDraggingItem] = useState<string | null>(null);
-
+  
   // Animation states
   const [recentlyCreated, setRecentlyCreated] = useState<Set<string>>(new Set());
   const [recentlyUpdated, setRecentlyUpdated] = useState<Set<string>>(new Set());
@@ -139,7 +139,7 @@ export function DocumentationPanel({
   // Filtered and sorted data
   const filteredData = useMemo(() => {
     let items: Array<(Document | Canvas) & { type: 'document' | 'canvas' }> = [];
-
+    
     // Combine and type items
     if (filterType === 'all' || filterType === 'documents') {
       items.push(...documents.map(doc => ({ ...doc, type: 'document' as const })));
@@ -147,7 +147,7 @@ export function DocumentationPanel({
     if (filterType === 'all' || filterType === 'canvases') {
       items.push(...canvases.map(canvas => ({ ...canvas, type: 'canvas' as const })));
     }
-
+    
     // Apply filters
     if (filterType === 'favorites') {
       items = items.filter(item => item.isFavorite);
@@ -156,15 +156,15 @@ export function DocumentationPanel({
       weekAgo.setDate(weekAgo.getDate() - 7);
       items = items.filter(item => new Date(item.updatedAt) > weekAgo);
     }
-
+    
     // Apply search
     if (searchTerm) {
-      items = items.filter(item =>
+      items = items.filter(item => 
         item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (item.tags && item.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
       );
     }
-
+    
     // Apply sorting
     items.sort((a, b) => {
       switch (sortType) {
@@ -184,7 +184,7 @@ export function DocumentationPanel({
           return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
       }
     });
-
+    
     return items;
   }, [documents, canvases, filterType, searchTerm, sortType]);
 
@@ -204,11 +204,11 @@ export function DocumentationPanel({
   // Handlers
   const handleFileClick = (id: string, type: 'document' | 'canvas') => {
     if (id.startsWith('temp-')) return;
-
+    
     setLoadingFileId(id);
-    const path = `/workspace/${projectId}`;
+    const path = `/project/${projectId}/${type}/${id}`;
     router.push(path);
-
+    
     setTimeout(() => setLoadingFileId(null), 1000);
   };
 
@@ -221,7 +221,7 @@ export function DocumentationPanel({
     if (!editingTitle.trim()) return;
 
     const newTitle = editingTitle.trim();
-    const originalItem = type === 'document'
+    const originalItem = type === 'document' 
       ? documents.find(doc => doc.id === id)
       : canvases.find(canvas => canvas.id === id);
 
@@ -243,13 +243,13 @@ export function DocumentationPanel({
 
     // Optimistic update
     const updatedItem = { ...originalItem, title: newTitle, updatedAt: new Date().toISOString() };
-
+    
     if (type === 'document') {
-      mutate(`/api/projects/${projectId}/documents`,
+      mutate(`/api/projects/${projectId}/documents`, 
         documents.map(doc => doc.id === id ? updatedItem : doc), false);
       mutate(`/api/documents/${id}`, updatedItem, false);
     } else {
-      mutate(`/api/projects/${projectId}/canvases`,
+      mutate(`/api/projects/${projectId}/canvases`, 
         canvases.map(canvas => canvas.id === id ? updatedItem : canvas), false);
       mutate(`/api/canvas/${id}`, updatedItem, false);
     }
@@ -272,38 +272,38 @@ export function DocumentationPanel({
       mutate(`/api/projects/${projectId}/canvases`);
     } catch (error) {
       console.error('Failed to rename:', error);
-
+      
       // Revert optimistic update
       if (type === 'document') {
-        mutate(`/api/projects/${projectId}/documents`,
+        mutate(`/api/projects/${projectId}/documents`, 
           documents.map(doc => doc.id === id ? originalItem : doc), false);
         mutate(`/api/documents/${id}`, originalItem, false);
       } else {
-        mutate(`/api/projects/${projectId}/canvases`,
+        mutate(`/api/projects/${projectId}/canvases`, 
           canvases.map(canvas => canvas.id === id ? originalItem : canvas), false);
         mutate(`/api/canvas/${id}`, originalItem, false);
       }
-
+      
       setEditingId(id);
       setEditingTitle(originalItem.title);
     }
   };
 
   const toggleFavorite = async (id: string, type: 'document' | 'canvas') => {
-    const originalItem = type === 'document'
+    const originalItem = type === 'document' 
       ? documents.find(doc => doc.id === id)
       : canvases.find(canvas => canvas.id === id);
 
     if (!originalItem) return;
 
     const updatedItem = { ...originalItem, isFavorite: !originalItem.isFavorite };
-
+    
     // Optimistic update
     if (type === 'document') {
-      mutate(`/api/projects/${projectId}/documents`,
+      mutate(`/api/projects/${projectId}/documents`, 
         documents.map(doc => doc.id === id ? updatedItem : doc), false);
     } else {
-      mutate(`/api/projects/${projectId}/canvases`,
+      mutate(`/api/projects/${projectId}/canvases`, 
         canvases.map(canvas => canvas.id === id ? updatedItem : canvas), false);
     }
 
@@ -317,10 +317,10 @@ export function DocumentationPanel({
     } catch (error) {
       // Revert on error
       if (type === 'document') {
-        mutate(`/api/projects/${projectId}/documents`,
+        mutate(`/api/projects/${projectId}/documents`, 
           documents.map(doc => doc.id === id ? originalItem : doc), false);
       } else {
-        mutate(`/api/projects/${projectId}/canvases`,
+        mutate(`/api/projects/${projectId}/canvases`, 
           canvases.map(canvas => canvas.id === id ? originalItem : canvas), false);
       }
     }
@@ -359,7 +359,7 @@ export function DocumentationPanel({
     const isActive = currentFileInfo?.id === item.id;
     const isLoading = loadingFileId === item.id;
     const isTemp = item.id.startsWith('temp-');
-
+    
     if (item.type === 'document') {
       return (
         <div className="relative">
@@ -483,18 +483,18 @@ export function DocumentationPanel({
                     )}
                   </button>
                 )}
-
+                
                 <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
                   <Clock className="h-3 w-3" />
                   {formatDate(item.updatedAt)}
-
+                  
                   {item.type === 'document' && (item as Document).wordCount && (
                     <>
                       <span>•</span>
                       <span>{(item as Document).wordCount} words</span>
                     </>
                   )}
-
+                  
                   {item.type === 'canvas' && (item as Canvas).elementCount && (
                     <>
                       <span>•</span>
@@ -518,12 +518,12 @@ export function DocumentationPanel({
                   </div>
                 )}
               </div>
-
+              
               <div className="flex items-center gap-1">
                 {item.isFavorite && (
                   <Star className="h-3 w-3 text-yellow-500 fill-current" />
                 )}
-
+                
                 {user && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -587,7 +587,7 @@ export function DocumentationPanel({
         isTemp && "opacity-60"
       )}>
         {getItemIcon(item)}
-
+        
         <div className="flex-1 min-w-0">
           {isEditing ? (
             <Input
@@ -617,18 +617,18 @@ export function DocumentationPanel({
               )}
             </button>
           )}
-
+          
           <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
             <Clock className="h-3 w-3" />
             {formatDate(item.updatedAt)}
-
+            
             {item.type === 'document' && (item as Document).wordCount && (
               <>
                 <span>•</span>
                 <span>{(item as Document).wordCount} words</span>
               </>
             )}
-
+            
             {item.type === 'canvas' && (item as Canvas).elementCount && (
               <>
                 <span>•</span>
@@ -640,8 +640,8 @@ export function DocumentationPanel({
               <>
                 <span>•</span>
                 <Badge variant={
-                  item.status === 'published' ? 'default' :
-                    item.status === 'draft' ? 'secondary' : 'outline'
+                  item.status === 'published' ? 'default' : 
+                  item.status === 'draft' ? 'secondary' : 'outline'
                 } className="text-xs px-1.5 py-0">
                   {item.status}
                 </Badge>
@@ -654,11 +654,11 @@ export function DocumentationPanel({
           {item.isFavorite && (
             <Star className="h-3 w-3 text-yellow-500 fill-current" />
           )}
-
+          
           {isLoading && (
             <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
           )}
-
+          
           {user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -736,7 +736,7 @@ export function DocumentationPanel({
               <FolderOpen className="h-4 w-4 text-muted-foreground" />
               <h2 className="font-semibold text-sm truncate">{projectName}</h2>
             </div>
-
+            
             <div className="flex items-center gap-1">
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -751,7 +751,7 @@ export function DocumentationPanel({
                 </TooltipTrigger>
                 <TooltipContent>Filters</TooltipContent>
               </Tooltip>
-
+              
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -760,9 +760,9 @@ export function DocumentationPanel({
                     onClick={() => setViewMode(viewMode === 'list' ? 'grid' : viewMode === 'grid' ? 'compact' : 'list')}
                     className="h-7 w-7 p-0"
                   >
-                    {viewMode === 'list' ? <List className="h-3 w-3" /> :
-                      viewMode === 'grid' ? <Grid3X3 className="h-3 w-3" /> :
-                        <Menu className="h-3 w-3" />}
+                    {viewMode === 'list' ? <List className="h-3 w-3" /> : 
+                     viewMode === 'grid' ? <Grid3X3 className="h-3 w-3" /> : 
+                     <Menu className="h-3 w-3" />}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>View: {viewMode}</TooltipContent>
@@ -812,7 +812,7 @@ export function DocumentationPanel({
                 <TabsTrigger value="recent" className="text-xs">Recent</TabsTrigger>
               </TabsList>
             </Tabs>
-
+            
             <div className="flex items-center gap-2 mt-2">
               <span className="text-xs text-muted-foreground">Sort:</span>
               <Button
@@ -893,7 +893,7 @@ export function DocumentationPanel({
               ) : (
                 <div className={cn(
                   viewMode === 'grid' ? 'grid grid-cols-1 gap-3' :
-                    viewMode === 'compact' ? 'space-y-1' : 'space-y-2'
+                  viewMode === 'compact' ? 'space-y-1' : 'space-y-2'
                 )}>
                   {filteredData.map(renderItem)}
                 </div>

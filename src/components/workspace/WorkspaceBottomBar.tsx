@@ -89,13 +89,37 @@ export function WorkspaceBottomBar({
     return (
         <>
             <div className="bg-card border-t">
+                {/* File Tabs */}
 
 
                 {/* Bottom Bar */}
                 <div className="h-10 flex items-center justify-between px-4">
                     {/* Left side - Save status */}
                     <div className="flex items-center gap-3">
-                        {/* File Tabs */}
+                        {/* {hasUnsavedChanges && !isReadOnly && (
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={handleSaveAll}
+                                disabled={saving}
+                                className="gap-2 h-7"
+                            >
+                                <Save className="w-3 h-3" />
+                                {saving ? 'Saving...' : 'Save All'}
+                            </Button>
+                        )}
+
+                        <div className="text-xs text-muted-foreground">
+                            {hasUnsavedChanges ? (
+                                <span className="text-orange-600">Unsaved changes</span>
+                            ) : (
+                                <span className="flex items-center gap-1">
+                                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                                    Auto-saved
+                                </span>
+                            )}
+                        </div> */}
+
                         {Object.keys(openFiles).length > 0 && (
                             <div className="h-10 flex items-center px-4 border-b">
                                 <div className="flex-1 overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
@@ -129,14 +153,13 @@ export function WorkspaceBottomBar({
                                                 const saveEvent = new CustomEvent('workspace-save-current');
                                                 window.dispatchEvent(saveEvent);
                                             }}
-                                            // disabled={!hasUnsavedChanges}
                                         >
                                             <Save className="w-4 h-4 mr-2" />
                                             Save Current File
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                             onClick={handleSaveAll}
-                                            disabled={  saving}
+                                            disabled={saving}
                                         >
                                             <Save className="w-4 h-4 mr-2" />
                                             {saving ? 'Saving All...' : 'Save All Files'}
