@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useWorkspaceStore } from '@/lib/stores/useWorkspaceStore';
 import { ShareDialog } from '@/components/project/ShareDialog';
+import { WorkspaceTabs } from './WorkspaceTabs';
 
 interface WorkspaceBottomBarProps {
     projectId: string;
@@ -66,90 +67,83 @@ export function WorkspaceBottomBar({
 
     return (
         <>
-            <div className="h-10 bg-card border-t flex items-center justify-between px-4">
-                {/* Left side - Save status */}
-                <div className="flex items-center gap-3">
-                    {hasUnsavedChanges && !isReadOnly && (
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={handleSaveAll}
-                            disabled={saving}
-                            className="gap-2 h-7"
-                        >
-                            <Save className="w-3 h-3" />
-                            {saving ? 'Saving...' : 'Save All'}
-                        </Button>
-                    )}
+            <div className="bg-card border-t">
 
-                    <div className="text-xs text-muted-foreground">
-                        {hasUnsavedChanges ? (
-                            <span className="text-orange-600">Unsaved changes</span>
-                        ) : (
-                            <span>All changes saved</span>
+
+                {/* Bottom Bar */}
+                <div className="h-10 flex items-center justify-between px-4">
+                    {/* File Tabs */}
+                    {Object.keys(openFiles).length > 0 && (
+                        <div className="h-10 flex items-center px-4 border-b">
+                            <div className="flex-1 overflow-hidden">
+                                <WorkspaceTabs />
+                            </div>
+                        </div>
+                    )}
+                    {/* Left side - Save status */}
+                    <div className="flex items-center gap-3">
+                        {hasUnsavedChanges && !isReadOnly && (
+                            <Button size="sm" variant="outline" onClick={handleSaveAll} disabled={saving} className="gap-2 h-7">
+                                <Save className="w-3 h-3" />
+                                {saving ? 'Saving...' : 'Save All'}
+                            </Button>
                         )}
+                        <div className="text-xs text-muted-foreground">
+                            {hasUnsavedChanges ? (
+                                <span className="text-orange-600">Unsaved changes</span>
+                            ) : (
+                                <span>All changes saved</span>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Right side - Actions */}
+                    <div className="flex items-center gap-2">
+                        <Button size="sm" variant="ghost" onClick={toggleTheme} className="h-7 w-7 p-0" title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
+                            {theme === 'dark' ? (
+                                <Sun className="w-3 h-3" />
+                            ) : (
+                                <Moon className="w-3 h-3" />
+                            )}
+                        </Button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button size="sm" variant="ghost" className="h-7 w-7 p-0" title="More options">
+                                    <MoreHorizontal className="w-3 h-3" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={handleShare}>
+                                    <Share className="w-4 h-4 mr-2" />
+                                    Share Project
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                    <Download className="w-4 h-4 mr-2" />
+                                    Export Project
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem>
+                                    <Settings className="w-4 h-4 mr-2" />
+                                    Project Settings
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={toggleTheme}>
+                                    {theme === 'dark' ? (
+                                        <>
+                                            <Sun className="w-4 h-4 mr-2" />
+                                            Switch to Light Mode
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Moon className="w-4 h-4 mr-2" />
+                                            Switch to Dark Mode
+                                        </>
+                                    )}
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </div>
-
-                {/* Right side - Actions */}
-                <div className="flex items-center gap-2">
-                    <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={toggleTheme}
-                        className="h-7 w-7 p-0"
-                        title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-                    >
-                        {theme === 'dark' ? (
-                            <Sun className="w-3 h-3" />
-                        ) : (
-                            <Moon className="w-3 h-3" />
-                        )}
-                    </Button>
-
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-7 w-7 p-0"
-                                title="More options"
-                            >
-                                <MoreHorizontal className="w-3 h-3" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={handleShare}>
-                                <Share className="w-4 h-4 mr-2" />
-                                Share Project
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                                <Download className="w-4 h-4 mr-2" />
-                                Export Project
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem>
-                                <Settings className="w-4 h-4 mr-2" />
-                                Project Settings
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={toggleTheme}>
-                                {theme === 'dark' ? (
-                                    <>
-                                        <Sun className="w-4 h-4 mr-2" />
-                                        Switch to Light Mode
-                                    </>
-                                ) : (
-                                    <>
-                                        <Moon className="w-4 h-4 mr-2" />
-                                        Switch to Dark Mode
-                                    </>
-                                )}
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
             </div>
-
             {/* Share Dialog */}
             <ShareDialog
                 projectId={projectId}

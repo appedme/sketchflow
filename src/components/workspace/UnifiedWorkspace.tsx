@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useProjectFiles } from '@/lib/hooks/useProjectData';
 import { useWorkspaceStore } from '@/lib/stores/useWorkspaceStore';
 import { WorkspaceEditor } from './WorkspaceEditor';
-import { WorkspaceTabs } from './WorkspaceTabs';
+
 import { WorkspaceBottomBar } from './WorkspaceBottomBar';
 import { Button } from '@/components/ui/button';
 import {
@@ -223,12 +223,7 @@ export function UnifiedWorkspace({
     // Show workspace with files - no sidebar since layout handles it
     return (
         <div className="h-full flex flex-col">
-            {/* Tabs */}
-            {Object.keys(openFiles).length > 0 && (
-                <div className="h-10 bg-card border-b flex items-center px-2">
-                    <WorkspaceTabs />
-                </div>
-            )}
+
 
             {/* Editor */}
             <div className="flex-1 overflow-hidden">

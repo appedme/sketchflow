@@ -60,7 +60,7 @@ export function WorkspaceHeader({ project, isMobile }: WorkspaceHeaderProps) {
                     className="gap-2"
                 >
                     <ArrowLeft className="w-4 h-4" />
-                    {!isMobile && 'Dashboard'}
+                    {/* {!isMobile && 'Dashboard'} */}
                 </Button>
 
                 {!isMobile && (
