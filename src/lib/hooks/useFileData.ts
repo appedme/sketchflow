@@ -1,0 +1,147 @@
+import useSWR, { mutate } from 'swr';
+import { useWorkspaceStore } from '@/lib/stores/useWorkspaceStore';
+import { useCallback, useEffect } from 'react';
+
+interface FileData {
+    id: string;
+    title: string;
+    type: 'canvas' | 'document';
+    content?: any;
+    elements?: any[];
+    appState?: any;
+    updatedAt: string;
+    createdAt: string;
+}
+
+const fetcher = async (url: string): Promise<FileData> => {
+    const res = await fetch(url);
+    if (!res.ok) {
+        throw new Error(`Failed to fetch file: ${res.status}`);
+    }
+    return res.json();
+};
+
+export function useFileData(fileId: string | null, fileType: 'canvas' | 'document' | null) {
+    const { setCacheData, getCacheData, markFileDirty } = useWorkspaceStore();
+
+    // Generate API URL
+    const apiUrl = fileId && fileType
+        ? (fileType === 'canvas' ? `/api/canvas/${fileId}` : `/api/documents/${fileId}`)
+        : null;
+
+    // Get cached data
+    const cachedData = fileId ? getCacheData(fileId) : null;
+
+    const swrResult = useSWR<FileData>(
+        apiUrl,
+        fetcher,
+        {
+            // Use cached data as fallback
+            fallbackData: cachedData,
+
+            // Aggressive caching
+            dedupingInterval: 5000,
+            revalidateOnFocus: false,
+            revalidateOnReconnect: true,
+
+            // Keep previous data while loading
+            keepPreviousData: true,
+
+            // Error handling
+            errorRetryCount: 3,
+            errorRetryInterval: 1000,
+
+            // Custom revalidation
+            revalidateIfStale: true,
+        }
+    );
+
+    // Update cache when data changes
+    useEffect(() => {
+        if (swrResult.data && fileId) {
+            setCacheData(fileId, swrResult.data);
+        }
+    }, [swrResult.data, fileId, setCacheData]);
+
+    // Save function with optimistic updates
+    const saveFile = useCallback(async (updates: Partial<FileData>) => {
+        if (!fileId || !fileType || !swrResult.data) return;
+
+        // Mark as dirty
+        markFileDirty(fileId, true);
+
+        // Optimistic update
+        const optimisticData = { ...swrResult.data, ...updates };
+        setCacheData(fileId, optimisticData);
+
+        // Update SWR cache optimistically
+        mutate(apiUrl, optimisticData, false);
+
+        try {
+            const endpoint = fileType === 'canvas' ? `/api/canvas/${fileId}` : `/api/documents/${fileId}`;
+            const response = await fetch(endpoint, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updates),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Save failed: ${response.status}`);
+            }
+
+            const savedData = await response.json();
+
+            // Update cache with server response
+            setCacheData(fileId, savedData);
+            mutate(apiUrl, savedData, false);
+
+            // Mark as clean
+            markFileDirty(fileId, false);
+
+            return savedData;
+        } catch (error) {
+            // Revert optimistic update on error
+            mutate(apiUrl);
+            markFileDirty(fileId, false);
+            throw error;
+        }
+    }, [fileId, fileType, apiUrl, swrResult.data, setCacheData, markFileDirty]);
+
+    // Auto-save functionality
+    const autoSave = useCallback((updates: Partial<FileData>, delay = 2000) => {
+        const timeoutId = setTimeout(() => {
+            saveFile(updates).catch(console.error);
+        }, delay);
+
+        return () => clearTimeout(timeoutId);
+    }, [saveFile]);
+
+    return {
+        ...swrResult,
+        saveFile,
+        autoSave,
+        isCanvas: fileType === 'canvas',
+        isDocument: fileType === 'document',
+    };
+}
+
+// Hook for managing multiple files
+export function useMultipleFiles(fileIds: string[]) {
+    const results = fileIds.map(fileId => {
+        // Determine file type from cache or API
+        const cachedData = useWorkspaceStore.getState().getCacheData(fileId);
+        const fileType = cachedData?.type || null;
+
+        return {
+            fileId,
+            ...useFileData(fileId, fileType)
+        };
+    });
+
+    return {
+        files: results,
+        isLoading: results.some(r => r.isLoading),
+        hasError: results.some(r => r.error),
+        errors: results.filter(r => r.error).map(r => r.error),
+    };
+}
