@@ -15,8 +15,6 @@ import {
 } from "@/components/ui/resizable";
 import { ViewTracker } from './ViewTracker';
 
-// Use optimized lazy loading for better performance
-import { LazyExcalidrawCanvas } from '';
 import { ExcalidrawCanvas } from './ExcalidrawCanvas';
 
 interface ProjectWorkspaceProps {
@@ -248,7 +246,7 @@ export function ProjectWorkspace({
             minSize={60}
             className="relative overflow-hidden"
           >
-            <LazyExcalidrawCanvas
+            <ExcalidrawCanvas
               projectId={projectId}
               projectName={projectName}
               isReadOnly={isReadOnly}

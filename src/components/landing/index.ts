@@ -1,0 +1,11 @@
+export { HeroSection } from './hero-section';
+export { StatsSection } from './stats-section';
+export { FeaturesSection } from './features-section';
+export { HowItWorksSection } from './how-it-works-section';
+export { UseCasesSection } from './use-cases-section';
+export { TestimonialsSection } from './testimonials-section';
+export { IntegrationSection } from './integration-section';
+export { FutureFeaturesSection } from './future-features-section';
+export { CTASection } from './cta-section';
+export { Navigation } from './navigation';
+export { Footer } from './footer';

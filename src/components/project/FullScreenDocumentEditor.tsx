@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { LazyPlateEditor } from '';
+import { PlateDocumentEditor } from './PlateDocumentEditor';
 import { DocumentationPanel } from './DocumentationPanel';
 import {
   ResizableHandle,
@@ -147,7 +147,7 @@ export function FullScreenDocumentEditor({
             minSize={50}
             className="overflow-hidden"
           >
-            <LazyPlateEditor
+            <PlateDocumentEditor
               documentId={documentId}
               projectId={projectId}
               projectName={projectName}
