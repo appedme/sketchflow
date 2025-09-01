@@ -50,7 +50,6 @@ import {
     type Project,
     type UpdateProjectData
 } from '@/hooks/workspace/useProjects';
-import './ProjectCard.css';
 
 interface ProjectCardProps {
     project: Project;
@@ -147,7 +146,6 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
         }
     };
 
-    // Settings modal state
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
     const getCategoryIcon = (category: string) => {
@@ -159,13 +157,13 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
             'other': Folder,
         };
         const IconComponent = iconMap[category] || Folder;
-        return <IconComponent className="project-card__category-icon" />;
+        return <IconComponent className="w-4 h-4" />;
     };
 
     const getVisibilityIcon = () => {
         return project.visibility === 'public' ?
-            <Globe className="project-card__visibility-icon" /> :
-            <Lock className="project-card__visibility-icon" />;
+            <Globe className="w-3 h-3" /> :
+            <Lock className="w-3 h-3" />;
     };
 
     const formatLastActivity = () => {
@@ -177,242 +175,121 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
         return (
             <>
                 <Card className={cn(
-                    "project-card project-card--list",
-                    project.visibility === 'public' && "project-card--public",
-                    project.status === 'active' && "project-card--active"
+                    "hover:shadow-md transition-shadow border-l-4",
+                    project.visibility === 'public' ? "border-l-green-500" : "border-l-blue-500",
+                    project.status === 'active' && "bg-green-50/50 dark:bg-green-950/20"
                 )}>
-                    <CardContent className="project-card__content project-card__content--list">
-                        <div className="project-card__main">
-                            <div className="project-card__header">
-                                <div className="project-card__title-section">
+                    <CardContent className="p-4">
+                        <div className="flex items-start justify-between">
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-3 mb-2">
                                     <Link
                                         href={`/workspace/${project.id}`}
-                                        className="project-card__title-link"
+                                        className="font-semibold text-lg hover:text-primary transition-colors truncate"
                                     >
-                                        <h3 className="project-card__title">{project.name}</h3>
+                                        {project.name}
                                     </Link>
-                                    <div className="project-card__meta">
-                                        {getCategoryIcon(project.category)}
-                                        <span className="project-card__category">{project.category}</span>
-
-                                        {/* Visibility Badge - Always Visible */}
-                                        <div className={cn(
-                                            "project-card__visibility-badge project-card__visibility-badge--compact",
-                                            project.visibility === 'public' && "project-card__visibility-badge--public"
-                                        )}>
-                                            {getVisibilityIcon()}
-                                            <span className="project-card__visibility-text">{project.visibility}</span>
+                                    
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md text-xs">
+                                            {getCategoryIcon(project.category)}
+                                            <span>{project.category}</span>
                                         </div>
 
-                                        {/* Status Badge - Always Visible */}
+                                        <Badge variant={project.visibility === 'public' ? 'default' : 'secondary'} className="text-xs">
+                                            {getVisibilityIcon()}
+                                            <span className="ml-1">{project.visibility}</span>
+                                        </Badge>
+
                                         {project.status && (
-                                            <div className={cn(
-                                                "project-card__status-badge project-card__status-badge--compact",
-                                                `project-card__status-badge--${project.status}`
-                                            )}>
-                                                <div className="project-card__status-dot" />
-                                                <span className="project-card__status-text">{project.status}</span>
-                                            </div>
+                                            <Badge variant="outline" className="text-xs">
+                                                <div className={cn("w-2 h-2 rounded-full mr-1", 
+                                                    project.status === 'active' ? 'bg-green-500' : 'bg-gray-400'
+                                                )} />
+                                                {project.status}
+                                            </Badge>
                                         )}
                                     </div>
                                 </div>
 
-                                <div className="project-card__actions">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={handleToggleFavorite}
-                                        className="project-card__favorite-btn"
-                                    >
-                                        {project.isFavorite ?
-                                            <Star className="project-card__star project-card__star--filled" /> :
-                                            <StarOff className="project-card__star" />
-                                        }
-                                    </Button>
+                                {project.description && (
+                                    <p className="text-muted-foreground text-sm mb-3 line-clamp-2">{project.description}</p>
+                                )}
 
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" size="sm" className="project-card__menu-btn">
-                                                <MoreHorizontal className="project-card__menu-icon" />
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end" className="project-card__dropdown">
-                                            <DropdownMenuItem onClick={() => setIsEditing(true)}>
-                                                <Edit2 className="project-card__dropdown-icon" />
-                                                Edit
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={handleDuplicate}>
-                                                <Copy className="project-card__dropdown-icon" />
-                                                Duplicate
-                                            </DropdownMenuItem>
-                                            <ProjectSettingsModal
-                                                projectId={project.id}
-                                                projectName={project.name}
-                                                isOpen={isSettingsModalOpen}
-                                                onOpenChange={setIsSettingsModalOpen}
-                                                trigger={
-                                                    <DropdownMenuItem
-                                                        onSelect={(e) => e.preventDefault()}
-                                                    >
-                                                        <Settings className="project-card__dropdown-icon" />
-                                                        Settings
-                                                    </DropdownMenuItem>
-                                                }
-                                            />
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem onClick={handleDelete} className="project-card__delete-item">
-                                                <Trash2 className="project-card__dropdown-icon" />
-                                                Delete
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                        <div className="flex items-center gap-1">
+                                            <Eye className="w-3 h-3" />
+                                            <span>{project.viewCount || 0} views</span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <Clock className="w-3 h-3" />
+                                            <span>{formatLastActivity()}</span>
+                                        </div>
+                                    </div>
+
+                                    {project.tags && project.tags.length > 0 && (
+                                        <div className="flex gap-1">
+                                            {project.tags.slice(0, 3).map((tag) => (
+                                                <Badge key={tag} variant="secondary" className="text-xs">
+                                                    {tag}
+                                                </Badge>
+                                            ))}
+                                            {project.tags.length > 3 && (
+                                                <Badge variant="outline" className="text-xs">
+                                                    +{project.tags.length - 3}
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
-                            {project.description && (
-                                <p className="project-card__description">{project.description}</p>
-                            )}
+                            <div className="flex items-center gap-1 ml-4">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={handleToggleFavorite}
+                                    className="h-8 w-8 p-0"
+                                >
+                                    {project.isFavorite ?
+                                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" /> :
+                                        <StarOff className="w-4 h-4" />
+                                    }
+                                </Button>
 
-                            <div className="project-card__footer">
-                                <div className="project-card__stats">
-                                    <div className="project-card__stat">
-                                        <Eye className="project-card__stat-icon" />
-                                        <span className="project-card__stat-text">{project.viewCount || 0} views</span>
-                                    </div>
-                                    <div className="project-card__stat">
-                                        <Clock className="project-card__stat-icon" />
-                                        <span className="project-card__stat-text">{formatLastActivity()}</span>
-                                    </div>
-                                </div>
-
-                                {project.tags && project.tags.length > 0 && (
-                                    <div className="project-card__tags">
-                                        {project.tags.slice(0, 3).map((tag) => (
-                                            <Badge key={tag} variant="secondary" className="project-card__tag">
-                                                {tag}
-                                            </Badge>
-                                        ))}
-                                        {project.tags.length > 3 && (
-                                            <Badge variant="outline" className="project-card__tag project-card__tag--more">
-                                                +{project.tags.length - 3}
-                                            </Badge>
-                                        )}
-                                    </div>
-                                )}
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                            <MoreHorizontal className="w-4 h-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                                            <Edit2 className="w-4 h-4 mr-2" />
+                                            Edit
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={handleDuplicate}>
+                                            <Copy className="w-4 h-4 mr-2" />
+                                            Duplicate
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setIsSettingsModalOpen(true)}>
+                                            <Settings className="w-4 h-4 mr-2" />
+                                            Settings
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+                                            <Trash2 className="w-4 h-4 mr-2" />
+                                            Delete
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
                 {isLoading && <ProjectLoadingOverlay isLoading={isLoading} />}
-
-                <Dialog open={isEditing} onOpenChange={setIsEditing}>
-                    <DialogContent className="project-card__edit-dialog">
-                        <DialogHeader>
-                            <DialogTitle>Edit Project</DialogTitle>
-                        </DialogHeader>
-                        <div className="project-card__edit-form">
-                            <div className="project-card__form-group">
-                                <Label htmlFor="name">Project Name</Label>
-                                <Input
-                                    id="name"
-                                    value={editedName}
-                                    onChange={(e) => setEditedName(e.target.value)}
-                                    className="project-card__form-input"
-                                />
-                            </div>
-
-                            <div className="project-card__form-group">
-                                <Label htmlFor="description">Description</Label>
-                                <Textarea
-                                    id="description"
-                                    value={editedDescription}
-                                    onChange={(e) => setEditedDescription(e.target.value)}
-                                    className="project-card__form-textarea"
-                                    rows={3}
-                                />
-                            </div>
-
-                            <div className="project-card__form-row">
-                                <div className="project-card__form-group">
-                                    <Label htmlFor="category">Category</Label>
-                                    <Select value={editedCategory} onValueChange={setEditedCategory}>
-                                        <SelectTrigger className="project-card__form-select">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="business">Business</SelectItem>
-                                            <SelectItem value="design">Design</SelectItem>
-                                            <SelectItem value="education">Education</SelectItem>
-                                            <SelectItem value="personal">Personal</SelectItem>
-                                            <SelectItem value="other">Other</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div className="project-card__form-group">
-                                    <Label htmlFor="visibility">Visibility</Label>
-                                    <Select value={editedVisibility} onValueChange={setEditedVisibility}>
-                                        <SelectTrigger className="project-card__form-select">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="private">Private</SelectItem>
-                                            <SelectItem value="public">Public</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-
-                            <div className="project-card__form-group">
-                                <Label>Tags</Label>
-                                <div className="project-card__tags-input">
-                                    <Input
-                                        value={newTag}
-                                        onChange={(e) => setNewTag(e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && addTag()}
-                                        placeholder="Add a tag..."
-                                        className="project-card__tag-input"
-                                    />
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={addTag}
-                                        className="project-card__add-tag-btn"
-                                    >
-                                        <Plus className="project-card__add-tag-icon" />
-                                    </Button>
-                                </div>
-
-                                {editedTags.length > 0 && (
-                                    <div className="project-card__current-tags">
-                                        {editedTags.map((tag) => (
-                                            <Badge key={tag} variant="secondary" className="project-card__current-tag">
-                                                {tag}
-                                                <button
-                                                    onClick={() => removeTag(tag)}
-                                                    className="project-card__remove-tag-btn"
-                                                >
-                                                    <X className="project-card__remove-tag-icon" />
-                                                </button>
-                                            </Badge>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="project-card__form-actions">
-                                <Button variant="outline" onClick={handleCancel}>
-                                    Cancel
-                                </Button>
-                                <Button onClick={handleSave}>
-                                    Save Changes
-                                </Button>
-                            </div>
-                        </div>
-                    </DialogContent>
-                </Dialog>
             </>
         );
     }
@@ -421,127 +298,103 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
     return (
         <>
             <Card className={cn(
-                "project-card project-card--grid",
-                // project.visibility === 'public' && "project-card--public",
-                project.status === 'active' && "project-card--active"
+                "hover:shadow-lg transition-all duration-200 group cursor-pointer",
+                project.status === 'active' && "ring-2 ring-green-500/20"
             )}>
-                <CardHeader className="project-card__header">
-                    <div className="project-card__header-top">
-                        <div className="project-card__category-badge">
+                <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md text-xs">
                             {getCategoryIcon(project.category)}
-                            <span className="project-card__category-text">{project.category}</span>
+                            <span className="capitalize">{project.category}</span>
                         </div>
 
-                        <div className="project-card__status-indicators">
-                            {/* Visibility Badge - Always Visible */}
-                            <div className={cn(
-                                "project-card__visibility-badge",
-                                project.visibility === 'public' && "project-card__visibility-badge--public"
-                            )}>
+                        <div className="flex items-center gap-2">
+                            <Badge variant={project.visibility === 'public' ? 'default' : 'secondary'} className="text-xs">
                                 {getVisibilityIcon()}
-                                <span className="project-card__visibility-text">{project.visibility}</span>
+                                <span className="ml-1">{project.visibility}</span>
+                            </Badge>
+
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={handleToggleFavorite}
+                                    className="h-7 w-7 p-0"
+                                >
+                                    {project.isFavorite ?
+                                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" /> :
+                                        <StarOff className="w-3 h-3" />
+                                    }
+                                </Button>
+
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                                            <MoreHorizontal className="w-3 h-3" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                                            <Edit2 className="w-4 h-4 mr-2" />
+                                            Edit
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={handleDuplicate}>
+                                            <Copy className="w-4 h-4 mr-2" />
+                                            Duplicate
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setIsSettingsModalOpen(true)}>
+                                            <Settings className="w-4 h-4 mr-2" />
+                                            Settings
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+                                            <Trash2 className="w-4 h-4 mr-2" />
+                                            Delete
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </div>
-
-                            {/* Status Badge - Always Visible */}
-                            {/* {project.status && (
-                                <div className={cn(
-                                    "project-card__status-badge",
-                                    `project-card__status-badge--${project.status}`
-                                )}>
-                                    <div className="project-card__status-dot" />
-                                    <span className="project-card__status-text">{project.status}</span>
-                                </div>
-                            )} */}
-                        </div>
-
-                        <div className="project-card__header-actions">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleToggleFavorite}
-                                className="project-card__favorite-btn"
-                            >
-                                {project.isFavorite ?
-                                    <Star className="project-card__star project-card__star--filled" /> :
-                                    <StarOff className="project-card__star" />
-                                }
-                            </Button>
-
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="project-card__menu-btn">
-                                        <MoreHorizontal className="project-card__menu-icon" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="project-card__dropdown">
-                                    <DropdownMenuItem onClick={() => setIsEditing(true)}>
-                                        <Edit2 className="project-card__dropdown-icon" />
-                                        Edit
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={handleDuplicate}>
-                                        <Copy className="project-card__dropdown-icon" />
-                                        Duplicate
-                                    </DropdownMenuItem>
-                                    <ProjectSettingsModal
-                                        projectId={project.id}
-                                        projectName={project.name}
-                                        isOpen={isSettingsModalOpen}
-                                        onOpenChange={setIsSettingsModalOpen}
-                                        trigger={
-                                            <DropdownMenuItem
-                                                onSelect={(e) => e.preventDefault()}
-                                            >
-                                                <Settings className="project-card__dropdown-icon" />
-                                                Settings
-                                            </DropdownMenuItem>
-                                        }
-                                    />
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={handleDelete} className="project-card__delete-item">
-                                        <Trash2 className="project-card__dropdown-icon" />
-                                        Delete
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
                         </div>
                     </div>
 
                     <Link
                         href={`/workspace/${project.id}`}
-                        className="project-card__title-link"
+                        className="block"
                     >
-                        <h3 className="project-card__title">{project.name}</h3>
+                        <h3 className="font-semibold text-lg mb-2 hover:text-primary transition-colors line-clamp-2">
+                            {project.name}
+                        </h3>
                     </Link>
 
                     {project.description && (
-                        <p className="project-card__description">{project.description}</p>
+                        <p className="text-muted-foreground text-sm line-clamp-3 mb-3">
+                            {project.description}
+                        </p>
                     )}
                 </CardHeader>
 
-                <CardContent className="project-card__content">
-                    <div className="project-card__footer">
-                        <div className="project-card__stats">
-                            <div className="project-card__stat">
-                                <Eye className="project-card__stat-icon" />
-                                <span className="project-card__stat-text">{project.viewCount || 0} views</span>
-                            </div>
+                <CardContent className="pt-0">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Eye className="w-3 h-3" />
+                            <span>{project.viewCount || 0} views</span>
                         </div>
 
-                        <div className="project-card__activity">
-                            <Clock className="project-card__activity-icon" />
-                            <span className="project-card__activity-text">{formatLastActivity()}</span>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Clock className="w-3 h-3" />
+                            <span>{formatLastActivity()}</span>
                         </div>
                     </div>
 
                     {project.tags && project.tags.length > 0 && (
-                        <div className="project-card__tags">
+                        <div className="flex flex-wrap gap-1">
                             {project.tags.slice(0, 2).map((tag) => (
-                                <Badge key={tag} variant="secondary" className="project-card__tag">
+                                <Badge key={tag} variant="secondary" className="text-xs">
                                     {tag}
                                 </Badge>
                             ))}
                             {project.tags.length > 2 && (
-                                <Badge variant="outline" className="project-card__tag project-card__tag--more">
+                                <Badge variant="outline" className="text-xs">
                                     +{project.tags.length - 2}
                                 </Badge>
                             )}
@@ -553,37 +406,35 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
             {isLoading && <ProjectLoadingOverlay isLoading={isLoading} />}
 
             <Dialog open={isEditing} onOpenChange={setIsEditing}>
-                <DialogContent className="project-card__edit-dialog">
+                <DialogContent className="max-w-md">
                     <DialogHeader>
                         <DialogTitle>Edit Project</DialogTitle>
                     </DialogHeader>
-                    <div className="project-card__edit-form">
-                        <div className="project-card__form-group">
+                    <div className="space-y-4">
+                        <div className="space-y-2">
                             <Label htmlFor="name">Project Name</Label>
                             <Input
                                 id="name"
                                 value={editedName}
                                 onChange={(e) => setEditedName(e.target.value)}
-                                className="project-card__form-input"
                             />
                         </div>
 
-                        <div className="project-card__form-group">
+                        <div className="space-y-2">
                             <Label htmlFor="description">Description</Label>
                             <Textarea
                                 id="description"
                                 value={editedDescription}
                                 onChange={(e) => setEditedDescription(e.target.value)}
-                                className="project-card__form-textarea"
                                 rows={3}
                             />
                         </div>
 
-                        <div className="project-card__form-row">
-                            <div className="project-card__form-group">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
                                 <Label htmlFor="category">Category</Label>
                                 <Select value={editedCategory} onValueChange={setEditedCategory}>
-                                    <SelectTrigger className="project-card__form-select">
+                                    <SelectTrigger>
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -596,10 +447,10 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                                 </Select>
                             </div>
 
-                            <div className="project-card__form-group">
+                            <div className="space-y-2">
                                 <Label htmlFor="visibility">Visibility</Label>
                                 <Select value={editedVisibility} onValueChange={setEditedVisibility}>
-                                    <SelectTrigger className="project-card__form-select">
+                                    <SelectTrigger>
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -610,37 +461,36 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                             </div>
                         </div>
 
-                        <div className="project-card__form-group">
+                        <div className="space-y-2">
                             <Label>Tags</Label>
-                            <div className="project-card__tags-input">
+                            <div className="flex gap-2">
                                 <Input
                                     value={newTag}
                                     onChange={(e) => setNewTag(e.target.value)}
                                     onKeyPress={(e) => e.key === 'Enter' && addTag()}
                                     placeholder="Add a tag..."
-                                    className="project-card__tag-input"
+                                    className="flex-1"
                                 />
                                 <Button
                                     type="button"
                                     variant="outline"
                                     size="sm"
                                     onClick={addTag}
-                                    className="project-card__add-tag-btn"
                                 >
-                                    <Plus className="project-card__add-tag-icon" />
+                                    <Plus className="w-4 h-4" />
                                 </Button>
                             </div>
 
                             {editedTags.length > 0 && (
-                                <div className="project-card__current-tags">
+                                <div className="flex flex-wrap gap-1 mt-2">
                                     {editedTags.map((tag) => (
-                                        <Badge key={tag} variant="secondary" className="project-card__current-tag">
+                                        <Badge key={tag} variant="secondary" className="text-xs">
                                             {tag}
                                             <button
                                                 onClick={() => removeTag(tag)}
-                                                className="project-card__remove-tag-btn"
+                                                className="ml-1 hover:text-destructive"
                                             >
-                                                <X className="project-card__remove-tag-icon" />
+                                                <X className="w-3 h-3" />
                                             </button>
                                         </Badge>
                                     ))}
@@ -648,7 +498,7 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                             )}
                         </div>
 
-                        <div className="project-card__form-actions">
+                        <div className="flex justify-end gap-2 pt-4">
                             <Button variant="outline" onClick={handleCancel}>
                                 Cancel
                             </Button>
@@ -659,6 +509,13 @@ export function ProjectCard({ project, viewMode = "grid", onUpdate }: ProjectCar
                     </div>
                 </DialogContent>
             </Dialog>
+
+            <ProjectSettingsModal
+                projectId={project.id}
+                projectName={project.name}
+                isOpen={isSettingsModalOpen}
+                onOpenChange={setIsSettingsModalOpen}
+            />
         </>
     );
 }

@@ -1,9 +1,9 @@
 "use client";
 
-import React from 'react';
+import React, { memo } from 'react';
 import { ExcalidrawCanvas } from '@/components/project/ExcalidrawCanvas';
 import { ShapeConnector } from './ShapeConnector';
-import { useCanvas } from '@/contexts/CanvasContext';
+import { CanvasProvider, useCanvas } from '@/contexts/CanvasContext';
 
 interface EnhancedExcalidrawCanvasProps {
   projectId: string;
@@ -12,7 +12,10 @@ interface EnhancedExcalidrawCanvasProps {
   isReadOnly?: boolean;
 }
 
-function EnhancedExcalidrawCanvasContent(props: EnhancedExcalidrawCanvasProps) {
+// Content component that uses the canvas context
+const EnhancedExcalidrawCanvasContent = memo(function EnhancedExcalidrawCanvasContent(
+  props: EnhancedExcalidrawCanvasProps
+) {
   const { elements, updateElements } = useCanvas();
   const [excalidrawAPI, setExcalidrawAPI] = React.useState<any>(null);
 
@@ -36,8 +39,15 @@ function EnhancedExcalidrawCanvasContent(props: EnhancedExcalidrawCanvasProps) {
       )}
     </div>
   );
-}
+});
 
-export function EnhancedExcalidrawCanvas(props: EnhancedExcalidrawCanvasProps) {
-  return <EnhancedExcalidrawCanvasContent {...props} />;
-}
+// Main component that provides the canvas context
+export const EnhancedExcalidrawCanvas = memo(function EnhancedExcalidrawCanvas(
+  props: EnhancedExcalidrawCanvasProps
+) {
+  return (
+    <CanvasProvider projectId={props.projectId} canvasId={props.canvasId}>
+      <EnhancedExcalidrawCanvasContent {...props} />
+    </CanvasProvider>
+  );
+});

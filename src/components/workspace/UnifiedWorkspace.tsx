@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, memo, useCallback, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useProjectFiles } from '@/lib/hooks/useProjectData';
-import { useWorkspaceStore } from '@/lib/stores/useWorkspaceStore';
+import { useWorkspaceStore, useActiveFileId, useOpenFiles, useFullscreenMode } from '@/lib/stores/useWorkspaceStore';
 import { WorkspaceEditor } from './WorkspaceEditor';
 import { WorkspaceBottomBar } from './WorkspaceBottomBar';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,6 @@ import {
     Minimize,
     X
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface UnifiedWorkspaceProps {
     projectId: string;
@@ -24,7 +23,114 @@ interface UnifiedWorkspaceProps {
     isPublicView?: boolean;
 }
 
-export function UnifiedWorkspace({
+// Memoized empty state component
+const EmptyState = memo(function EmptyState({
+    project,
+    isReadOnly,
+    onCreateFile,
+}: {
+    project: any;
+    isReadOnly: boolean;
+    onCreateFile: (type: 'document' | 'canvas') => void;
+}) {
+    return (
+        <div className="h-full flex flex-col">
+            <div className="border-b bg-card">
+                <div className="max-w-4xl mx-auto px-6 py-8">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-2xl font-bold mb-2">{project.name}</h1>
+                            {project.description && (
+                                <p className="text-muted-foreground">{project.description}</p>
+                            )}
+                        </div>
+
+                        {!isReadOnly && (
+                            <div className="flex gap-2">
+                                <Button onClick={() => onCreateFile('document')} className="gap-2">
+                                    <FileText className="w-4 h-4" />
+                                    New Document
+                                </Button>
+                                <Button onClick={() => onCreateFile('canvas')} variant="outline" className="gap-2">
+                                    <PencilRuler className="w-4 h-4" />
+                                    New Canvas
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            <div className="flex-1 flex items-center justify-center">
+                <div className="text-center py-16">
+                    <div className="w-16 h-16 bg-muted/50 rounded-lg flex items-center justify-center mx-auto mb-4">
+                        <FolderOpen className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">No files yet</h3>
+                    <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                        {isReadOnly
+                            ? "This project doesn't have any files yet."
+                            : "Get started by creating your first document or canvas."
+                        }
+                    </p>
+
+                    {!isReadOnly && (
+                        <div className="flex gap-3 justify-center">
+                            <Button onClick={() => onCreateFile('document')} className="gap-2">
+                                <FileText className="w-4 h-4" />
+                                Create Document
+                            </Button>
+                            <Button onClick={() => onCreateFile('canvas')} variant="outline" className="gap-2">
+                                <PencilRuler className="w-4 h-4" />
+                                Create Canvas
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+});
+
+// Memoized loading state component
+const LoadingState = memo(function LoadingState() {
+    return (
+        <div className="h-full flex items-center justify-center">
+            <div className="text-center space-y-4">
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto">
+                    <FolderOpen className="w-6 h-6 text-primary animate-pulse" />
+                </div>
+                <div>
+                    <h3 className="font-semibold">Loading Project</h3>
+                    <p className="text-sm text-muted-foreground">Fetching your files...</p>
+                </div>
+            </div>
+        </div>
+    );
+});
+
+// Memoized fullscreen controls
+const FullscreenControls = memo(function FullscreenControls({
+    onToggleFullscreen,
+}: {
+    onToggleFullscreen: () => void;
+}) {
+    return (
+        <div className="absolute top-4 right-4 z-50 flex gap-2">
+            <Button
+                size="sm"
+                variant="secondary"
+                onClick={onToggleFullscreen}
+                className="gap-2 shadow-lg z-[99]"
+                title="Exit fullscreen (Esc or F11)"
+            >
+                <Minimize className="w-4 h-4" />
+            </Button>
+        </div>
+    );
+});
+
+export const UnifiedWorkspace = memo(function UnifiedWorkspace({
     projectId,
     project,
     currentUser,
@@ -34,13 +140,16 @@ export function UnifiedWorkspace({
     const router = useRouter();
     const searchParams = useSearchParams();
     const { files, isLoading, mutateAll } = useProjectFiles(projectId);
+    
+    // Use optimized selectors to prevent re-renders
+    const openFiles = useOpenFiles();
+    const activeFileId = useActiveFileId();
+    const fullscreenMode = useFullscreenMode();
+    
     const {
-        openFiles,
-        activeFileId,
         openFile,
         setActiveFile,
         initializeWorkspace,
-        fullscreenMode,
         toggleFullscreen
     } = useWorkspaceStore();
 
@@ -52,13 +161,11 @@ export function UnifiedWorkspace({
     // Keyboard shortcuts for fullscreen
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
-            // F11 or Cmd/Ctrl + Shift + F for fullscreen toggle
             if (event.key === 'F11' ||
                 ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'F')) {
                 event.preventDefault();
                 toggleFullscreen();
             }
-            // Escape to exit fullscreen
             if (event.key === 'Escape' && fullscreenMode) {
                 event.preventDefault();
                 toggleFullscreen();
@@ -69,13 +176,12 @@ export function UnifiedWorkspace({
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [toggleFullscreen, fullscreenMode]);
 
-    // Handle URL file parameter and auto-open files
-    useEffect(() => {
+    // Handle URL file parameter and auto-open files (memoized to prevent re-runs)
+    const handleUrlFileParam = useCallback(() => {
         if (!isLoading && files.length > 0) {
             const fileParam = searchParams.get('file');
 
             if (fileParam) {
-                // Open file from URL parameter
                 const fileFromUrl = files.find(f => f.id === fileParam);
                 if (fileFromUrl && !openFiles[fileParam]) {
                     openFile(fileFromUrl.id, fileFromUrl.type, fileFromUrl.title);
@@ -83,13 +189,25 @@ export function UnifiedWorkspace({
                 }
             } else if (Object.keys(openFiles).length === 0) {
                 // Auto-open most recent file if no files are open and no URL param
-                const mostRecentFile = files[0]; // Already sorted by updatedAt
-                handleFileClick(mostRecentFile);
+                const mostRecentFile = files[0];
+                if (mostRecentFile) {
+                    openFile(mostRecentFile.id, mostRecentFile.type, mostRecentFile.title);
+                    setActiveFile(mostRecentFile.id);
+                    
+                    // Update URL
+                    const params = new URLSearchParams(searchParams);
+                    params.set('file', mostRecentFile.id);
+                    router.replace(`?${params.toString()}`, { scroll: false });
+                }
             }
         }
-    }, [isLoading, files, openFiles, searchParams]);
+    }, [isLoading, files, openFiles, searchParams, openFile, setActiveFile, router]);
 
-    const handleFileClick = (file: any) => {
+    useEffect(() => {
+        handleUrlFileParam();
+    }, [handleUrlFileParam]);
+
+    const handleFileClick = useCallback((file: any) => {
         openFile(file.id, file.type, file.title);
         setActiveFile(file.id);
 
@@ -97,9 +215,9 @@ export function UnifiedWorkspace({
         const params = new URLSearchParams(searchParams);
         params.set('file', file.id);
         router.replace(`?${params.toString()}`, { scroll: false });
-    };
+    }, [openFile, setActiveFile, searchParams, router]);
 
-    const handleCreateFile = async (type: 'document' | 'canvas') => {
+    const handleCreateFile = useCallback(async (type: 'document' | 'canvas') => {
         if (isReadOnly) return;
 
         try {
@@ -147,129 +265,48 @@ export function UnifiedWorkspace({
         } catch (error) {
             console.error(`Failed to create ${type}:`, error);
         }
-    };
+    }, [isReadOnly, projectId, mutateAll, handleFileClick]);
 
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
-
-        if (diffInHours < 1) return 'Just now';
-        if (diffInHours < 24) return `${Math.floor(diffInHours)}h ago`;
-        if (diffInHours < 168) return `${Math.floor(diffInHours / 24)}d ago`;
-        return date.toLocaleDateString();
-    };
+    // Memoize the active file data to prevent re-renders
+    const activeFile = useMemo(() => {
+        return activeFileId && openFiles[activeFileId] ? openFiles[activeFileId] : null;
+    }, [activeFileId, openFiles]);
 
     // Show loading state
     if (isLoading) {
-        return (
-            <div className="h-full flex items-center justify-center">
-                <div className="text-center space-y-4">
-                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto">
-                        <FolderOpen className="w-6 h-6 text-primary animate-pulse" />
-                    </div>
-                    <div>
-                        <h3 className="font-semibold">Loading Project</h3>
-                        <p className="text-sm text-muted-foreground">Fetching your files...</p>
-                    </div>
-                </div>
-            </div>
-        );
+        return <LoadingState />;
     }
 
     // Show empty state if no files
     if (files.length === 0) {
         return (
-            <div className="h-full flex flex-col">
-                {/* Header */}
-                <div className="border-b bg-card">
-                    <div className="max-w-4xl mx-auto px-6 py-8">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h1 className="text-2xl font-bold mb-2">{project.name}</h1>
-                                {project.description && (
-                                    <p className="text-muted-foreground">{project.description}</p>
-                                )}
-                            </div>
-
-                            {!isReadOnly && (
-                                <div className="flex gap-2">
-                                    <Button onClick={() => handleCreateFile('document')} className="gap-2">
-                                        <FileText className="w-4 h-4" />
-                                        New Document
-                                    </Button>
-                                    <Button onClick={() => handleCreateFile('canvas')} variant="outline" className="gap-2">
-                                        <PencilRuler className="w-4 h-4" />
-                                        New Canvas
-                                    </Button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Empty state */}
-                <div className="flex-1 flex items-center justify-center">
-                    <div className="text-center py-16">
-                        <div className="w-16 h-16 bg-muted/50 rounded-lg flex items-center justify-center mx-auto mb-4">
-                            <FolderOpen className="w-8 h-8 text-muted-foreground" />
-                        </div>
-                        <h3 className="text-lg font-semibold mb-2">No files yet</h3>
-                        <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                            {isReadOnly
-                                ? "This project doesn't have any files yet."
-                                : "Get started by creating your first document or canvas."
-                            }
-                        </p>
-
-                        {!isReadOnly && (
-                            <div className="flex gap-3 justify-center">
-                                <Button onClick={() => handleCreateFile('document')} className="gap-2">
-                                    <FileText className="w-4 h-4" />
-                                    Create Document
-                                </Button>
-                                <Button onClick={() => handleCreateFile('canvas')} variant="outline" className="gap-2">
-                                    <PencilRuler className="w-4 h-4" />
-                                    Create Canvas
-                                </Button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
+            <EmptyState
+                project={project}
+                isReadOnly={isReadOnly}
+                onCreateFile={handleCreateFile}
+            />
         );
     }
 
-    // Show workspace with files - no sidebar since layout handles it
+    // Show workspace with files - keep all editors mounted
     return (
         <div className="h-full flex flex-col relative">
             {/* Fullscreen Exit Button - Only visible in fullscreen mode */}
             {fullscreenMode && (
-                <div className="absolute top-4 right-4 z-50 flex gap-2">
-                    <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={toggleFullscreen}
-                        className="gap-2 shadow-lg z-[99]"
-                        title="Exit fullscreen (Esc or F11)"
-                    >
-                        <Minimize className="w-4 h-4" />
-                        {/* Exit Fullscreen */}
-                    </Button>
-                </div>
+                <FullscreenControls onToggleFullscreen={toggleFullscreen} />
             )}
 
-            {/* Editor */}
+            {/* Editor Container - This is where the magic happens */}
             <div className="flex-1 overflow-hidden">
-                {activeFileId && openFiles[activeFileId] ? (
+                {Object.keys(openFiles).length > 0 ? (
+                    // Use the persistent WorkspaceEditor that keeps all editors mounted
                     <WorkspaceEditor
-                        key={activeFileId} // This ensures each file gets its own editor instance
-                        fileId={activeFileId}
-                        fileType={openFiles[activeFileId].type}
+                        fileId={activeFileId || Object.keys(openFiles)[0]}
+                        fileType={activeFile?.type || 'document'}
                         projectId={projectId}
                         isReadOnly={isReadOnly}
                         isActive={true}
-                        onActivate={() => { }}
+                        onActivate={() => {}}
                     />
                 ) : (
                     <div className="h-full flex items-center justify-center bg-muted/20">
@@ -286,7 +323,7 @@ export function UnifiedWorkspace({
                                         className="gap-2"
                                     >
                                         <X className="w-4 h-4" />
-                                        {/* Exit Fullscreen */}
+                                        Exit Fullscreen
                                     </Button>
                                 </div>
                             )}
@@ -305,4 +342,4 @@ export function UnifiedWorkspace({
             )}
         </div>
     );
-}
+});
