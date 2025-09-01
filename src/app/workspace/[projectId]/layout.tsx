@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { WorkspaceSidebar } from '@/components/workspace/WorkspaceSidebar';
-import { WorkspaceHeader } from '@/components/workspace/WorkspaceHeader';
+import { WorkspaceSidebar } from '@/components/workspace';
+import { WorkspaceHeader } from '@/components/workspace';
 import { useWorkspaceStore } from '@/lib/stores/useWorkspaceStore';
 import { useProjectData } from '@/lib/hooks/useProjectData';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';

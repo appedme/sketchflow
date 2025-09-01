@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { LazyPlateEditor } from '@/components/optimized/LazyPlateEditor';
+import { LazyPlateEditor } from '';
 import { DocumentationPanel } from './DocumentationPanel';
 import {
   ResizableHandle,

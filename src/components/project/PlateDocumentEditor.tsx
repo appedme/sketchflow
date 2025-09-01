@@ -13,7 +13,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { useDebounce } from '@/hooks/use-debounce';
+import { useDebounce } from '@/hooks/shared/use-debounce';
 import { cn } from '@/lib/utils';
 import { uploadImageToImgBB } from '@/lib/imageUpload';
 import { useFileOperations } from '@/components/files/FileStatusIndicator';

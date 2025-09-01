@@ -6,7 +6,7 @@ import { DocumentationPanel } from '@/components/project/DocumentationPanel';
 import { ProjectNavigation } from '@/components/project/ProjectNavigation';
 import { cn } from '@/lib/utils';
 import { useUser } from '@stackframe/stack';
-import { useCachedApi } from '@/hooks/useCachedApi';
+import { useCachedApi } from '@/hooks/files/useCachedApi';
 
 interface ProjectLayoutProps {
     children: React.ReactNode;

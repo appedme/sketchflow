@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef, useCallback } from 'react';
-import { LazyExcalidrawCanvas } from '@/components/optimized/LazyExcalidrawCanvas';
+import { EnhancedExcalidrawCanvas } from '@/components/canvas/EnhancedExcalidrawCanvas';
+import { CanvasProvider } from '@/contexts/CanvasContext';
 
 interface CanvasEditorProps {
     fileId: string;
@@ -88,13 +89,14 @@ export function CanvasEditor({
             className="h-full w-full"
             onClick={handleClick}
         >
-            <LazyExcalidrawCanvas
-                projectId={projectId}
-                canvasId={fileId}
-                projectName={fileData.title}
-                isReadOnly={isReadOnly}
-                className="h-full"
-            />
+            <CanvasProvider projectId={projectId} canvasId={fileId}>
+                <EnhancedExcalidrawCanvas
+                    projectId={projectId}
+                    canvasId={fileId}
+                    projectName={fileData.title}
+                    isReadOnly={isReadOnly}
+                />
+            </CanvasProvider>
         </div>
     );
 }

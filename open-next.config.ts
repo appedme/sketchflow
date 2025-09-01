@@ -8,7 +8,7 @@ export default defineCloudflareConfig({
   // incrementalCache: r2IncrementalCache,
 
   // Disable features that might cause issues with Cloudflare Workers
-  disableInstrumentation: true,
+  // disableInstrumentation: true,
 
   // Optimize for Cloudflare Workers
   minify: true,

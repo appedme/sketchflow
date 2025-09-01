@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useFileContent } from '@/lib/fileCache';
-import { useCanvasSync } from '@/hooks/useCanvasSync';
+import { useCanvasSync } from '@/hooks/workspace/useCanvasSync';
 import { toast } from 'sonner';
 import { useFileOperations } from '@/components/files/FileStatusIndicator';
 import { useLoading } from '@/components/ui/loading-bar';

@@ -1,7 +1,7 @@
 "use client";
 
-import { useViewTracking } from '@/hooks/useViewTracking';
-import { useProjectStats } from '@/hooks/useProjectStats';
+import { useViewTracking } from '@/hooks/workspace/useViewTracking';
+import { useProjectStats } from '@/hooks/workspace/useProjectStats';
 import { Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 

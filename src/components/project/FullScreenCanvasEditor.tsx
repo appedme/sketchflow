@@ -10,8 +10,8 @@ import {
 } from "@/components/ui/resizable";
 
 // Use optimized lazy loading for better performance
-import { LazyExcalidrawCanvas } from '@/components/optimized/LazyExcalidrawCanvas';
-import { useApi } from '@/hooks/useApi';
+import { LazyExcalidrawCanvas } from '';
+import { useApi } from '@/hooks/shared/useApi';
 
 interface FullScreenCanvasEditorProps {
   projectId: string;

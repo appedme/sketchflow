@@ -31,8 +31,8 @@ import {
     Eye
 } from "lucide-react";
 import Link from "next/link";
-import { useApi } from '@/hooks/useApi';
-import { Loading } from '@/components/loading';
+import { useApi } from '@/hooks/shared/useApi';
+import { Loading } from '@/components/ui/loading';
 
 const iconMap = {
     FileText,

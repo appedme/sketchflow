@@ -31,7 +31,7 @@ import {
     Download,
     Upload
 } from "lucide-react";
-import { useApi } from '@/hooks/useApi';
+import { useApi } from '@/hooks/shared/useApi';
 import { toast } from '@/components/ui/use-toast';
 
 interface Project {

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { useFileOperations } from '@/components/files/FileStatusIndicator';
-import { useDebounce } from './use-debounce';
+import { useDebounce } from '../shared/use-debounce';
 
 interface UseDocumentAutoSaveOptions {
   documentId: string;

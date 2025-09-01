@@ -37,14 +37,14 @@ import {
   Sparkles
 } from "lucide-react";
 
-import { ThemeToggleSimple } from "@/components/theme-toggle-simple";
+import { ThemeToggle } from "@/components/theme-toggle";
 
-import { ProjectCard } from '@/components/dashboard/ProjectCard';
-import { ProjectFilters } from '@/components/dashboard/ProjectFilters';
-import { useApi } from '@/hooks/useApi';
-import { useCachedApi } from '@/hooks/useCachedApi';
+import { ProjectCard } from '@/components/dashboard';
+import { ProjectFilters } from '@/components/dashboard';
+import { useApi } from '@/hooks/shared/useApi';
+import { useCachedApi } from '@/hooks/files/useCachedApi';
 import { cn } from '@/lib/utils';
-import { Loading } from '@/components/loading';
+import { Loading } from '@/components/ui/loading';
 
 interface Project {
   id: string;
@@ -257,7 +257,7 @@ export default function DashboardPage() {
                 <Plus className="w-4 h-4" />
                 {isLoading ? 'Creating...' : 'New Project'}
               </Button>
-              <ThemeToggleSimple />
+              <ThemeToggle />
               <UserButton />
             </div>
           </div>

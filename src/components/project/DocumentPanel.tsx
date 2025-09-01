@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, FileText, Folder, Search, Save } from 'lucide-react';
-import { useDebounce } from '@/hooks/use-debounce';
+import { useDebounce } from '@/hooks/shared/use-debounce';
 import useSWR, { mutate } from 'swr';
 
 interface Document {

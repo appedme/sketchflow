@@ -15,8 +15,8 @@ import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import "@excalidraw/excalidraw/index.css";
 import "../../styles/excalidraw-custom.css";
 import { CanvasProvider, useCanvas } from '@/contexts/CanvasContext';
-import { CanvasWelcomeScreen } from '@/components/canvas/CanvasWelcomeScreen';
-import { ExcalidrawLibrarySystem } from '@/components/canvas/ExcalidrawLibrarySystem';
+import { CanvasWelcomeScreen } from '@/components/canvas';
+import { ExcalidrawLibrarySystem } from '@/components/canvas';
 import { useTheme } from 'next-themes';
 
 interface ExcalidrawCanvasProps {

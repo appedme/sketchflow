@@ -4,7 +4,6 @@ import { stackClientApp } from "@/lib/stack";
 import { Nunito } from 'next/font/google'
 import { PWAInstallPrompt } from '@/components/PWAInstallPrompt'
 import { ThemeProvider } from "@/components/theme-provider"
-import { PreloadManager } from "@/components/optimized/PreloadManager"
 import { SWRProvider } from "@/components/providers/swr-provider"
 import HydrationErrorBoundary from "@/components/utils/HydrationErrorBoundary"
 import { CacheStatus } from "@/components/files/CacheStatus"
@@ -120,9 +119,7 @@ export default function RootLayout({
               <FileOperationProvider>
                 <StackProvider app={stackClientApp}>
                   <SWRProvider>
-                    <PreloadManager>
-                      {children}
-                    </PreloadManager>
+                    {children}
                     <PWAInstallPrompt />
                     <CacheStatus />
                     <FileOperationsStatus />

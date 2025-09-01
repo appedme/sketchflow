@@ -4,18 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Sparkles } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
-import { TweetGrid } from "@/components/ui/tweet-grid";
 
 export function TestimonialsSection() {
-  // Tweet IDs extracted from the URLs
-  const tweets = [
-    "1947960911832162360", // @sarvagya_kul
-    "1947957536659054848", // @SH20RAJ
-    "1948577885109018977", // Third tweet
-  ];
-
-
-
   return (
     <section className="py-20 px-4 bg-gradient-to-br from-background via-background to-muted/20 relative overflow-hidden">
       {/* Background decorations */}
@@ -46,35 +36,19 @@ export function TestimonialsSection() {
           </p>
         </motion.div>
 
-        {/* Twitter Testimonials */}
+        {/* Testimonials Placeholder */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
+          className="text-center"
         >
-          <TweetGrid
-            tweets={tweets}
-            columns={3}
-            spacing="lg"
-            className="max-w-6xl mx-auto"
-          />
-        </motion.div>
-
-        {/* Call to Action */}
-        <motion.div
-          className="text-center mt-16"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          viewport={{ once: true }}
-        >
-          <p className="text-muted-foreground mb-6">
-            Join thousands of creators who've transformed their workflow
-          </p>
-          <Button size="lg" className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90">
-            Start Your Free Trial
-          </Button>
+          <div className="bg-muted/50 rounded-lg p-12 max-w-2xl mx-auto">
+            <p className="text-muted-foreground text-lg">
+              Testimonials coming soon! We're collecting feedback from our amazing community.
+            </p>
+          </div>
         </motion.div>
       </div>
     </section>

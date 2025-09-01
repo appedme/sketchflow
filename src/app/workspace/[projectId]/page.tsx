@@ -1,7 +1,7 @@
 import { stackServerApp } from '@/lib/stack';
 import { redirect, notFound } from 'next/navigation';
 import { getProject } from '@/lib/actions/projects';
-import { UnifiedWorkspace } from '@/components/workspace/UnifiedWorkspace';
+import { UnifiedWorkspace } from '@/components/workspace';
 
 interface WorkspaceProjectPageProps {
     params: Promise<{

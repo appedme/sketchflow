@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useCallback } from 'react';
-import { LazyPlateEditor } from '@/components/optimized/LazyPlateEditor';
+import { PlateDocumentEditor } from '@/components/project/PlateDocumentEditor';
 
 interface DocumentEditorProps {
     fileId: string;
@@ -59,7 +59,7 @@ export function DocumentEditor({
             className="h-full w-full"
             onClick={handleClick}
         >
-            <LazyPlateEditor
+            <PlateDocumentEditor
                 documentId={fileId}
                 projectId={projectId}
                 projectName={fileData?.title || 'Untitled Document'}

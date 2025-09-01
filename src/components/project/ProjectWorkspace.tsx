@@ -16,7 +16,7 @@ import {
 import { ViewTracker } from './ViewTracker';
 
 // Use optimized lazy loading for better performance
-import { LazyExcalidrawCanvas } from '@/components/optimized/LazyExcalidrawCanvas';
+import { LazyExcalidrawCanvas } from '';
 import { ExcalidrawCanvas } from './ExcalidrawCanvas';
 
 interface ProjectWorkspaceProps {

@@ -6,7 +6,7 @@ import { ExternalLink, Eye, Menu, X } from 'lucide-react';
 import { PublicDocumentationPanel } from './PublicDocumentationPanel';
 import { PlateDocumentEditor } from './PlateDocumentEditor';
 import dynamic from 'next/dynamic';
-import { Loading } from '@/components/loading';
+import { Loading } from '@/components/ui/loading';
 
 const ExcalidrawCanvas = dynamic(
   () => import('./ExcalidrawCanvas').then(mod => mod.ExcalidrawCanvas),

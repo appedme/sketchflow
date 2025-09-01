@@ -1,5 +1,5 @@
-import { useApi, useMutation } from '@/hooks/useApi';
-import { useCachedApi } from '@/hooks/useCachedApi';
+import { useApi, useMutation } from '@/hooks/shared/useApi';
+import { useCachedApi } from '@/hooks/files/useCachedApi';
 import { mutate } from 'swr';
 
 export interface Project {

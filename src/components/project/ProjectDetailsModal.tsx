@@ -18,7 +18,7 @@ import {
     Loader2,
     TrendingUp
 } from "lucide-react";
-import { useApi } from '@/hooks/useApi';
+import { useApi } from '@/hooks/shared/useApi';
 import { formatDistanceToNow, format } from 'date-fns';
 
 interface ProjectDetailsModalProps {

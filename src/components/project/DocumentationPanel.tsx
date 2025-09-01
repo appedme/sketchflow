@@ -46,7 +46,7 @@ import {
 } from 'lucide-react';
 import { mutate } from 'swr';
 import { cn } from '@/lib/utils';
-import { useApi, usePublicApi } from '@/hooks/useApi';
+import { useApi, usePublicApi } from '@/hooks/shared/useApi';
 
 interface Document {
   id: string;

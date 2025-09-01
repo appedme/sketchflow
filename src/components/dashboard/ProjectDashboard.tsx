@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ProjectCard } from './ProjectCard';
-import { useProjects } from '@/hooks/useProjects';
+import { useProjects } from '@/hooks/workspace/useProjects';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

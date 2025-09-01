@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
-import { Loading } from '@/components/loading';
+import { Loading } from '@/components/ui/loading';
 
 // Dynamically import components to avoid SSR issues
 const ExcalidrawCanvas = dynamic(

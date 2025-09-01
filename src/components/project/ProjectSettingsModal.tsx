@@ -37,7 +37,7 @@ import {
     Loader2,
     AlertTriangle
 } from "lucide-react";
-import { useApi } from '@/hooks/useApi';
+import { useApi } from '@/hooks/shared/useApi';
 import { mutate } from 'swr';
 
 interface Project {

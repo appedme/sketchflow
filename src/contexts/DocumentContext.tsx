@@ -1,9 +1,8 @@
 "use client";
 
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useState, useEffect, useCallback } from 'react';
 import { useUser } from '@stackframe/stack';
-import { useDebounce } from '@/hooks/use-debounce';
-import { useState, useEffect } from 'react';
+import { useDebounce } from '@/hooks/shared/use-debounce';
 
 interface Document {
   id: string;

@@ -49,7 +49,7 @@ import {
     useToggleFavorite,
     type Project,
     type UpdateProjectData
-} from '@/hooks/useProjects';
+} from '@/hooks/workspace/useProjects';
 import './ProjectCard.css';
 
 interface ProjectCardProps {

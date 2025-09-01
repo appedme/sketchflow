@@ -31,8 +31,8 @@ import {
   TrendingUp,
   Activity
 } from "lucide-react";
-import { useApi } from '@/hooks/useApi';
-import { Loading } from '@/components/loading';
+import { useApi } from '@/hooks/shared/useApi';
+import { Loading } from '@/components/ui/loading';
 
 const ADMIN_EMAIL = "sh20raj@gmail.com";
 

@@ -6,7 +6,7 @@ import { useFileOperations } from './FileStatusIndicator';
 import { useLoading } from '@/components/ui/loading-bar';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save, RefreshCw, Trash2, Database, FileRefresh } from 'lucide-react';
+import { Loader2, Save, RefreshCw, Trash2, Database } from 'lucide-react';
 import {
     Tooltip,
     TooltipContent,
@@ -14,7 +14,6 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { clearFileCache } from '@/lib/fileCache';
-import { toast } from 'sonner';
 
 export function CacheControls() {
     const { saveAllCaches, revalidateAllCaches, clearAndRevalidateAll, isLoading } = useCacheContext();
@@ -171,22 +170,7 @@ export function CacheControls() {
                                 {isFileCacheClearing ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                 ) : (
-                                    <svg
-                                        className="h-4 w-4"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <path d="M14 3v4a1 1 0 0 0 1 1h4" />
-                                        <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
-                                        <path d="M12 17v.01" />
-                                        <path d="M9.5 10.5a2.5 2.5 0 0 1 5 0v3a2.5 2.5 0 0 1 -5 0v-3z" />
-                                        <path d="M10 14h4" />
-                                    </svg>
+                                    <RefreshCw className="h-4 w-4" />
                                 )}
                             </Button>
                         </TooltipTrigger>
