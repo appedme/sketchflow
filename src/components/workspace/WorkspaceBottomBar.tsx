@@ -102,33 +102,10 @@ export function WorkspaceBottomBar({
                                 </div>
                             </div>
                         )}
-                        {/* Save Button */}
-                        {!isReadOnly && (
-                            <Button
-                                size="sm"
-                                variant={hasUnsavedChanges ? "outline" : "ghost"}
-                                onClick={handleSaveAll}
-                                disabled={saving}
-                                className="gap-2 h-7"
-                                title="Save all files (Ctrl+S)"
-                            >
-                                <Save className="w-3 h-3" />
-                                {saving ? 'Saving...' : hasUnsavedChanges ? 'Save All' : 'Save'}
-                            </Button>
-                        )}
-
-                        {/* Status indicator */}
-                        <div className="text-xs text-muted-foreground">
-                            {hasUnsavedChanges ? (
-                                <span className="text-orange-600">
-                                    {/* Unsaved changes */}
-                                </span>
-                            ) : (
-                                <span className="flex items-center gap-1">
-                                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                                    Auto-saved
-                                </span>
-                            )}
+                        {/* Status indicator - Always show auto-saved since we have autosave */}
+                        <div className="text-xs text-muted-foreground flex items-center gap-1">
+                            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                            Auto-saved
                         </div>
                     </div>
 
@@ -148,29 +125,6 @@ export function WorkspaceBottomBar({
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                                {!isReadOnly && (
-                                    <>
-                                        <DropdownMenuItem
-                                            onClick={() => {
-                                                // Trigger save for current active file
-                                                const saveEvent = new CustomEvent('workspace-save-current');
-                                                window.dispatchEvent(saveEvent);
-                                            }}
-                                        >
-                                            <Save className="w-4 h-4 mr-2" />
-                                            Save Current File
-                                            <span className="ml-auto text-xs text-muted-foreground">Ctrl+S</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                            onClick={handleSaveAll}
-                                            disabled={saving}
-                                        >
-                                            <Save className="w-4 h-4 mr-2" />
-                                            {saving ? 'Saving All...' : 'Save All Files'}
-                                        </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
-                                    </>
-                                )}
                                 <DropdownMenuItem onClick={handleShare}>
                                     <Share className="w-4 h-4 mr-2" />
                                     Share Project

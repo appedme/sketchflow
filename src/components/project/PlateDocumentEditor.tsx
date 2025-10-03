@@ -86,10 +86,36 @@ export function PlateDocumentEditor({
   const { startOperation, completeOperation } = useFileOperations();
   const { startLoading, completeLoading } = useLoading();
 
-  // Initialize editor with document content
+  // Initialize editor with document content and change handler
   const editor = usePlateEditor({
     plugins: EditorKit,
     value: document?.content || defaultContent,
+    onChange: useCallback((editorInstance: any) => {
+      // This will be called whenever the editor content changes
+      if (editorInstance && !isReadOnly && !shareToken) {
+        const currentContent = editorInstance.children;
+        const hasContentChanged = JSON.stringify(currentContent) !== JSON.stringify(document?.content || []);
+        
+        if (hasContentChanged) {
+          setHasUnsavedChanges(true);
+          
+          // Notify workspace of content change for autosave
+          const cleanup = onContentChange?.({ content: currentContent });
+          
+          // Auto-save the document after 1.5 seconds of inactivity
+          const timeoutId = setTimeout(() => {
+            saveDocument(undefined, currentContent, true).then(() => {
+              cleanup?.();
+            }).catch(() => {
+              cleanup?.();
+            });
+          }, 1500);
+          
+          // Return cleanup function to clear timeout if needed
+          return () => clearTimeout(timeoutId);
+        }
+      }
+    }, [document, isReadOnly, shareToken, onContentChange, saveDocument])
   });
 
   // Debounce editor content changes for autosave

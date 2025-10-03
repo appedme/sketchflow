@@ -63,6 +63,13 @@ export function UnifiedWorkspace({
                 event.preventDefault();
                 toggleFullscreen();
             }
+            // Ctrl+S or Cmd+S for save
+            if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+                event.preventDefault();
+                // Trigger save event for all editors
+                const saveEvent = new CustomEvent('workspace-save-all');
+                window.dispatchEvent(saveEvent);
+            }
         };
 
         window.addEventListener('keydown', handleKeyDown);
@@ -87,10 +94,13 @@ export function UnifiedWorkspace({
                 handleFileClick(mostRecentFile);
             }
         }
-    }, [isLoading, files, openFiles, searchParams]);
+    }, [isLoading, files, openFiles, searchParams, openFile, setActiveFile]);
 
     const handleFileClick = (file: any) => {
-        openFile(file.id, file.type, file.title);
+        // Only open the file if it's not already open to prevent unnecessary re-renders
+        if (!openFiles[file.id]) {
+            openFile(file.id, file.type, file.title);
+        }
         setActiveFile(file.id);
 
         // Update URL parameter without reloading
@@ -142,7 +152,7 @@ export function UnifiedWorkspace({
             if (response.ok) {
                 const newFile = await response.json();
                 mutateAll(); // Refresh file list
-                handleFileClick({ ...newFile, type } as any);
+                handleFileClick(Object.assign({}, newFile, { type }) as any);
             }
         } catch (error) {
             console.error(`Failed to create ${type}:`, error);

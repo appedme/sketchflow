@@ -56,6 +56,9 @@ export function useFileData(fileId: string | null, fileType: 'canvas' | 'documen
 
             // Faster loading timeout
             loadingTimeout: 100,
+            
+            // Cache for longer to improve switching performance
+            refreshInterval: 0, // Disable automatic refresh
         }
     );
 
@@ -128,23 +131,3 @@ export function useFileData(fileId: string | null, fileType: 'canvas' | 'documen
     };
 }
 
-// Hook for managing multiple files
-export function useMultipleFiles(fileIds: string[]) {
-    const results = fileIds.map(fileId => {
-        // Determine file type from cache or API
-        const cachedData = useWorkspaceStore.getState().getCacheData(fileId);
-        const fileType = cachedData?.type || null;
-
-        return {
-            fileId,
-            ...useFileData(fileId, fileType)
-        };
-    });
-
-    return {
-        files: results,
-        isLoading: results.some(r => r.isLoading),
-        hasError: results.some(r => r.error),
-        errors: results.filter(r => r.error).map(r => r.error),
-    };
-}
