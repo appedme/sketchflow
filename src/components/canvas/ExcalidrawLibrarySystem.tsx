@@ -168,7 +168,8 @@ export function ExcalidrawLibrarySystem({ excalidrawAPI, className }: Excalidraw
     };
 
     const createMockLibraryItems = (libraryName: string): LibraryItems => {
-        const mockItems: LibraryItems = [];
+        // Create a mutable array from the readonly LibraryItems
+        const mockItems: LibraryItem[] = [];
 
         for (let i = 0; i < 3; i++) {
             mockItems.push({
@@ -199,13 +200,17 @@ export function ExcalidrawLibrarySystem({ excalidrawAPI, className }: Excalidraw
                         updated: 1,
                         link: null,
                         locked: false,
-                        id: `mock-element-${i}`
+                        id: `mock-element-${i}`,
+                        version: 1,
+                        index: 'a0' as any
                     }
-                ]
-            } as LibraryItem);
+                ] as const,
+                created: Date.now()
+            });
         }
 
-        return mockItems;
+        // Return as readonly LibraryItems
+        return mockItems as LibraryItems;
     };
 
     const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -219,10 +224,10 @@ export function ExcalidrawLibrarySystem({ excalidrawAPI, className }: Excalidraw
             if (contents.type === MIME_TYPES.excalidrawlib) {
                 const libraryData = contents.data as any;
                 if (libraryData.libraryItems) {
-                    const currentLib = excalidrawAPI.getLibrary() || [];
+                    const currentLib = await excalidrawAPI.getLatestLibrary() || [];
                     const mergedItems = mergeLibraryItems(currentLib, libraryData.libraryItems);
 
-                    excalidrawAPI.updateLibrary(mergedItems);
+                    await excalidrawAPI.updateLibrary({ libraryItems: mergedItems });
                     loadCurrentLibrary();
                     toast.success(`Imported ${libraryData.libraryItems.length} library items`);
                 }
@@ -620,3 +625,14 @@ export function ExcalidrawLibrarySystem({ excalidrawAPI, className }: Excalidraw
         </Dialog>
     );
 }
+
+
+
+
+
+
+
+
+
+
+

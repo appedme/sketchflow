@@ -7,13 +7,6 @@ export default defineCloudflareConfig({
   // See https://opennext.js.org/cloudflare/caching for more details
   // incrementalCache: r2IncrementalCache,
 
-  // Disable features that might cause issues with Cloudflare Workers
-  disableInstrumentation: true,
 
-  // Optimize for Cloudflare Workers
-  minify: true,
 
-  // Increase compatibility
-  compatibilityDate: "2023-10-30",
-  compatibilityFlags: ["nodejs_compat"],
 });

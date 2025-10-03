@@ -12,12 +12,31 @@ interface ProjectData {
     updatedAt: string;
 }
 
-const fetcher = async (url: string) => {
+interface DocumentData {
+    id: string;
+    title: string;
+    content: any;
+    projectId: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+interface CanvasData {
+    id: string;
+    title: string;
+    elements: any[];
+    appState: any;
+    projectId: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+const fetcher = async <T>(url: string): Promise<T> => {
     const res = await fetch(url);
     if (!res.ok) {
         throw new Error(`Failed to fetch: ${res.status}`);
     }
-    return res.json();
+    return res.json() as T;
 };
 
 export function useProjectData(projectId: string | null) {
@@ -25,7 +44,7 @@ export function useProjectData(projectId: string | null) {
 
     return useSWR<ProjectData>(
         projectId ? `/api/projects/${projectId}` : null,
-        fetcher,
+        (url: string) => fetcher<ProjectData>(url),
         {
             revalidateOnFocus: false,
             revalidateOnReconnect: true,
@@ -39,18 +58,18 @@ export function useProjectData(projectId: string | null) {
 export function useProjectFiles(projectId: string | null) {
     const user = useUser();
 
-    const { data: documents = [], error: docsError, mutate: mutateDocuments } = useSWR(
+    const { data: documents = [], error: docsError, mutate: mutateDocuments } = useSWR<DocumentData[]>(
         projectId ? `/api/projects/${projectId}/documents` : null,
-        fetcher,
+        (url: string) => fetcher<DocumentData[]>(url),
         {
             revalidateOnFocus: false,
             dedupingInterval: 10000, // 10 seconds
         }
     );
 
-    const { data: canvases = [], error: canvasError, mutate: mutateCanvases } = useSWR(
+    const { data: canvases = [], error: canvasError, mutate: mutateCanvases } = useSWR<CanvasData[]>(
         projectId ? `/api/projects/${projectId}/canvases` : null,
-        fetcher,
+        (url: string) => fetcher<CanvasData[]>(url),
         {
             revalidateOnFocus: false,
             dedupingInterval: 10000, // 10 seconds
@@ -58,8 +77,8 @@ export function useProjectFiles(projectId: string | null) {
     );
 
     const allFiles = [
-        ...documents.map((doc: any) => ({ ...doc, type: 'document' as const })),
-        ...canvases.map((canvas: any) => ({ ...canvas, type: 'canvas' as const }))
+        ...documents.map((doc) => ({ ...doc, type: 'document' as const })),
+        ...canvases.map((canvas) => ({ ...canvas, type: 'canvas' as const }))
     ].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
     return {

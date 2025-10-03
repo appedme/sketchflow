@@ -53,7 +53,7 @@ export async function PATCH(
     }
 
     const { projectId } = await params;
-    const body = await request.json();
+    const body = await request.json() as Partial<typeof projects.$inferInsert>;
     const db = getDb();
     
     // Update the project
