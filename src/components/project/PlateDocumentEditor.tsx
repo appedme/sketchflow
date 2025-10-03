@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from 'react';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Plate, usePlateEditor, PlateContent } from 'platejs/react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -86,40 +86,17 @@ export function PlateDocumentEditor({
   const { startOperation, completeOperation } = useFileOperations();
   const { startLoading, completeLoading } = useLoading();
 
-  // Initialize editor with document content and change handler
+  // Track editor changes for autosave
+  const editorChangeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Initialize editor with document content
   const editor = usePlateEditor({
     plugins: EditorKit,
     value: document?.content || defaultContent,
-    onChange: useCallback((editorInstance: any) => {
-      // This will be called whenever the editor content changes
-      if (editorInstance && !isReadOnly && !shareToken) {
-        const currentContent = editorInstance.children;
-        const hasContentChanged = JSON.stringify(currentContent) !== JSON.stringify(document?.content || []);
-        
-        if (hasContentChanged) {
-          setHasUnsavedChanges(true);
-          
-          // Notify workspace of content change for autosave
-          const cleanup = onContentChange?.({ content: currentContent });
-          
-          // Auto-save the document after 1.5 seconds of inactivity
-          const timeoutId = setTimeout(() => {
-            saveDocument(undefined, currentContent, true).then(() => {
-              cleanup?.();
-            }).catch(() => {
-              cleanup?.();
-            });
-          }, 1500);
-          
-          // Return cleanup function to clear timeout if needed
-          return () => clearTimeout(timeoutId);
-        }
-      }
-    }, [document, isReadOnly, shareToken, onContentChange, saveDocument])
   });
 
-  // Debounce editor content changes for autosave
-  const debouncedContent = useDebounce((editor as any)?.children || [], 1500);
+  // Remove the debounced content since we're handling it with our custom tracking
+  // const debouncedContent = useDebounce((editor as any)?.children || [], 1500);
   const debouncedTitle = useDebounce(localTitle, 800);
 
   // Autosave state
@@ -244,29 +221,41 @@ export function PlateDocumentEditor({
     }
   }, [document, documentId, isSaving, startOperation, completeOperation]);
 
-  // Auto-save on content changes
+  // Effect to handle editor content changes
   useEffect(() => {
-    if (!document || isReadOnly || shareToken || isAutoSaving) return; // Don't auto-save in public mode or if already saving
-
-    if (!editor) return;
-
+    if (!editor || isReadOnly || shareToken) return;
+    
     const currentContent = (editor as any).children;
-    const hasContentChanged = JSON.stringify(currentContent) !== JSON.stringify(document.content);
-
+    const hasContentChanged = JSON.stringify(currentContent) !== JSON.stringify(document?.content || []);
+    
     if (hasContentChanged) {
       setHasUnsavedChanges(true);
-
-      // Notify workspace of content change
+      
+      // Clear existing timeout
+      if (editorChangeTimeoutRef.current) {
+        clearTimeout(editorChangeTimeoutRef.current);
+      }
+      
+      // Notify workspace of content change for autosave
       const cleanup = onContentChange?.({ content: currentContent });
-
-      // Auto-save the document
-      saveDocument(undefined, currentContent, true).then(() => {
-        cleanup?.(); // Clean up after successful save
-      }).catch(() => {
-        cleanup?.(); // Clean up even on error
-      });
+      
+      // Auto-save the document after 500ms of inactivity (more instant)
+      editorChangeTimeoutRef.current = setTimeout(() => {
+        saveDocument(undefined, currentContent, true).then(() => {
+          cleanup?.();
+        }).catch(() => {
+          cleanup?.();
+        });
+      }, 500);
+      
+      // Cleanup function
+      return () => {
+        if (editorChangeTimeoutRef.current) {
+          clearTimeout(editorChangeTimeoutRef.current);
+        }
+      };
     }
-  }, [debouncedContent, document, editor, isReadOnly, saveDocument, isAutoSaving, onContentChange]);
+  }, [(editor as any)?.children, document, isReadOnly, shareToken, onContentChange]);
 
   // Auto-save on title changes
   useEffect(() => {
@@ -319,6 +308,11 @@ export function PlateDocumentEditor({
     return () => {
       window.removeEventListener('document-save-all', handleDocumentSave);
       window.removeEventListener('document-fullscreen', handleFullScreen);
+      
+      // Clean up autosave timeout on unmount
+      if (editorChangeTimeoutRef.current) {
+        clearTimeout(editorChangeTimeoutRef.current);
+      }
     };
   }, [handleManualSave]);
 
