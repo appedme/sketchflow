@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/connection';
 import { organizations, organizationMembers } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { stackServerApp } from '@/lib/stack';
 
 interface Params {
   params: {
@@ -12,11 +13,13 @@ interface Params {
 // GET /api/organizations/:id - Get organization details
 export async function GET(request: NextRequest, { params }: Params) {
   try {
-    const userId = request.headers.get('x-user-id');
+    const user = await stackServerApp.getUser();
     
-    if (!userId) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    
+    const userId = user.id;
 
     const { id } = params;
     const db = getDb();
@@ -58,11 +61,13 @@ export async function GET(request: NextRequest, { params }: Params) {
 // PATCH /api/organizations/:id - Update organization
 export async function PATCH(request: NextRequest, { params }: Params) {
   try {
-    const userId = request.headers.get('x-user-id');
+    const user = await stackServerApp.getUser();
     
-    if (!userId) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    
+    const userId = user.id;
 
     const { id } = params;
     const body = await request.json();
@@ -109,11 +114,13 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 // DELETE /api/organizations/:id - Delete organization
 export async function DELETE(request: NextRequest, { params }: Params) {
   try {
-    const userId = request.headers.get('x-user-id');
+    const user = await stackServerApp.getUser();
     
-    if (!userId) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    
+    const userId = user.id;
 
     const { id } = params;
     const db = getDb();

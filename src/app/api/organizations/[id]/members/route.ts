@@ -3,6 +3,7 @@ import { getDb } from '@/lib/db/connection';
 import { organizationMembers, users, organizationInvitations } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
+import { stackServerApp } from '@/lib/stack';
 
 interface Params {
   params: {
@@ -13,11 +14,13 @@ interface Params {
 // GET /api/organizations/:id/members - Get organization members
 export async function GET(request: NextRequest, { params }: Params) {
   try {
-    const userId = request.headers.get('x-user-id');
+    const user = await stackServerApp.getUser();
     
-    if (!userId) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    
+    const userId = user.id;
 
     const { id } = params;
     const db = getDb();
@@ -57,11 +60,13 @@ export async function GET(request: NextRequest, { params }: Params) {
 // POST /api/organizations/:id/members - Invite member
 export async function POST(request: NextRequest, { params }: Params) {
   try {
-    const userId = request.headers.get('x-user-id');
+    const user = await stackServerApp.getUser();
     
-    if (!userId) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    
+    const userId = user.id;
 
     const { id } = params;
     const body = await request.json();

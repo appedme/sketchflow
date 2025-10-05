@@ -59,6 +59,14 @@ export function useFileData(fileId: string | null, fileType: 'canvas' | 'documen
             
             // Cache for longer to improve switching performance
             refreshInterval: 0, // Disable automatic refresh
+            
+            // Debug
+            onSuccess: (data) => {
+                console.log('useFileData success:', { fileId, fileType, hasData: !!data });
+            },
+            onError: (err) => {
+                console.error('useFileData error:', { fileId, fileType, error: err.message });
+            },
         }
     );
 

@@ -3,15 +3,18 @@ import { getDb } from '@/lib/db/connection';
 import { organizations, organizationMembers } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
+import { stackServerApp } from '@/lib/stack';
 
 // GET /api/organizations - Get all organizations for current user
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id');
+    const user = await stackServerApp.getUser();
     
-    if (!userId) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    
+    const userId = user.id;
 
     const db = getDb();
 
@@ -38,11 +41,13 @@ export async function GET(request: NextRequest) {
 // POST /api/organizations - Create a new organization
 export async function POST(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id');
+    const user = await stackServerApp.getUser();
     
-    if (!userId) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    
+    const userId = user.id;
 
     const body = await request.json();
     const { name, description, slug } = body;

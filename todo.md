@@ -34,3 +34,8 @@ add image upload support to docs
 
 
 
+---
+
+remove save buttons from the workspace there are two - use context7 mcp to get to know about exculidraw and platjs and add autosave features and ctrl+s or cmd+s features to save 
+
+add lib feature and openmoji and pexels image search and add to canvas

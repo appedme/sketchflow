@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Building2, Plus, Users, Folder, Settings, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useUser } from '@stackframe/stack';
 
 interface Organization {
   organization: {
@@ -26,6 +27,7 @@ interface Organization {
 }
 
 export function OrganizationsList() {
+  const user = useUser();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -35,8 +37,10 @@ export function OrganizationsList() {
   const [newOrgDescription, setNewOrgDescription] = useState('');
 
   useEffect(() => {
-    fetchOrganizations();
-  }, []);
+    if (user) {
+      fetchOrganizations();
+    }
+  }, [user]);
 
   const fetchOrganizations = async () => {
     try {
@@ -97,10 +101,14 @@ export function OrganizationsList() {
       .replace(/^-|-$/g, '');
   };
 
-  if (loading) {
+  // Show loading while user is being fetched or organizations are loading
+  if (!user || loading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex flex-col items-center justify-center py-12 space-y-4">
         <Loader2 className="w-8 h-8 animate-spin" />
+        <p className="text-sm text-muted-foreground">
+          {!user ? 'Authenticating...' : 'Loading organizations...'}
+        </p>
       </div>
     );
   }
