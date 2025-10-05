@@ -19,7 +19,7 @@ Update your main navigation component to include the organization switcher:
 
 ```tsx
 // In your navigation component (e.g., src/components/layout/Header.tsx)
-import { OrganizationSwitcher } from '@/components/dashboard/OrganizationSwitcher';
+import { OrganizationSwitcher } from "@/components/dashboard/OrganizationSwitcher";
 
 export function Header() {
   return (
@@ -48,28 +48,30 @@ When creating projects, optionally assign them to organizations:
 
 ```tsx
 // In your new project form
-const [selectedOrganization, setSelectedOrganization] = useState<string | null>(null);
+const [selectedOrganization, setSelectedOrganization] = useState<string | null>(
+  null
+);
 
 // Fetch user's organizations
-const { data: orgs } = useSWR('/api/organizations');
+const { data: orgs } = useSWR("/api/organizations");
 
 // Add organization selector to form
 <select onChange={(e) => setSelectedOrganization(e.target.value)}>
   <option value="">Personal</option>
-  {orgs?.organizations?.map(org => (
+  {orgs?.organizations?.map((org) => (
     <option key={org.organization.id} value={org.organization.id}>
       {org.organization.name}
     </option>
   ))}
-</select>
+</select>;
 
 // When creating project
-await fetch('/api/projects', {
-  method: 'POST',
+await fetch("/api/projects", {
+  method: "POST",
   body: JSON.stringify({
     ...projectData,
-    organizationId: selectedOrganization
-  })
+    organizationId: selectedOrganization,
+  }),
 });
 ```
 
@@ -83,8 +85,8 @@ The API routes currently use `x-user-id` header. Update to use your auth system:
 export function middleware(request: NextRequest) {
   const user = await getCurrentUser(); // Your auth method
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-user-id', user.id);
-  
+  requestHeaders.set("x-user-id", user.id);
+
   return NextResponse.next({
     request: {
       headers: requestHeaders,
@@ -94,7 +96,7 @@ export function middleware(request: NextRequest) {
 
 // Option 2: Update each API route
 // Replace:
-const userId = request.headers.get('x-user-id');
+const userId = request.headers.get("x-user-id");
 
 // With your auth method:
 const { userId } = await auth(); // Your auth method
@@ -106,7 +108,7 @@ Add email service to send invitation emails:
 
 ```tsx
 // src/lib/email.ts
-import { Resend } from 'resend';
+import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -117,7 +119,7 @@ export async function sendInvitationEmail(
   inviterName: string
 ) {
   await resend.emails.send({
-    from: 'noreply@yourapp.com',
+    from: "noreply@yourapp.com",
     to: email,
     subject: `You've been invited to join ${organizationName}`,
     html: `
@@ -129,7 +131,7 @@ export async function sendInvitationEmail(
 }
 
 // Use in API route
-import { sendInvitationEmail } from '@/lib/email';
+import { sendInvitationEmail } from "@/lib/email";
 
 // After creating invitation
 await sendInvitationEmail(
@@ -143,11 +145,13 @@ await sendInvitationEmail(
 ## Step 7: Testing
 
 ### Test Organization Creation
+
 1. Go to `/organizations`
 2. Click "New Organization"
 3. Fill in details and create
 
 ### Test Member Invitation
+
 1. Go to organization settings
 2. Navigate to Members tab
 3. Enter email and click Invite
@@ -156,6 +160,7 @@ await sendInvitationEmail(
 6. Accept invitation
 
 ### Test Team Creation
+
 1. Go to organization settings
 2. Navigate to Teams tab
 3. Create a new team
@@ -170,21 +175,21 @@ Add checks to ensure users can only access projects they have permission for:
 export async function GET(request, { params }) {
   const userId = await getCurrentUser();
   const project = await getProject(params.id);
-  
+
   // Check access
   if (project.organizationId) {
     const membership = await checkOrganizationMembership(
       project.organizationId,
       userId
     );
-    
+
     if (!membership) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
   } else if (project.ownerId !== userId) {
-    return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    return NextResponse.json({ error: "Access denied" }, { status: 403 });
   }
-  
+
   // Return project
 }
 ```
@@ -204,20 +209,26 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ## Common Issues & Solutions
 
 ### Issue: TypeScript errors in API routes
+
 **Solution**: These are compile-time warnings and won't affect runtime. The dependencies are installed, just TypeScript can't find them during static analysis.
 
 ### Issue: "Unauthorized" errors
+
 **Solution**: Make sure your authentication middleware is setting the `x-user-id` header or update the API routes to use your auth system.
 
 ### Issue: Invitations not working
+
 **Solution**: Check that:
+
 1. Token is being generated correctly
 2. Expiration date is in the future
 3. User is authenticated when accepting
 4. Database migration was applied
 
 ### Issue: Can't see organizations
+
 **Solution**: Make sure you've:
+
 1. Created an organization
 2. Are a member of the organization
 3. Fetching organizations with correct user ID
@@ -237,6 +248,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ## Support
 
 For issues or questions:
+
 1. Check the documentation in `docs/organizations-and-teams.md`
 2. Review the implementation summary in `docs/ORGANIZATION_IMPLEMENTATION_SUMMARY.md`
 3. Check the API routes and server actions for examples

@@ -40,6 +40,7 @@ SketchFlow now supports **Organizations and Teams** similar to Notion, allowing 
 ### Tables
 
 #### `organizations`
+
 - `id`: Unique identifier
 - `name`: Organization name
 - `slug`: URL-friendly slug
@@ -53,6 +54,7 @@ SketchFlow now supports **Organizations and Teams** similar to Notion, allowing 
 - `createdAt`, `updatedAt`: Timestamps
 
 #### `organization_members`
+
 - `id`: Unique identifier
 - `organizationId`: Reference to organization
 - `userId`: Reference to user
@@ -64,6 +66,7 @@ SketchFlow now supports **Organizations and Teams** similar to Notion, allowing 
 - `lastActiveAt`: Last activity timestamp
 
 #### `teams`
+
 - `id`: Unique identifier
 - `organizationId`: Reference to organization
 - `name`: Team name
@@ -75,6 +78,7 @@ SketchFlow now supports **Organizations and Teams** similar to Notion, allowing 
 - `createdAt`, `updatedAt`: Timestamps
 
 #### `team_members`
+
 - `id`: Unique identifier
 - `teamId`: Reference to team
 - `userId`: Reference to user
@@ -83,6 +87,7 @@ SketchFlow now supports **Organizations and Teams** similar to Notion, allowing 
 - `addedAt`: When added
 
 #### `organization_invitations`
+
 - `id`: Unique identifier
 - `organizationId`: Reference to organization
 - `email`: Invitee email
@@ -96,6 +101,7 @@ SketchFlow now supports **Organizations and Teams** similar to Notion, allowing 
 ### Updated Tables
 
 #### `projects` (added columns)
+
 - `organizationId`: Optional reference to organization
 - `teamId`: Optional reference to team
 
@@ -159,42 +165,38 @@ Located in `/src/lib/actions/organizations.ts`:
 ### Creating an Organization
 
 ```typescript
-import { createOrganization } from '@/lib/actions/organizations';
+import { createOrganization } from "@/lib/actions/organizations";
 
 const result = await createOrganization(userId, {
-  name: 'Acme Inc',
-  slug: 'acme-inc',
-  description: 'Building the future'
+  name: "Acme Inc",
+  slug: "acme-inc",
+  description: "Building the future",
 });
 ```
 
 ### Inviting a Member
 
 ```typescript
-import { inviteMember } from '@/lib/actions/organizations';
+import { inviteMember } from "@/lib/actions/organizations";
 
 const result = await inviteMember(
   organizationId,
   currentUserId,
-  'newmember@example.com',
-  'member'
+  "newmember@example.com",
+  "member"
 );
 ```
 
 ### Creating a Team
 
 ```typescript
-import { createTeam } from '@/lib/actions/organizations';
+import { createTeam } from "@/lib/actions/organizations";
 
-const result = await createTeam(
-  organizationId,
-  currentUserId,
-  {
-    name: 'Engineering',
-    description: 'Software development team',
-    isDefault: false
-  }
-);
+const result = await createTeam(organizationId, currentUserId, {
+  name: "Engineering",
+  description: "Software development team",
+  isDefault: false,
+});
 ```
 
 ## Migration
@@ -206,6 +208,7 @@ npm run db:migrate
 ```
 
 Or manually apply the migration file:
+
 ```bash
 migrations/0005_add_organizations_and_teams.sql
 ```
