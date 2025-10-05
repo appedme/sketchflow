@@ -17,6 +17,7 @@
     "db:seed": "tsx src/lib/db/seed.ts",
     "generate-icons": "node scripts/generate-icons.js"
   },
+  
   "dependencies": {
     "@ai-sdk/openai": "^1.3.23",
     "@ai-sdk/provider": "^1.1.3",

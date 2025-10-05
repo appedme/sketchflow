@@ -47,3 +47,4 @@ public/workbox-*
 .gitignore
 .kiro/
 todo.md
+.env
