@@ -302,7 +302,7 @@ export function WorkspaceSidebar({ projectId, project }: WorkspaceSidebarProps) 
                         {file.title}
                     </p>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Clock className="w-3 h-3" />
+                        {/* <Clock className="w-3 h-3" /> */}
                         {formatDate(file.updatedAt)}
                     </div>
                 </div>

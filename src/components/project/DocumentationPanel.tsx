@@ -485,7 +485,7 @@ export function DocumentationPanel({
                 )}
                 
                 <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3" />
+                  {/* <Clock className="h-3 w-3" /> */}
                   {formatDate(item.updatedAt)}
                   
                   {item.type === 'document' && (item as Document).wordCount && (
@@ -619,7 +619,7 @@ export function DocumentationPanel({
           )}
           
           <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-            <Clock className="h-3 w-3" />
+            {/* <Clock className="h-3 w-3" /> */}
             {formatDate(item.updatedAt)}
             
             {item.type === 'document' && (item as Document).wordCount && (
