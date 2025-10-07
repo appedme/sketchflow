@@ -14,7 +14,8 @@ import {
     Maximize,
     Minimize,
     EyeOff,
-    Eye
+    Eye,
+    Download
 } from 'lucide-react';
 import {
     DropdownMenu,
@@ -67,6 +68,28 @@ export function WorkspaceHeader({ project, isMobile, isReadOnly = false }: Works
 
     const handleSettings = () => {
         router.push(`/project/${project.id}/settings`);
+    };
+
+    const handleExportProject = async () => {
+        try {
+            const response = await fetch(`/api/export/project?projectId=${project.id}`);
+            if (!response.ok) {
+                throw new Error('Export failed');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${project.name.replace(/[^a-zA-Z0-9]/g, '_')}_export.zip`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Export failed:', error);
+            // You could add a toast notification here
+        }
     };
 
     return (
@@ -181,7 +204,8 @@ export function WorkspaceHeader({ project, isMobile, isReadOnly = false }: Works
                             Project Settings
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleExportProject}>
+                            <Download className="w-4 h-4 mr-2" />
                             Export Project
                         </DropdownMenuItem>
                         <DropdownMenuItem>
