@@ -49,7 +49,7 @@ export function UnifiedWorkspace({
         initializeWorkspace(projectId);
     }, [projectId, initializeWorkspace]);
 
-    // Keyboard shortcuts for fullscreen
+    // Keyboard shortcuts for fullscreen and save
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             // F11 or Cmd/Ctrl + Shift + F for fullscreen toggle
@@ -62,6 +62,12 @@ export function UnifiedWorkspace({
             if (event.key === 'Escape' && fullscreenMode) {
                 event.preventDefault();
                 toggleFullscreen();
+            }
+            // Cmd/Ctrl + S for save
+            if ((event.metaKey || event.ctrlKey) && event.key === 's') {
+                event.preventDefault();
+                // Trigger save event that editors will listen to
+                window.dispatchEvent(new Event('workspace-save-all'));
             }
         };
 

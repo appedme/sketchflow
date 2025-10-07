@@ -27,9 +27,10 @@ import {
 interface WorkspaceHeaderProps {
     project: any;
     isMobile: boolean;
+    isReadOnly?: boolean;
 }
 
-export function WorkspaceHeader({ project, isMobile }: WorkspaceHeaderProps) {
+export function WorkspaceHeader({ project, isMobile, isReadOnly = false }: WorkspaceHeaderProps) {
     const router = useRouter();
     const {
         sidebarVisible,
@@ -121,17 +122,22 @@ export function WorkspaceHeader({ project, isMobile }: WorkspaceHeaderProps) {
 
             {/* Right side */}
             <div className="flex items-center gap-2">
-                {/* Save Button - Always visible */}
-                <Button
-                    variant={hasUnsavedChanges ? "outline" : "ghost"}
-                    size="sm"
-                    onClick={handleSaveAll}
-                    className="gap-2"
-                    title="Save all files (Ctrl+S)"
-                >
-                    <Save className="w-4 h-4" />
-                    {!isMobile && (hasUnsavedChanges ? 'Save All' : 'Save')}
-                </Button>
+                {/* Auto-save Status */}
+                {!isReadOnly && (
+                    <div className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        {hasUnsavedChanges ? (
+                            <>
+                                <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse"></span>
+                                <span>Saving...</span>
+                            </>
+                        ) : (
+                            <>
+                                <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                                <span>Saved</span>
+                            </>
+                        )}
+                    </div>
+                )}
 
                 {/* Fullscreen Toggle */}
                 <Button

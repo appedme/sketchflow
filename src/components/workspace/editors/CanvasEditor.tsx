@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { LazyExcalidrawCanvas } from '@/components/optimized/LazyExcalidrawCanvas';
 
 interface CanvasEditorProps {
@@ -21,61 +21,7 @@ export function CanvasEditor({
     isReadOnly = false,
     isActive = true,
     onActivate,
-    onContentChange,
-    onSave,
 }: CanvasEditorProps) {
-    const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const lastSaveRef = useRef<string>('');
-
-    // Handle canvas changes with debounced auto-save
-    const handleCanvasChange = useCallback((elements: any[], appState: any) => {
-        if (isReadOnly) return;
-
-        const serialized = JSON.stringify({ elements, appState });
-
-        // Skip if no actual changes
-        if (serialized === lastSaveRef.current) return;
-
-        lastSaveRef.current = serialized;
-
-        // Clear existing timeout
-        if (saveTimeoutRef.current) {
-            clearTimeout(saveTimeoutRef.current);
-        }
-
-        // Trigger content change callback (for marking dirty)
-        const cleanup = onContentChange?.({ elements, appState });
-
-        // Auto-save after 2 seconds of inactivity
-        saveTimeoutRef.current = setTimeout(async () => {
-            try {
-                await onSave?.({ elements, appState });
-                cleanup?.(); // Clean up the auto-save timeout
-            } catch (error) {
-                console.error('Auto-save failed:', error);
-            }
-        }, 2000);
-    }, [isReadOnly, onContentChange, onSave]);
-
-    // Handle manual save events
-    useEffect(() => {
-        const handleSaveEvent = () => {
-            if (saveTimeoutRef.current) {
-                clearTimeout(saveTimeoutRef.current);
-            }
-            // Trigger immediate save with current data
-            onSave?.(fileData);
-        };
-
-        window.addEventListener('workspace-save-all', handleSaveEvent);
-        return () => {
-            window.removeEventListener('workspace-save-all', handleSaveEvent);
-            if (saveTimeoutRef.current) {
-                clearTimeout(saveTimeoutRef.current);
-            }
-        };
-    }, [onSave, fileData]);
-
     // Handle activation
     const handleClick = useCallback(() => {
         if (!isActive) {
@@ -83,17 +29,38 @@ export function CanvasEditor({
         }
     }, [isActive, onActivate]);
 
+    // Bridge Workspace save events to Excalidraw canvas save
+    useEffect(() => {
+        const triggerCanvasSave = () => {
+            const saveEvent = new CustomEvent('excalidraw-save');
+            window.dispatchEvent(saveEvent);
+        };
+
+        const handleWorkspaceSaveAll = () => {
+            triggerCanvasSave();
+        };
+
+        const handleWorkspaceSaveCurrent = () => {
+            if (isActive) {
+                triggerCanvasSave();
+            }
+        };
+
+        window.addEventListener('workspace-save-all', handleWorkspaceSaveAll);
+        window.addEventListener('workspace-save-current', handleWorkspaceSaveCurrent);
+        return () => {
+            window.removeEventListener('workspace-save-all', handleWorkspaceSaveAll);
+            window.removeEventListener('workspace-save-current', handleWorkspaceSaveCurrent);
+        };
+    }, [isActive]);
+
     return (
-        <div
-            className="h-full w-full"
-            onClick={handleClick}
-        >
+        <div className="h-full w-full" onClick={handleClick}>
             <LazyExcalidrawCanvas
                 projectId={projectId}
+                projectName={fileData?.title || 'Canvas'}
                 canvasId={fileId}
-                projectName={fileData.title}
                 isReadOnly={isReadOnly}
-                className="h-full"
             />
         </div>
     );

@@ -102,34 +102,22 @@ export function WorkspaceBottomBar({
                                 </div>
                             </div>
                         )}
-                        {/* Save Button */}
-                        {!isReadOnly && (
-                            <Button
-                                size="sm"
-                                variant={hasUnsavedChanges ? "outline" : "ghost"}
-                                onClick={handleSaveAll}
-                                disabled={saving}
-                                className="gap-2 h-7"
-                                title="Save all files (Ctrl+S)"
-                            >
-                                <Save className="w-3 h-3" />
-                                {saving ? 'Saving...' : hasUnsavedChanges ? 'Save All' : 'Save'}
-                            </Button>
-                        )}
-
                         {/* Status indicator */}
-                        <div className="text-xs text-muted-foreground">
-                            {hasUnsavedChanges ? (
-                                <span className="text-orange-600">
-                                    {/* Unsaved changes */}
-                                </span>
-                            ) : (
-                                <span className="flex items-center gap-1">
-                                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                                    Auto-saved
-                                </span>
-                            )}
-                        </div>
+                        {!isReadOnly && (
+                            <div className="text-xs text-muted-foreground flex items-center gap-1.5">
+                                {hasUnsavedChanges ? (
+                                    <>
+                                        <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
+                                        <span>Saving...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                                        <span>Auto-saved</span>
+                                    </>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     {/* Right side - Actions */}
