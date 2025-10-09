@@ -35,13 +35,22 @@ export function WorkspaceTabs() {
         e.stopPropagation();
         closeFile(fileId);
 
-        // Just switch to another open file, no URL navigation
+        // Switch to another open file and update URL
         const remainingFiles = Object.keys(openFiles).filter(id => id !== fileId);
         if (remainingFiles.length > 0) {
             const nextFileId = remainingFiles[0];
             setActiveFile(nextFileId);
+            
+            // Update URL to reflect the new active file
+            const params = new URLSearchParams(searchParams);
+            params.set('file', nextFileId);
+            router.replace(`?${params.toString()}`, { scroll: false });
+        } else {
+            // If no files remain, clear the file parameter from URL
+            const params = new URLSearchParams(searchParams);
+            params.delete('file');
+            router.replace(`?${params.toString()}`, { scroll: false });
         }
-        // If no files remain, the workspace will show the empty state
     };
 
     if (openFilesList.length === 0) {

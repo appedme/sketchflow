@@ -205,6 +205,7 @@ make the library feature work in the workspace canvas fetch https://libraries.ex
 
 
  ---
+ use https://context7.com/animate-ui/animate-ui and replace all icons with animated icons
  
  add <Expand animateOnHover />
 // Or use with the AnimateIcon component

@@ -75,6 +75,20 @@ export function UnifiedWorkspace({
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [toggleFullscreen, fullscreenMode]);
 
+    // Handle file click with URL update
+    const handleFileClick = React.useCallback((file: any) => {
+        // Only open the file if it's not already open to prevent unnecessary re-renders
+        if (!openFiles[file.id]) {
+            openFile(file.id, file.type, file.title);
+        }
+        setActiveFile(file.id);
+
+        // Update URL parameter without reloading
+        const params = new URLSearchParams(searchParams);
+        params.set('file', file.id);
+        router.replace(`?${params.toString()}`, { scroll: false });
+    }, [openFiles, openFile, setActiveFile, searchParams, router]);
+
     // Handle URL file parameter and auto-open files
     useEffect(() => {
         if (!isLoading && files.length > 0) {
@@ -90,23 +104,12 @@ export function UnifiedWorkspace({
             } else if (Object.keys(openFiles).length === 0) {
                 // Auto-open most recent file if no files are open and no URL param
                 const mostRecentFile = files[0]; // Already sorted by updatedAt
-                handleFileClick(mostRecentFile);
+                if (mostRecentFile) {
+                    handleFileClick(mostRecentFile);
+                }
             }
         }
-    }, [isLoading, files, openFiles, searchParams, openFile, setActiveFile]);
-
-    const handleFileClick = (file: any) => {
-        // Only open the file if it's not already open to prevent unnecessary re-renders
-        if (!openFiles[file.id]) {
-            openFile(file.id, file.type, file.title);
-        }
-        setActiveFile(file.id);
-
-        // Update URL parameter without reloading
-        const params = new URLSearchParams(searchParams);
-        params.set('file', file.id);
-        router.replace(`?${params.toString()}`, { scroll: false });
-    };
+    }, [isLoading, files, openFiles, searchParams, openFile, setActiveFile, handleFileClick]);
 
     const handleCreateFile = async (type: 'document' | 'canvas') => {
         if (isReadOnly) return;
