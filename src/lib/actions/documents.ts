@@ -36,22 +36,56 @@ export async function createDocument(projectId: string, title: string, content?:
     const documentId = await generateUniqueDocumentId();
     const defaultContent = content || [
       {
-        type: 'h1',
-        children: [{ text: 'Welcome to your document!' }],
+      type: 'h1',
+      children: [{ text: 'Welcome to your document!' }],
       },
       {
-        type: 'p',
-        children: [
-          { text: 'Start writing your content here. You can use ' },
-          { text: 'formatting', bold: true },
-          { text: ', create ' },
-          { text: 'lists', italic: true },
-          { text: ', add links, and much more.' },
-        ],
+      type: 'p',
+      children: [
+        { text: 'Start writing your content here. You can use ' },
+        { text: 'formatting', bold: true },
+        { text: ', create ' },
+        { text: 'lists', italic: true },
+        { text: ', add links, and much more.' },
+      ],
       },
       {
-        type: 'p',
-        children: [{ text: '' }],
+      type: 'p',
+      children: [{ text: '' }],
+      },
+      {
+      type: 'p',
+      children: [{ text: '' }],
+      },
+      {
+      type: 'p',
+      children: [{ text: '' }],
+      },
+      {
+      type: 'p',
+      children: [{ text: '' }],
+      },
+      {
+      type: 'p',
+      children: [{ text: '' }],
+      },{
+      type: 'p',
+      children: [{ text: '' }],
+      },{
+      type: 'p',
+      children: [{ text: '' }],
+      },{
+      type: 'p',
+      children: [{ text: '' }],
+      },{
+      type: 'p',
+      children: [{ text: '' }],
+      },{
+      type: 'p',
+      children: [{ text: '' }],
+      },{
+      type: 'p',
+      children: [{ text: '' }],
       },
     ];
 

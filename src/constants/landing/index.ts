@@ -25,6 +25,11 @@ export const LANDING_CONTENT = {
       icon: "Brain"
     },
     {
+      title: "Copy & Paste from Erasor.io",
+      description: "Easily copy diagrams from erasor.io and paste them directly into SketchFlow using Ctrl+C and Ctrl+V shortcuts.",
+      icon: "Copy"
+    },
+    {
       title: "Advanced Sharing (Coming Soon)",
       description: "Future features: Community sharing, real-time commenting, collaborative editing, and blog publishing capabilities",
       icon: "Share"

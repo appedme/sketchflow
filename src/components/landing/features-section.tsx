@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Users, Share, Brain } from "lucide-react";
+import { FileText, Users, Share, Brain, Copy } from "lucide-react";
 import { LANDING_CONTENT } from "@/constants/landing";
 // import { BorderBeam } from "../magicui/border-beam";
 
@@ -8,6 +8,7 @@ const iconMap = {
   Users,
   Share,
   Brain,
+  Copy,
 } as const;
 
 export function FeaturesSection() {

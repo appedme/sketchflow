@@ -102,32 +102,20 @@ export function WorkspaceBottomBar({
                                 </div>
                             </div>
                         )}
-                        {/* Save button and status indicator */}
+                        {/* Status indicator */}
                         {!isReadOnly && (
-                            <div className="flex items-center gap-2">
-                                <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={handleSaveAll}
-                                    disabled={saving || !hasUnsavedChanges}
-                                    className="h-7 text-xs gap-1"
-                                >
-                                    {saving ? (
-                                        <>
-                                            <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                                            Saving...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Save className="w-3 h-3" />
-                                            Save All
-                                        </>
-                                    )}
-                                </Button>
-                                <div className="text-xs text-muted-foreground flex items-center gap-1">
-                                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                                    Auto-saved
-                                </div>
+                            <div className="text-xs text-muted-foreground flex items-center gap-1.5">
+                                {hasUnsavedChanges ? (
+                                    <>
+                                        <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
+                                        <span>Saving...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                                        <span>Auto-saved</span>
+                                    </>
+                                )}
                             </div>
                         )}
                     </div>

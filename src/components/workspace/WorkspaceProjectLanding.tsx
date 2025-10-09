@@ -223,7 +223,7 @@ export function WorkspaceProjectLanding({
                                                     {file.title}
                                                 </h3>
                                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                    <Clock className="w-3 h-3" />
+                                                    {/* <Clock className="w-3 h-3" /> */}
                                                     <span>Updated {formatDate(file.updatedAt)}</span>
                                                     <span>•</span>
                                                     <span className="capitalize">{file.type}</span>

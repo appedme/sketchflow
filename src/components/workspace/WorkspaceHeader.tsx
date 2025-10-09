@@ -14,7 +14,8 @@ import {
     Maximize,
     Minimize,
     EyeOff,
-    Eye
+    Eye,
+    Download
 } from 'lucide-react';
 import {
     DropdownMenu,
@@ -27,9 +28,10 @@ import {
 interface WorkspaceHeaderProps {
     project: any;
     isMobile: boolean;
+    isReadOnly?: boolean;
 }
 
-export function WorkspaceHeader({ project, isMobile }: WorkspaceHeaderProps) {
+export function WorkspaceHeader({ project, isMobile, isReadOnly = false }: WorkspaceHeaderProps) {
     const router = useRouter();
     const {
         sidebarVisible,
@@ -66,6 +68,28 @@ export function WorkspaceHeader({ project, isMobile }: WorkspaceHeaderProps) {
 
     const handleSettings = () => {
         router.push(`/project/${project.id}/settings`);
+    };
+
+    const handleExportProject = async () => {
+        try {
+            const response = await fetch(`/api/export/project?projectId=${project.id}`);
+            if (!response.ok) {
+                throw new Error('Export failed');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${project.name.replace(/[^a-zA-Z0-9]/g, '_')}_export.zip`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Export failed:', error);
+            // You could add a toast notification here
+        }
     };
 
     return (
@@ -121,17 +145,22 @@ export function WorkspaceHeader({ project, isMobile }: WorkspaceHeaderProps) {
 
             {/* Right side */}
             <div className="flex items-center gap-2">
-                {/* Save Button - Always visible */}
-                <Button
-                    variant={hasUnsavedChanges ? "outline" : "ghost"}
-                    size="sm"
-                    onClick={handleSaveAll}
-                    className="gap-2"
-                    title="Save all files (Ctrl+S)"
-                >
-                    <Save className="w-4 h-4" />
-                    {!isMobile && (hasUnsavedChanges ? 'Save All' : 'Save')}
-                </Button>
+                {/* Auto-save Status */}
+                {!isReadOnly && (
+                    <div className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        {hasUnsavedChanges ? (
+                            <>
+                                <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse"></span>
+                                <span>Saving...</span>
+                            </>
+                        ) : (
+                            <>
+                                <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                                <span>Saved</span>
+                            </>
+                        )}
+                    </div>
+                )}
 
                 {/* Fullscreen Toggle */}
                 <Button
@@ -175,7 +204,8 @@ export function WorkspaceHeader({ project, isMobile }: WorkspaceHeaderProps) {
                             Project Settings
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleExportProject}>
+                            <Download className="w-4 h-4 mr-2" />
                             Export Project
                         </DropdownMenuItem>
                         <DropdownMenuItem>

@@ -43,7 +43,8 @@ function ExcalidrawCanvasContent({
     updateElements,
     updateAppState,
     updateFiles,
-    isLoading
+    isLoading,
+    saveCanvas
   } = useCanvas();
 
   // Handle custom events from navigation
@@ -60,6 +61,21 @@ function ExcalidrawCanvasContent({
       window.removeEventListener('canvas-fit-to-content', handleFitToContent);
     };
   }, []);
+
+  // Handle external save events (from Workspace)
+  useEffect(() => {
+    const handleExternalSave = () => {
+      // Delegate save to CanvasProvider logic
+      saveCanvas().catch((err) => {
+        console.error('Excalidraw external save failed:', err);
+      });
+    };
+
+    window.addEventListener('excalidraw-save', handleExternalSave);
+    return () => {
+      window.removeEventListener('excalidraw-save', handleExternalSave);
+    };
+  }, [saveCanvas]);
 
   // Handle changes from Excalidraw
   const handleChange = useCallback((

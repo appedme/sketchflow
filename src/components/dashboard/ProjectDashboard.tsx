@@ -4,7 +4,7 @@ import { useProjects } from '@/hooks/useProjects';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter, FolderOpen } from 'lucide-react';
+import { Search, Filter, FolderOpen, Download } from 'lucide-react';
 import { ModeToggler, ViewMode } from './ModeToggler';
 import { cn } from '@/lib/utils';
 
@@ -37,6 +37,28 @@ export function ProjectDashboard() {
         setSortOrder('desc');
     };
 
+    const handleExportAccount = async () => {
+        try {
+            const response = await fetch('/api/export/account');
+            if (!response.ok) {
+                throw new Error('Export failed');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'account_export.zip';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Export failed:', error);
+            // You could add a toast notification here
+        }
+    };
+
     if (error) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -58,6 +80,10 @@ export function ProjectDashboard() {
                     <h1 className="text-2xl font-bold text-foreground">Projects</h1>
                     
                     <div className="flex items-center justify-between sm:justify-end gap-3">
+                        <Button variant="outline" onClick={handleExportAccount}>
+                            <Download className="w-4 h-4 mr-2" />
+                            Export Account
+                        </Button>
                         <ModeToggler 
                             viewMode={viewMode} 
                             onViewModeChange={setViewMode}

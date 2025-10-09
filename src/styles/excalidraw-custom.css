@@ -2,34 +2,34 @@
 
 /* Dark mode support for Excalidraw */
 .dark .excalidraw .App-canvas {
-  background: hsl(var(--background)) !important;
+  /* background: hsl(var(--background)) !important; */
 }
 
 .dark .excalidraw .Island {
-  background: hsl(var(--card)) !important;
-  border: 1px solid hsl(var(--border)) !important;
-  color: hsl(var(--foreground)) !important;
+  /* background: hsl(var(--card)) !important; */
+  /* border: 1px solid hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important; */
 }
 
 .dark .excalidraw .App-menu {
-  background: hsl(var(--card)) !important;
-  border: 1px solid hsl(var(--border)) !important;
-  color: hsl(var(--foreground)) !important;
+  /* background: hsl(var(--card)) !important; */
+  /* border: 1px solid hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important; */
 }
 
 .dark .excalidraw .App-toolbar {
-  background: hsl(var(--card)) !important;
-  border: 1px solid hsl(var(--border)) !important;
+  /* background: hsl(var(--card)) !important; */
+  /* border: 1px solid hsl(var(--border)) !important; */
 }
 
 .dark .excalidraw button {
-  color: hsl(var(--foreground)) !important;
+  /* color: hsl(var(--foreground)) !important; */
 }
 
 .dark .excalidraw .sidebar {
-  background: hsl(var(--card)) !important;
-  border: 1px solid hsl(var(--border)) !important;
-  color: hsl(var(--foreground)) !important;
+  /* background: hsl(var(--card)) !important; */
+  /* border: 1px solid hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important; */
 }
 
 /* Move toolbar to the right side */
@@ -222,7 +222,7 @@
 } */
 
 
-.excalidraw, .dark  {
+/* .excalidraw, .dark  {
   --theme-filter: invert(100%) hue-rotate(180deg);
   --button-destructive-bg-color: #1a0000;
   --button-destructive-color: #ff4444;
@@ -248,12 +248,12 @@
   --popup-secondary-bg-color: #1a1a1a;
   --popup-text-color: #cccccc;
   --popup-text-inverted-color: #333333;
-  --select-highlight-color: #ffaa00;
+  --select-highlight-color: #ffaa00; */
   /* --shadow-island: 0px 0px 20px 0px rgba(255, 170, 0, 0.3),
     0px 0px 40px 0px rgba(255, 170, 0, 0.1),
     0px 10px 30px 0px rgba(0, 0, 0, 0.8); */
 
-  --button-hover-bg: #222222;
+  /* --button-hover-bg: #222222;
   --button-active-bg: #333333;
   --button-active-border: #ffaa00;
   --default-border-color: #333333;
@@ -269,109 +269,4 @@
     --default-button-size: 2.25rem;
     --default-icon-size: 1.25rem;
   }
-
-  --scrollbar-thumb: #333333;
-  --scrollbar-thumb-hover: #444444;
-
-  --color-slider-track: #222222;
-  --color-slider-thumb: #ffaa00;
-
-  --modal-shadow: 0px 0px 50px rgba(255, 170, 0, 0.2),
-  0px 0px 100px rgba(0, 0, 0, 0.8),
-  0px 20px 60px rgba(0, 0, 0, 0.9);
-  --avatar-border-color: #333333;
-  --sidebar-shadow: 0px 0px 50px rgba(255, 170, 0, 0.2),
-  0px 0px 100px rgba(0, 0, 0, 0.8),
-  0px 20px 60px rgba(0, 0, 0, 0.9);
-  --sidebar-border-color: #333333;
-  --sidebar-bg-color: #0f0f0f;
-  --library-dropdown-shadow: 0px 15px 30px rgba(0, 0, 0, 0.8),
-  0px 8px 20px rgba(255, 170, 0, 0.1);
-  --space-factor: 0.25rem;
-  --text-primary-color: #cccccc;
-
-  --color-selection: #ffaa00;
-
-  --color-icon-white: #cccccc;
-
-  --color-primary: #ffaa00;
-  --color-primary-darker: #cc8800;
-  --color-primary-darkest: #996600;
-  --color-primary-light: #332200;
-  --color-primary-light-darker: #221100;
-  --color-primary-hover: #ffcc33;
-
-  --color-gray-10: #0a0a0a;
-  --color-gray-20: #1a1a1a;
-  --color-gray-30: #2a2a2a;
-  --color-gray-40: #3a3a3a;
-  --color-gray-50: #4a4a4a;
-  --color-gray-60: #5a5a5a;
-  --color-gray-70: #6a6a6a;
-  --color-gray-80: #7a7a7a;
-  --color-gray-85: #888888;
-  --color-gray-90: #999999;
-  --color-gray-100: #aaaaaa;
-
-  --color-disabled: #444444;
-
-  --color-warning: #332200;
-  --color-warning-dark: #ffaa00;
-  --color-warning-darker: #cc8800;
-  --color-warning-darkest: #996600;
-  --color-text-warning: #cccccc;
-
-  --color-danger: #ff4444;
-  --color-danger-dark: #cc2222;
-  --color-danger-darker: #aa1111;
-  --color-danger-darkest: #880000;
-  --color-danger-text: #cccccc;
-
-  --color-danger-background: #330000;
-  --color-danger-icon-background: #660000;
-  --color-danger-color: #ff4444;
-  --color-danger-icon-color: #ff4444;
-
-  --color-warning-background: #332200;
-  --color-warning-icon-background: #664400;
-  --color-warning-color: #cccccc;
-  --color-warning-icon-color: #cccccc;
-
-  --color-muted: #444444;
-  --color-muted-darker: #333333;
-  --color-muted-darkest: #222222;
-  --color-muted-background: #1a1a1a;
-  --color-muted-background-darker: #0a0a0a;
-
-  --color-promo: #ffaa00;
-
-  --color-success: #003300;
-  --color-success-darker: #004400;
-  --color-success-darkest: #006600;
-  --color-success-text: #00ff00;
-  --color-success-contrast: #00cc00;
-  --color-success-contrast-hover: #00ff00;
-  --color-success-contrast-active: #33ff33;
-
-  --color-logo-icon: #ffaa00;
-  --color-logo-text: #ffaa00;
-  --border-radius-md: 0.375rem;
-  --border-radius-lg: 0.5rem;
-
-  --color-surface-high: #1a1a1a;
-  --color-surface-mid: #111111;
-  --color-surface-low: #0a0a0a;
-  --color-surface-lowest: #000000;
-  --color-on-surface: #cccccc;
-  --color-brand-hover: #ffcc33;
-  --color-on-primary-container: #ffaa00;
-  --color-surface-primary-container: #332200;
-  --color-brand-active: #ffdd66;
-  --color-border-outline: #666666;
-  --color-border-outline-variant: #444444;
-  --color-badge: #ffaa00;
-  --background-color-badge: #332200;
-
-  background: #000000;
-  color: #cccccc;
-}
+} */
