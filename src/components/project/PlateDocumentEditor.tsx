@@ -230,7 +230,7 @@ export function PlateDocumentEditor({
     }
   }, [document, documentId, isSaving, startOperation, completeOperation]);
 
-  // Effect to handle editor content changes
+  // Effect to handle editor content changes - Auto-save every 2 seconds
   useEffect(() => {
     if (!editor || isReadOnly || shareToken) return;
     
@@ -248,14 +248,14 @@ export function PlateDocumentEditor({
       // Notify workspace of content change for autosave
       const cleanup = onContentChange?.({ content: currentContent });
       
-      // Auto-save the document after 500ms of inactivity (more instant)
+      // Auto-save the document after 2 seconds of inactivity
       editorChangeTimeoutRef.current = setTimeout(() => {
         saveDocument(undefined, currentContent, true).then(() => {
           cleanup?.();
         }).catch(() => {
           cleanup?.();
         });
-      }, 500);
+      }, 2000); // Changed from 500ms to 2000ms (2 seconds)
       
       // Cleanup function
       return () => {
@@ -297,6 +297,38 @@ export function PlateDocumentEditor({
     loadDocument();
   }, [loadDocument]);
 
+  // Save document when switching files or unmounting
+  useEffect(() => {
+    return () => {
+      // Save any unsaved changes when component unmounts or document changes
+      if (hasUnsavedChanges && document && editor && !isReadOnly && !shareToken) {
+        const currentContent = (editor as any).children;
+        const currentTitle = localTitle;
+        
+        // Perform synchronous save before unmounting
+        fetch(`/api/documents/${documentId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: currentTitle !== document.title ? currentTitle : undefined,
+            content: JSON.stringify(currentContent) !== JSON.stringify(document.content) ? currentContent : undefined,
+            contentText: extractTextFromContent(currentContent),
+          }),
+          keepalive: true, // Ensures request completes even if page unloads
+        }).catch(err => {
+          console.error('Error saving on unmount:', err);
+        });
+      }
+      
+      // Clean up autosave timeout
+      if (editorChangeTimeoutRef.current) {
+        clearTimeout(editorChangeTimeoutRef.current);
+      }
+    };
+  }, [documentId, hasUnsavedChanges, document, editor, localTitle, isReadOnly, shareToken]);
+
   // Handle custom events from navigation
   useEffect(() => {
     const handleDocumentSave = () => {
@@ -317,11 +349,6 @@ export function PlateDocumentEditor({
     return () => {
       window.removeEventListener('document-save-all', handleDocumentSave);
       window.removeEventListener('document-fullscreen', handleFullScreen);
-      
-      // Clean up autosave timeout on unmount
-      if (editorChangeTimeoutRef.current) {
-        clearTimeout(editorChangeTimeoutRef.current);
-      }
     };
   }, [handleManualSave]);
 
