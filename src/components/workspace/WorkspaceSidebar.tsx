@@ -458,7 +458,7 @@ export function WorkspaceSidebar({ projectId, project }: WorkspaceSidebarProps) 
 
             {/* File List */}
             <ScrollArea className="flex-1">
-                <div className="p-4 space-y-6">
+                <div className="py-1 space-y-6">
                     {isLoading ? (
                         <div className="space-y-2">
                             {Array.from({ length: 4 }).map((_, i) => (

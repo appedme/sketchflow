@@ -90,6 +90,15 @@ export function PlateDocumentEditor({
   const editor = usePlateEditor({
     plugins: EditorKit,
     value: document?.content || defaultContent,
+    onChange: ({ value }) => {
+      // Track that content has changed
+      if (!isReadOnly && document) {
+        const hasContentChanged = JSON.stringify(value) !== JSON.stringify(document.content);
+        if (hasContentChanged) {
+          setHasUnsavedChanges(true);
+        }
+      }
+    },
   });
 
   // Debounce editor content changes for autosave
