@@ -19,6 +19,8 @@ interface Library {
 
 interface ExcalidrawLibrarySystemProps {
   excalidrawAPI: ExcalidrawImperativeAPI | null;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 const LIBRARIES_API = 'https://libraries.excalidraw.com/libraries.json';
@@ -26,6 +28,8 @@ const ITEMS_PER_PAGE = 20;
 
 export function ExcalidrawLibrarySystem({ 
   excalidrawAPI,
+  isOpen,
+  onClose
 }: ExcalidrawLibrarySystemProps) {
   const [libraries, setLibraries] = useState<Library[]>([]);
   const [filteredLibraries, setFilteredLibraries] = useState<Library[]>([]);
@@ -60,8 +64,10 @@ export function ExcalidrawLibrarySystem({
       }
     };
 
-    fetchLibraries();
-  }, []);
+    if (isOpen) {
+      fetchLibraries();
+    }
+  }, [isOpen]);
 
   // Filter libraries based on search query
   useEffect(() => {
@@ -130,33 +136,43 @@ export function ExcalidrawLibrarySystem({
     }
   };
 
+  if (!isOpen) return null;
+
   return (
-    <div className="h-full flex flex-col">
+    <div className="w-80 h-full bg-background border-r border-border shadow-2xl flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between p-3 border-b border-border">
+      <div className="flex items-center justify-between p-4 border-b border-border">
         <div className="flex items-center gap-2">
-          <Download className="h-4 w-4" />
-          <h3 className="text-sm font-semibold">Community Libraries</h3>
+          <Download className="h-5 w-5" />
+          <h2 className="text-lg font-semibold">Community Libraries</h2>
         </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onClose}
+          className="h-8 w-8"
+        >
+          <X className="h-4 w-4" />
+        </Button>
       </div>
 
       {/* Search Bar */}
-      <div className="p-3 border-b border-border">
+      <div className="p-4 border-b border-border">
         <div className="relative">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
             placeholder="Search libraries..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8 h-8 text-sm"
+            className="pl-9 h-9"
           />
           {searchQuery && (
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setSearchQuery('')}
-              className="absolute right-0.5 top-1/2 -translate-y-1/2 h-6 w-6"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
             >
               <X className="h-3 w-3" />
             </Button>
@@ -170,60 +186,60 @@ export function ExcalidrawLibrarySystem({
         ref={scrollAreaRef}
         onScroll={handleScroll}
       >
-        <div className="p-3 space-y-2">
+        <div className="p-4 space-y-3">
           {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           ) : error ? (
-            <div className="text-center py-8 text-destructive">
-              <p className="font-medium text-sm">Error loading libraries</p>
-              <p className="text-xs text-muted-foreground mt-1">{error}</p>
+            <div className="text-center py-12 text-destructive">
+              <p className="font-medium">Error loading libraries</p>
+              <p className="text-sm text-muted-foreground mt-1">{error}</p>
             </div>
           ) : filteredLibraries.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <p className="font-medium text-sm">No libraries found</p>
-              <p className="text-xs mt-1">
+            <div className="text-center py-12 text-muted-foreground">
+              <p className="font-medium">No libraries found</p>
+              <p className="text-sm mt-1">
                 {searchQuery ? 'Try a different search term' : 'No libraries available'}
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-2">
+            <div className="grid grid-cols-1 gap-3">
               {filteredLibraries.slice(0, displayedItems).map((library, index) => (
                 <div
                   key={`${library.name}-${index}`}
-                  className="border border-border rounded-md p-3 hover:bg-accent transition-colors cursor-pointer group"
+                  className="border border-border rounded-lg p-3 hover:bg-accent transition-colors cursor-pointer group"
                   onClick={() => loadLibrary(library)}
                 >
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-xs truncate group-hover:text-primary transition-colors">
+                      <h3 className="font-medium text-sm truncate group-hover:text-primary transition-colors">
                         {library.name}
-                      </h4>
+                      </h3>
                       {library.description && (
-                        <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2">
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                           {library.description}
                         </p>
                       )}
                       {library.tags && library.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-1.5">
-                          {library.tags.slice(0, 2).map((tag, tagIndex) => (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {library.tags.slice(0, 3).map((tag, tagIndex) => (
                             <span
                               key={tagIndex}
-                              className="inline-flex items-center px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground text-[10px]"
+                              className="inline-flex items-center px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground text-xs"
                             >
                               {tag}
                             </span>
                           ))}
-                          {library.tags.length > 2 && (
-                            <span className="text-[10px] text-muted-foreground">
-                              +{library.tags.length - 2}
+                          {library.tags.length > 3 && (
+                            <span className="text-xs text-muted-foreground">
+                              +{library.tags.length - 3}
                             </span>
                           )}
                         </div>
                       )}
                     </div>
-                    <Download className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+                    <Download className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
                   </div>
                 </div>
               ))}
@@ -232,7 +248,7 @@ export function ExcalidrawLibrarySystem({
           
           {/* Loading More Indicator */}
           {displayedItems < filteredLibraries.length && (
-            <div className="text-center py-3 text-xs text-muted-foreground">
+            <div className="text-center py-4 text-sm text-muted-foreground">
               Showing {displayedItems} of {filteredLibraries.length}
             </div>
           )}
@@ -240,7 +256,7 @@ export function ExcalidrawLibrarySystem({
       </ScrollArea>
 
       {/* Footer */}
-      <div className="p-2 border-t border-border text-[10px] text-muted-foreground text-center">
+      <div className="p-3 border-t border-border text-xs text-muted-foreground text-center">
         <p>
           From{' '}
           <a

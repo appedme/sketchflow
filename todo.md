@@ -221,3 +221,9 @@ Whenever I do full screen or exit full screen the canvas or document should not 
 ---
 
 Add organisations and teams feature like notion with the best ui ux 
+
+
+---
+
+delete /project/* and all the components used in it that it not used in /workspace/* or on any other page of the website
+
