@@ -168,10 +168,8 @@ function ExcalidrawCanvasContent({
         </WelcomeScreen>
 
         {!isReadOnly && !shareToken && (
-          <Sidebar name="library" tab="library">
-            <div className="p-4 space-y-4">
-              <ExcalidrawLibrarySystem excalidrawAPI={excalidrawAPIRef.current} />
-            </div>
+          <Sidebar name="library" tab="libraries">
+            <ExcalidrawLibrarySystem excalidrawAPI={excalidrawAPIRef.current} />
           </Sidebar>
         )}
       </Excalidraw>
