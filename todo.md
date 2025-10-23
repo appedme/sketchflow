@@ -205,6 +205,7 @@ make the library feature work in the workspace canvas fetch https://libraries.ex
 
 
  ---
+ use https://context7.com/animate-ui/animate-ui and replace all icons with animated icons
  
  add <Expand animateOnHover />
 // Or use with the AnimateIcon component
@@ -220,3 +221,9 @@ Whenever I do full screen or exit full screen the canvas or document should not 
 ---
 
 Add organisations and teams feature like notion with the best ui ux 
+
+
+---
+
+delete /project/* and all the components used in it that it not used in /workspace/* or on any other page of the website
+

@@ -83,6 +83,15 @@ const WorkspaceEditorComponent = memo(function WorkspaceEditor({
     const { data: fileData, error, isLoading, saveFile, autoSave } = useFileData(fileId, fileType);
     const { markFileDirty } = useWorkspaceStore();
 
+    // Debug logging
+    console.log('WorkspaceEditor render:', {
+        fileId,
+        fileType,
+        hasData: !!fileData,
+        isLoading,
+        error: error?.message,
+    });
+
     // Handle content changes with auto-save
     const handleContentChange = useCallback((updates: any) => {
         // Mark file as dirty immediately

@@ -29,17 +29,17 @@ export async function uploadImageToImgBB(file: File): Promise<ImageUploadRespons
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = await response.json() as { error?: string };
       throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
 
-    const result = await response.json();
+    const result = await response.json() as { success?: boolean; url?: string; provider?: string; data?: any; error?: string };
 
     if (result.success && result.url) {
       return {
         success: true,
         url: result.url,
-        provider: result.provider,
+        provider: result.provider as 'imgbb' | 'freeimage' | undefined,
         data: result.data,
       };
     } else {
@@ -71,11 +71,11 @@ export async function uploadImageFromDataURL(dataURL: string, filename: string =
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = await response.json() as { error?: string };
       throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
 
-    const result = await response.json();
+    const result = await response.json() as { success?: boolean; url?: string; provider?: 'imgbb' | 'freeimage'; data?: any; error?: string };
 
     if (result.success && result.url) {
       return {

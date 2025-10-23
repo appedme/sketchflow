@@ -34,7 +34,7 @@ export function useProjectStats({
                 throw new Error('Failed to fetch project stats');
             }
 
-            const data = await response.json();
+            const data = await response.json() as ProjectStats;
             setStats(data);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Unknown error');

@@ -109,21 +109,21 @@ export default function AdminPanel() {
       // Fetch stats
       const statsResponse = await fetch('/api/admin/stats');
       if (statsResponse.ok) {
-        const statsData = await statsResponse.json();
+        const statsData = await statsResponse.json() as AdminStats;
         setStats(statsData);
       }
 
       // Fetch users
       const usersResponse = await fetch('/api/admin/users');
       if (usersResponse.ok) {
-        const usersData = await usersResponse.json();
+        const usersData = await usersResponse.json() as User[];
         setUsers(usersData);
       }
 
       // Fetch projects
       const projectsResponse = await fetch('/api/admin/projects');
       if (projectsResponse.ok) {
-        const projectsData = await projectsResponse.json();
+        const projectsData = await projectsResponse.json() as Project[];
         setProjects(projectsData);
       }
     } catch (error) {

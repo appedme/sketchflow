@@ -10,7 +10,7 @@ export async function POST(
         const { projectId } = await params;
         console.log('View tracking API called for project:', projectId);
 
-        const body = await request.json();
+        const body = await request.json() as { userId?: string };
         const { userId } = body;
         console.log('Request body:', { userId });
 

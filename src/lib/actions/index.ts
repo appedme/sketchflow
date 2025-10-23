@@ -5,7 +5,7 @@ export * from './documents';
 export * from './canvases';
 export * from './templates';
 export * from './files';
-export * from './sharing';
+export * from './public-sharing';
 
 // Initialize database with system templates
 export async function initializeDatabase() {

@@ -37,6 +37,8 @@ export const projects = sqliteTable('projects', {
   visibility: text('visibility').notNull().default('private'), // private, team, public
   templateId: text('template_id').references(() => templates.id),
   ownerId: text('owner_id').notNull().references(() => users.id),
+  organizationId: text('organization_id').references(() => organizations.id, { onDelete: 'cascade' }), // Organization ownership
+  teamId: text('team_id').references(() => teams.id), // Team ownership (optional)
   thumbnailUrl: text('thumbnail_url'),
   settings: text('settings', { mode: 'json' }), // Project-specific settings
   viewCount: integer('view_count').default(0),
@@ -150,6 +152,72 @@ export const splitViewSettings = sqliteTable('split_view_settings', {
   updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
 });
 
+// Organizations table
+export const organizations = sqliteTable('organizations', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull().unique(), // URL-friendly name
+  description: text('description'),
+  avatarUrl: text('avatar_url'),
+  plan: text('plan').notNull().default('free'), // free, pro, team, enterprise
+  maxMembers: integer('max_members').default(5),
+  maxProjects: integer('max_projects').default(10),
+  settings: text('settings', { mode: 'json' }), // Organization-specific settings
+  createdBy: text('created_by').notNull().references(() => users.id),
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Organization members table
+export const organizationMembers = sqliteTable('organization_members', {
+  id: text('id').primaryKey(),
+  organizationId: text('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  role: text('role').notNull().default('member'), // owner, admin, member, guest
+  title: text('title'), // Job title or role in organization
+  invitedBy: text('invited_by').references(() => users.id),
+  invitedAt: text('invited_at').default(sql`CURRENT_TIMESTAMP`),
+  joinedAt: text('joined_at'),
+  lastActiveAt: text('last_active_at'),
+});
+
+// Teams table (sub-groups within organizations)
+export const teams = sqliteTable('teams', {
+  id: text('id').primaryKey(),
+  organizationId: text('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  description: text('description'),
+  avatarUrl: text('avatar_url'),
+  isDefault: integer('is_default', { mode: 'boolean' }).default(false), // Default team for new members
+  settings: text('settings', { mode: 'json' }),
+  createdBy: text('created_by').notNull().references(() => users.id),
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Team members table
+export const teamMembers = sqliteTable('team_members', {
+  id: text('id').primaryKey(),
+  teamId: text('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  role: text('role').notNull().default('member'), // lead, member
+  addedBy: text('added_by').notNull().references(() => users.id),
+  addedAt: text('added_at').default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Organization invitations table
+export const organizationInvitations = sqliteTable('organization_invitations', {
+  id: text('id').primaryKey(),
+  organizationId: text('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  email: text('email').notNull(),
+  role: text('role').notNull().default('member'),
+  token: text('token').notNull().unique(),
+  invitedBy: text('invited_by').notNull().references(() => users.id),
+  expiresAt: text('expires_at').notNull(),
+  acceptedAt: text('accepted_at'),
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+});
+
 // Export types for TypeScript
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -180,3 +248,18 @@ export type NewUserPreference = typeof userPreferences.$inferInsert;
 
 export type SplitViewSetting = typeof splitViewSettings.$inferSelect;
 export type NewSplitViewSetting = typeof splitViewSettings.$inferInsert;
+
+export type Organization = typeof organizations.$inferSelect;
+export type NewOrganization = typeof organizations.$inferInsert;
+
+export type OrganizationMember = typeof organizationMembers.$inferSelect;
+export type NewOrganizationMember = typeof organizationMembers.$inferInsert;
+
+export type Team = typeof teams.$inferSelect;
+export type NewTeam = typeof teams.$inferInsert;
+
+export type TeamMember = typeof teamMembers.$inferSelect;
+export type NewTeamMember = typeof teamMembers.$inferInsert;
+
+export type OrganizationInvitation = typeof organizationInvitations.$inferSelect;
+export type NewOrganizationInvitation = typeof organizationInvitations.$inferInsert;

@@ -117,7 +117,11 @@ export function useApiOptimized<T = any>(
 // Hook for public API calls (no auth required)
 export function usePublicApiOptimized<T = any>(
   url: string | null, 
-  options?: SWRConfiguration
+  options?: SWRConfiguration & {
+    requireAuth?: boolean;
+    refreshInterval?: number;
+    suspense?: boolean;
+  }
 ) {
   return useApiOptimized<T>(url, { ...options, requireAuth: false });
 }
@@ -126,7 +130,11 @@ export function usePublicApiOptimized<T = any>(
 export function useRealtimeApi<T = any>(
   url: string | null,
   intervalMs: number = 30000,
-  options?: SWRConfiguration
+  options?: SWRConfiguration & {
+    requireAuth?: boolean;
+    refreshInterval?: number;
+    suspense?: boolean;
+  }
 ) {
   return useApiOptimized<T>(url, {
     ...options,
@@ -142,12 +150,15 @@ export function usePaginatedApi<T = any>(
 ) {
   const user = useUser();
   
+  // Separate SWR-specific options from custom options
+  const swrOptions = options ? { ...options } : {};
+  
   return useSWR<T[]>(
     user ? getUrl : null,
     authenticatedFetcher,
     {
       ...defaultConfig,
-      ...options,
+      ...swrOptions,
     }
   );
 }
