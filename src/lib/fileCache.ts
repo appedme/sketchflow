@@ -23,7 +23,7 @@ const FILE_SELECTED = 'file:selected';
 const FILE_SAVED = 'file:saved';
 
 // Debug mode for logging cache operations
-const DEBUG = false;
+const DEBUG = process.env.NODE_ENV === 'development';
 
 /**
  * Log cache operations if debug mode is enabled
