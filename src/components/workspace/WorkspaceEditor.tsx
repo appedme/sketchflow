@@ -84,13 +84,15 @@ const WorkspaceEditorComponent = memo(function WorkspaceEditor({
     const { markFileDirty } = useWorkspaceStore();
 
     // Debug logging
-    console.log('WorkspaceEditor render:', {
-        fileId,
-        fileType,
-        hasData: !!fileData,
-        isLoading,
-        error: error?.message,
-    });
+    if (process.env.NODE_ENV === 'development') {
+        console.log('WorkspaceEditor render:', {
+            fileId,
+            fileType,
+            hasData: !!fileData,
+            isLoading,
+            error: error?.message,
+        });
+    }
 
     // Handle content changes with auto-save
     const handleContentChange = useCallback((updates: any) => {
