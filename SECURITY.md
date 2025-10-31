@@ -1,5 +1,6 @@
 # Security Policy
 
+
 ## Supported Versions
 
 We release patches for security vulnerabilities. Currently supported versions:
