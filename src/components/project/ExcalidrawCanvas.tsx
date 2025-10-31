@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useRef, useEffect } from "react";
+import { useCallback, useRef, useEffect, useState } from "react";
 import {
   Excalidraw,
   WelcomeScreen,
@@ -18,6 +18,8 @@ import { CanvasProvider, useCanvas } from '@/contexts/CanvasContext';
 import { CanvasWelcomeScreen } from '@/components/canvas/CanvasWelcomeScreen';
 import { ExcalidrawLibrarySystem } from '@/components/canvas/ExcalidrawLibrarySystem';
 import { useTheme } from 'next-themes';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 interface ExcalidrawCanvasProps {
   projectId: string;
@@ -34,6 +36,7 @@ function ExcalidrawCanvasContent({
 }: ExcalidrawCanvasProps) {
   const excalidrawAPIRef = useRef<ExcalidrawImperativeAPI | null>(null);
   const { theme } = useTheme();
+  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
 
   const {
     elements,
@@ -166,15 +169,30 @@ function ExcalidrawCanvasContent({
         <WelcomeScreen>
           <CanvasWelcomeScreen projectName={projectName} />
         </WelcomeScreen>
-
-        {!isReadOnly && !shareToken && (
-          <Sidebar name="library" tab="library">
-            <div className="p-4 space-y-4">
-              <ExcalidrawLibrarySystem excalidrawAPI={excalidrawAPIRef.current} />
-            </div>
-          </Sidebar>
-        )}
       </Excalidraw>
+
+      {/* Library Toggle Button - Positioned below menu */}
+      {!isReadOnly && !shareToken && (
+        <Button
+          onClick={() => setIsLibraryOpen(!isLibraryOpen)}
+          className="absolute top-14 left-4 z-50 rounded-full w-10 h-10 p-0 shadow-lg"
+          variant={isLibraryOpen ? "default" : "secondary"}
+          title="Browse Community Libraries"
+        >
+          <Plus className={`h-5 w-5 transition-transform ${isLibraryOpen ? 'rotate-45' : ''}`} />
+        </Button>
+      )}
+
+      {/* Library Panel */}
+      {!isReadOnly && !shareToken && isLibraryOpen && (
+        <div className="absolute top-0 left-0 h-full z-40">
+          <ExcalidrawLibrarySystem 
+            excalidrawAPI={excalidrawAPIRef.current}
+            isOpen={isLibraryOpen}
+            onClose={() => setIsLibraryOpen(false)}
+          />
+        </div>
+      )}
 
       {/* Saving indicator */}
       {saving && !isReadOnly && !shareToken && (

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useProjectFiles } from '@/lib/hooks/useProjectData';
 import { useWorkspaceStore } from '@/lib/stores/useWorkspaceStore';
 import { Button } from '@/components/ui/button';
@@ -45,6 +46,8 @@ export function WorkspaceSidebar({ projectId, project }: WorkspaceSidebarProps) 
     const [projectName, setProjectName] = useState(project?.name || '');
     const [projectDescription, setProjectDescription] = useState(project?.description || '');
 
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const { files, isLoading, mutateAll } = useProjectFiles(projectId);
     const { openFile, activeFileId, setActiveFile } = useWorkspaceStore();
 
@@ -60,7 +63,11 @@ export function WorkspaceSidebar({ projectId, project }: WorkspaceSidebarProps) 
     const handleFileClick = (file: any) => {
         openFile(file.id, file.type, file.title);
         setActiveFile(file.id);
-        // No URL change - everything stays on the same route
+        
+        // Update URL parameter without reloading
+        const params = new URLSearchParams(searchParams);
+        params.set('file', file.id);
+        router.replace(`?${params.toString()}`, { scroll: false });
     };
 
     const handleCreateFile = async (type: 'document' | 'canvas') => {

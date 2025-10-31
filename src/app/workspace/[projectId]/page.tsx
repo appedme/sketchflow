@@ -2,11 +2,48 @@ import { stackServerApp } from '@/lib/stack';
 import { redirect, notFound } from 'next/navigation';
 import { getProject } from '@/lib/actions/projects';
 import { UnifiedWorkspace } from '@/components/workspace/UnifiedWorkspace';
+import { Metadata } from 'next';
 
 interface WorkspaceProjectPageProps {
     params: Promise<{
         projectId: string;
     }>;
+}
+
+export async function generateMetadata({ params }: WorkspaceProjectPageProps): Promise<Metadata> {
+    const { projectId } = await params;
+    const project = await getProject(projectId);
+
+    if (!project) {
+        return {
+            title: 'Workspace Not Found | SketchFlow',
+            description: 'The requested workspace could not be found.',
+        };
+    }
+
+    return {
+        title: `${project.name} | SketchFlow Workspace`,
+        description: project.description || `Collaborate on ${project.name} with SketchFlow - a unified workspace for documents and canvas drawings.`,
+        openGraph: {
+            title: `${project.name} | SketchFlow`,
+            description: project.description || `Collaborate on ${project.name} with SketchFlow`,
+            type: 'website',
+            images: [
+                {
+                    url: '/og-image.jpg',
+                    width: 1200,
+                    height: 630,
+                    alt: `${project.name} - SketchFlow Workspace`,
+                },
+            ],
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: `${project.name} | SketchFlow`,
+            description: project.description || `Collaborate on ${project.name} with SketchFlow`,
+            images: ['/og-image.jpg'],
+        },
+    };
 }
 
 export default async function WorkspaceProjectPage({ params }: WorkspaceProjectPageProps) {

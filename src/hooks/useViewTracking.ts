@@ -14,7 +14,7 @@ export function useViewTracking({
     delay = 3000 // 3 seconds delay by default
 }: UseViewTrackingOptions) {
     const hasTrackedView = useRef(false);
-    const timeoutRef = useRef<NodeJS.Timeout>();
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         // Don't track views for:

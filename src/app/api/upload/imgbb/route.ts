@@ -98,7 +98,11 @@ async function uploadToFreeImage(file: File): Promise<ImageUploadResponse> {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
+        const data = await response.json() as { 
+            success?: boolean; 
+            image?: { url?: string }; 
+            error?: { message?: string } 
+        };
 
         if (data.success && data.image && data.image.url) {
             return {

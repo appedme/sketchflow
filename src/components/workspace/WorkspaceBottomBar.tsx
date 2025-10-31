@@ -136,29 +136,6 @@ export function WorkspaceBottomBar({
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                                {!isReadOnly && (
-                                    <>
-                                        <DropdownMenuItem
-                                            onClick={() => {
-                                                // Trigger save for current active file
-                                                const saveEvent = new CustomEvent('workspace-save-current');
-                                                window.dispatchEvent(saveEvent);
-                                            }}
-                                        >
-                                            <Save className="w-4 h-4 mr-2" />
-                                            Save Current File
-                                            <span className="ml-auto text-xs text-muted-foreground">Ctrl+S</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                            onClick={handleSaveAll}
-                                            disabled={saving}
-                                        >
-                                            <Save className="w-4 h-4 mr-2" />
-                                            {saving ? 'Saving All...' : 'Save All Files'}
-                                        </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
-                                    </>
-                                )}
                                 <DropdownMenuItem onClick={handleShare}>
                                     <Share className="w-4 h-4 mr-2" />
                                     Share Project

@@ -160,16 +160,15 @@ export default function ProjectSettingsPage() {
             if (!response.ok) throw new Error('Failed to update project settings');
 
             refreshProject();
-            toast({
+            toast.default({
                 title: "Settings saved",
                 description: "Your project settings have been updated successfully.",
             });
         } catch (error) {
             console.error('Failed to update project settings:', error);
-            toast({
+            toast.destructive({
                 title: "Error",
                 description: "Failed to save project settings. Please try again.",
-                variant: "destructive",
             });
         } finally {
             setIsSaving(false);
@@ -179,10 +178,9 @@ export default function ProjectSettingsPage() {
     // Delete project
     const deleteProject = async () => {
         if (deleteConfirmation !== projectData?.name) {
-            toast({
+            toast.destructive({
                 title: "Confirmation failed",
                 description: "Please type the project name correctly to confirm deletion.",
-                variant: "destructive",
             });
             return;
         }
@@ -195,7 +193,7 @@ export default function ProjectSettingsPage() {
 
             if (!response.ok) throw new Error('Failed to delete project');
 
-            toast({
+            toast.default({
                 title: "Project deleted",
                 description: "Your project has been permanently deleted.",
             });
@@ -203,10 +201,9 @@ export default function ProjectSettingsPage() {
             router.push('/dashboard');
         } catch (error) {
             console.error('Failed to delete project:', error);
-            toast({
+            toast.destructive({
                 title: "Error",
                 description: "Failed to delete project. Please try again.",
-                variant: "destructive",
             });
             setIsDeleting(false);
         }
@@ -646,7 +643,10 @@ export default function ProjectSettingsPage() {
                                         <Button
                                             variant="destructive"
                                             size="sm"
-                                            onClick={() => document.getElementById('delete-dialog')?.showModal()}
+                                            onClick={() => {
+                                                const dialog = document.getElementById('delete-dialog') as HTMLDialogElement | null;
+                                                dialog?.showModal();
+                                            }}
                                         >
                                             Delete Project
                                         </Button>
@@ -683,7 +683,8 @@ export default function ProjectSettingsPage() {
                                 variant="outline"
                                 onClick={() => {
                                     setDeleteConfirmation('');
-                                    document.getElementById('delete-dialog')?.close();
+                                    const dialog = document.getElementById('delete-dialog') as HTMLDialogElement | null;
+                                    dialog?.close();
                                 }}
                             >
                                 Cancel

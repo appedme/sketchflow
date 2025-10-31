@@ -27,9 +27,9 @@ const LIBRARIES_API = 'https://libraries.excalidraw.com/libraries.json';
 const ITEMS_PER_PAGE = 20;
 
 export function ExcalidrawLibrarySystem({ 
-  excalidrawAPI, 
-  isOpen, 
-  onClose 
+  excalidrawAPI,
+  isOpen,
+  onClose
 }: ExcalidrawLibrarySystemProps) {
   const [libraries, setLibraries] = useState<Library[]>([]);
   const [filteredLibraries, setFilteredLibraries] = useState<Library[]>([]);
@@ -51,7 +51,7 @@ export function ExcalidrawLibrarySystem({
           throw new Error('Failed to fetch libraries');
         }
         
-        const data = await response.json();
+        const data: any = await response.json();
         const librariesData = data.libraries || [];
         
         setLibraries(librariesData);
@@ -113,7 +113,7 @@ export function ExcalidrawLibrarySystem({
         throw new Error('Failed to load library content');
       }
 
-      const libraryData = await response.json();
+      const libraryData: any = await response.json();
       
       // Add library items to Excalidraw
       if (libraryData.library || libraryData.libraryItems) {
@@ -139,12 +139,12 @@ export function ExcalidrawLibrarySystem({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-96 bg-background border-l border-border shadow-xl z-50 flex flex-col">
+    <div className="w-80 h-full bg-background border-r border-border shadow-2xl flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Download className="h-5 w-5" />
-          <h2 className="text-lg font-semibold">Excalidraw Libraries</h2>
+          <h2 className="text-lg font-semibold">Community Libraries</h2>
         </div>
         <Button
           variant="ghost"
@@ -162,10 +162,10 @@ export function ExcalidrawLibrarySystem({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search libraries by name or tags..."
+            placeholder="Search libraries..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
+            className="pl-9 h-9"
           />
           {searchQuery && (
             <Button
@@ -208,7 +208,7 @@ export function ExcalidrawLibrarySystem({
               {filteredLibraries.slice(0, displayedItems).map((library, index) => (
                 <div
                   key={`${library.name}-${index}`}
-                  className="border border-border rounded-lg p-4 hover:bg-accent transition-colors cursor-pointer group"
+                  className="border border-border rounded-lg p-3 hover:bg-accent transition-colors cursor-pointer group"
                   onClick={() => loadLibrary(library)}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -249,16 +249,16 @@ export function ExcalidrawLibrarySystem({
           {/* Loading More Indicator */}
           {displayedItems < filteredLibraries.length && (
             <div className="text-center py-4 text-sm text-muted-foreground">
-              Showing {displayedItems} of {filteredLibraries.length} libraries
+              Showing {displayedItems} of {filteredLibraries.length}
             </div>
           )}
         </div>
       </ScrollArea>
 
       {/* Footer */}
-      <div className="p-4 border-t border-border text-xs text-muted-foreground text-center">
+      <div className="p-3 border-t border-border text-xs text-muted-foreground text-center">
         <p>
-          Libraries from{' '}
+          From{' '}
           <a
             href="https://libraries.excalidraw.com"
             target="_blank"

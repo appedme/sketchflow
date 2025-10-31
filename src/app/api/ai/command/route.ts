@@ -218,10 +218,13 @@ export async function POST(req: NextRequest) {
     apiKey: key,
     messages,
     system,
-    provider = 'pollinations',
+    provider: providerParam = 'pollinations',
     action = 'text',
     imageOptions = {}
   } = body;
+
+  // Make provider mutable for fallback scenarios
+  let provider = providerParam;
 
   // Handle image generation requests
   if (action === 'image') {
@@ -324,7 +327,7 @@ export async function POST(req: NextRequest) {
       console.error('Pollinations.AI error:', error);
       // Fallback to OpenAI if Pollinations fails
       // Re-declare provider as mutable
-      let mutableProvider: any = 'openai';
+      const mutableProvider: any = 'openai';
       provider = mutableProvider;
     }
   }

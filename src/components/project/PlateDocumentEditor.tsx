@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from 'react';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Plate, usePlateEditor, PlateContent } from 'platejs/react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -86,6 +86,9 @@ export function PlateDocumentEditor({
   const { startOperation, completeOperation } = useFileOperations();
   const { startLoading, completeLoading } = useLoading();
 
+  // Track editor changes for autosave
+  const editorChangeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
   // Initialize editor with document content
   const editor = usePlateEditor({
     plugins: EditorKit,
@@ -101,8 +104,8 @@ export function PlateDocumentEditor({
     },
   });
 
-  // Debounce editor content changes for autosave
-  const debouncedContent = useDebounce((editor as any)?.children || [], 1500);
+  // Remove the debounced content since we're handling it with our custom tracking
+  // const debouncedContent = useDebounce((editor as any)?.children || [], 1500);
   const debouncedTitle = useDebounce(localTitle, 800);
 
   // Autosave state
@@ -227,29 +230,41 @@ export function PlateDocumentEditor({
     }
   }, [document, documentId, isSaving, startOperation, completeOperation]);
 
-  // Auto-save on content changes
+  // Effect to handle editor content changes - Auto-save every 2 seconds
   useEffect(() => {
-    if (!document || isReadOnly || shareToken || isAutoSaving) return; // Don't auto-save in public mode or if already saving
-
-    if (!editor) return;
-
+    if (!editor || isReadOnly || shareToken) return;
+    
     const currentContent = (editor as any).children;
-    const hasContentChanged = JSON.stringify(currentContent) !== JSON.stringify(document.content);
-
+    const hasContentChanged = JSON.stringify(currentContent) !== JSON.stringify(document?.content || []);
+    
     if (hasContentChanged) {
       setHasUnsavedChanges(true);
-
-      // Notify workspace of content change
+      
+      // Clear existing timeout
+      if (editorChangeTimeoutRef.current) {
+        clearTimeout(editorChangeTimeoutRef.current);
+      }
+      
+      // Notify workspace of content change for autosave
       const cleanup = onContentChange?.({ content: currentContent });
-
-      // Auto-save the document
-      saveDocument(undefined, currentContent, true).then(() => {
-        cleanup?.(); // Clean up after successful save
-      }).catch(() => {
-        cleanup?.(); // Clean up even on error
-      });
+      
+      // Auto-save the document after 2 seconds of inactivity
+      editorChangeTimeoutRef.current = setTimeout(() => {
+        saveDocument(undefined, currentContent, true).then(() => {
+          cleanup?.();
+        }).catch(() => {
+          cleanup?.();
+        });
+      }, 2000); // Changed from 500ms to 2000ms (2 seconds)
+      
+      // Cleanup function
+      return () => {
+        if (editorChangeTimeoutRef.current) {
+          clearTimeout(editorChangeTimeoutRef.current);
+        }
+      };
     }
-  }, [debouncedContent, document, editor, isReadOnly, saveDocument, isAutoSaving, onContentChange]);
+  }, [(editor as any)?.children, document, isReadOnly, shareToken, onContentChange]);
 
   // Auto-save on title changes
   useEffect(() => {
@@ -281,6 +296,38 @@ export function PlateDocumentEditor({
   useEffect(() => {
     loadDocument();
   }, [loadDocument]);
+
+  // Save document when switching files or unmounting
+  useEffect(() => {
+    return () => {
+      // Save any unsaved changes when component unmounts or document changes
+      if (hasUnsavedChanges && document && editor && !isReadOnly && !shareToken) {
+        const currentContent = (editor as any).children;
+        const currentTitle = localTitle;
+        
+        // Perform synchronous save before unmounting
+        fetch(`/api/documents/${documentId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: currentTitle !== document.title ? currentTitle : undefined,
+            content: JSON.stringify(currentContent) !== JSON.stringify(document.content) ? currentContent : undefined,
+            contentText: extractTextFromContent(currentContent),
+          }),
+          keepalive: true, // Ensures request completes even if page unloads
+        }).catch(err => {
+          console.error('Error saving on unmount:', err);
+        });
+      }
+      
+      // Clean up autosave timeout
+      if (editorChangeTimeoutRef.current) {
+        clearTimeout(editorChangeTimeoutRef.current);
+      }
+    };
+  }, [documentId, hasUnsavedChanges, document, editor, localTitle, isReadOnly, shareToken]);
 
   // Handle custom events from navigation
   useEffect(() => {

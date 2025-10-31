@@ -40,22 +40,33 @@ export function useFileData(fileId: string | null, fileType: 'canvas' | 'documen
             fallbackData: cachedData,
 
             // Aggressive caching for instant switching
-            dedupingInterval: 10000, // 10 seconds
+            dedupingInterval: 30000, // Increased to 30 seconds for better performance
             revalidateOnFocus: false,
-            revalidateOnReconnect: true,
+            revalidateOnReconnect: false, // Disable to prevent unnecessary revalidation
 
             // Keep previous data while loading - this is key for smooth switching
             keepPreviousData: true,
 
             // Error handling
-            errorRetryCount: 3,
-            errorRetryInterval: 1000,
+            errorRetryCount: 2, // Reduced retry count for faster failure
+            errorRetryInterval: 500, // Faster retry interval
 
             // Custom revalidation
-            revalidateIfStale: true,
+            revalidateIfStale: false, // Disable stale revalidation for better performance
 
             // Faster loading timeout
-            loadingTimeout: 100,
+            loadingTimeout: 50, // Reduced timeout for quicker response
+            
+            // Cache for longer to improve switching performance
+            refreshInterval: 0, // Disable automatic refresh
+            
+            // Debug
+            onSuccess: (data) => {
+                console.log('useFileData success:', { fileId, fileType, hasData: !!data });
+            },
+            onError: (err) => {
+                console.error('useFileData error:', { fileId, fileType, error: err.message });
+            },
         }
     );
 
@@ -110,8 +121,9 @@ export function useFileData(fileId: string | null, fileType: 'canvas' | 'documen
         }
     }, [fileId, fileType, apiUrl, swrResult.data, setCacheData, markFileDirty]);
 
-    // Auto-save functionality
-    const autoSave = useCallback((updates: Partial<FileData>, delay = 2000) => {
+    // Auto-save functionality with more aggressive timing
+    const autoSave = useCallback((updates: Partial<FileData>, delay = 500) => {
+        // More aggressive auto-save timing (500ms instead of 2000ms)
         const timeoutId = setTimeout(() => {
             saveFile(updates).catch(console.error);
         }, delay);
@@ -125,26 +137,5 @@ export function useFileData(fileId: string | null, fileType: 'canvas' | 'documen
         autoSave,
         isCanvas: fileType === 'canvas',
         isDocument: fileType === 'document',
-    };
-}
-
-// Hook for managing multiple files
-export function useMultipleFiles(fileIds: string[]) {
-    const results = fileIds.map(fileId => {
-        // Determine file type from cache or API
-        const cachedData = useWorkspaceStore.getState().getCacheData(fileId);
-        const fileType = cachedData?.type || null;
-
-        return {
-            fileId,
-            ...useFileData(fileId, fileType)
-        };
-    });
-
-    return {
-        files: results,
-        isLoading: results.some(r => r.isLoading),
-        hasError: results.some(r => r.error),
-        errors: results.filter(r => r.error).map(r => r.error),
     };
 }

@@ -33,8 +33,8 @@ interface WorkspaceState {
     // Layout
     layout: 'horizontal' | 'vertical';
 
-    // File content cache
-    fileCache: Record<string, any>;
+    // File content cache with expiration
+    fileCache: Record<string, { data: any; timestamp: number }>;
 
     // Actions
     initializeWorkspace: (projectId: string) => void;
@@ -60,7 +60,13 @@ interface WorkspaceState {
     setCacheData: (fileId: string, data: any) => void;
     getCacheData: (fileId: string) => any;
     clearCache: () => void;
+    
+    // Cache management
+    isCacheValid: (fileId: string) => boolean;
 }
+
+// Cache expiration time (5 minutes)
+const CACHE_EXPIRATION = 5 * 60 * 1000;
 
 export const useWorkspaceStore = create<WorkspaceState>()(
     devtools(
@@ -235,22 +241,40 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     set({ layout });
                 },
 
-                // Cache actions
+                // Cache actions with expiration
                 setCacheData: (fileId: string, data: any) => {
                     const state = get();
                     set({
                         fileCache: {
                             ...state.fileCache,
                             [fileId]: {
-                                ...data,
-                                cachedAt: Date.now(),
+                                data,
+                                timestamp: Date.now(),
                             },
                         },
                     });
                 },
 
                 getCacheData: (fileId: string) => {
-                    return get().fileCache[fileId];
+                    const state = get();
+                    const cacheEntry = state.fileCache[fileId];
+                    
+                    // Check if cache is valid
+                    if (cacheEntry && state.isCacheValid(fileId)) {
+                        return cacheEntry.data;
+                    }
+                    
+                    return null;
+                },
+                
+                isCacheValid: (fileId: string) => {
+                    const state = get();
+                    const cacheEntry = state.fileCache[fileId];
+                    
+                    if (!cacheEntry) return false;
+                    
+                    // Check if cache has expired
+                    return (Date.now() - cacheEntry.timestamp) < CACHE_EXPIRATION;
                 },
 
                 clearCache: () => {
